@@ -1,0 +1,42 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+  docker-build)
+    echo "Building Go app..."
+    #docker rmi citystreetdata:multistage
+    docker build -t citystreetdata:multistage -f Dockerfile .
+    ;;
+
+  docker-run)
+    echo "Running Go app..."
+    #docker container remove rest-server
+    docker run -d --network mynet --name rest-server -p 80:8080 -e PGUSER=totoro -e PGPASSWORD=myfriend -e PGHOST=db -e PGPORT=5432 -e PGDATABASE=mydb citystreetdata:multistage
+    ;;
+
+
+  docker-db-run)
+    echo "Running DB..."
+    ###for some reason you MUST initially specify the db where this postgis extension must be created first. If not then any command when executing pgx go fails with errors like: ERROR: type "box2d" does not exist (SQLSTATE 42704)
+    docker run -d -v cityctreetdataDB --name postGIS --hostname db --network mynet -p 5432:5432 -p 8080:8080 -e POSTGRES_USER=totoro -e POSTGRES_PASSWORD=myfriend POSTGRES_DB=CityData postgis/postgis
+    #docker run -d --name postGIS --hostname db --network mynet -p 5432:5432 -p 8080:8080 -e POSTGRES_HOST_AUTH_METHOD=trust postgis/postgis
+    ;;
+
+  docker-db-exec)
+    docker exec -ti postGIS -U postgres
+    ;;
+
+  docker-stop)
+    docker stop $(docker ps -a -q)
+    ;;
+
+  docker-rm)
+    docker rm $(docker ps -a -q)
+    ;;
+
+  *)
+    echo "Usage: $0 {docker-build|docker-run}"
+    exit 1
+    ;;
+esac
