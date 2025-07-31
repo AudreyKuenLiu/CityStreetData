@@ -19,7 +19,7 @@ case "$1" in
   docker-db-run)
     echo "Running DB..."
     ###for some reason you MUST initially specify the db where this postgis extension must be created first. If not then any command when executing pgx go fails with errors like: ERROR: type "box2d" does not exist (SQLSTATE 42704)
-    docker run -d -v cityctreetdataDB --name postGIS --hostname db --network mynet -p 5432:5432 -p 8080:8080 -e POSTGRES_USER=totoro -e POSTGRES_PASSWORD=myfriend POSTGRES_DB=CityData postgis/postgis
+    docker run -d -v cityctreetdataDB --name postGIS --hostname db --network mynet -p 5432:5432 -p 8080:8080 -e POSTGRES_USER=totoro -e POSTGRES_PASSWORD=myfriend POSTGRES_DB=geo_data postgis/postgis
     #docker run -d --name postGIS --hostname db --network mynet -p 5432:5432 -p 8080:8080 -e POSTGRES_HOST_AUTH_METHOD=trust postgis/postgis
     ;;
 

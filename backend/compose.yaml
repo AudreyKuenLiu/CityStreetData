@@ -1,29 +1,28 @@
-version: "3.8"
-
 services:
-  citystreetdata:
+  city_street_data:
     depends_on:
-      - cityctreetdataDB
+      - city_street_data_db
     build:
       context: .
-    container_name: city-street-data
-    hostname: city-street-data
+    container_name: city_street_data
+    hostname: city_street_data
     networks:
       - mynet
     ports:
       - 80:8080
     environment:
-      - PGUSER=${PGUSER:-user}
-      - PGPASSWORD=${PGPASSWORD:?database password not set}
+      - PGUSER=${POSTGRES_USER}
+      - PGPASSWORD=${POSTGRES_PASSWORD}
       - PGHOST=${PGHOST:-db}
       - PGPORT=${PGPORT:-5432}
-      - PGDATABASE=${PGDATABASE:-mydb}
+      - PGDATABASE=${POSTGRES_DB}
     deploy:
       restart_policy:
         condition: on-failure
-  citystreetdataDB:
-    image: postgis/postgis:17-3.5
-    container_name: postgis
+  city_street_data_db:
+    # image: postgis/postgis:17-3.5
+    image: city_street_data_db
+    container_name: city_street_data_db
     hostname: db
     networks:
       - mynet
@@ -31,11 +30,14 @@ services:
       - 5432:5432
       - 8080:8080
     volumes:
-      - postgis
-    command: start-single-node 
+      - city_street_data_db:/var/lib/pgsql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER} 
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
 
 volumes:
-  postgis:
+  city_street_data_db:
 
 networks:
   mynet:

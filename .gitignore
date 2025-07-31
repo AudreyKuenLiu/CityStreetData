@@ -1,3 +1,4 @@
 *.swp
+/database/initdata
 # Environment variables
 .env

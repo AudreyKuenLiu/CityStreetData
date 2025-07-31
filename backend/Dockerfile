@@ -35,6 +35,4 @@ COPY --from=build-stage /citystreetdata /citystreetdata
 
 EXPOSE 8080
 
-#USER 1001:1001
-
 ENTRYPOINT ["/citystreetdata"]
