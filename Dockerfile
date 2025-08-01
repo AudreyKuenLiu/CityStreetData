@@ -8,7 +8,7 @@ WORKDIR /app
 
 #COPY go.mod go.sum ./
 
-COPY . .
+COPY ./backend/. .
 RUN apt-get update
 RUN apt-get install -y libgeos-dev
 RUN go mod download
