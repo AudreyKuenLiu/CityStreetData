@@ -1,5 +1,9 @@
 *.swp
 /database/initdata
+/datapipeline/config
+/datapipeline/logs
+/datapipeline/plugins
+/datapipeline/dags/__pycache__
 scratch.sql
 project
 # Environment variables
