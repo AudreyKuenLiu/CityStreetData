@@ -1,5 +1,6 @@
 *.swp
 /database/initdata
+scratch.sql
 project
 # Environment variables
 .env
