@@ -1,8 +1,10 @@
+.vscode
 *.swp
 /database/initdata
 /datapipeline/config
 /datapipeline/logs
 /datapipeline/plugins
+/datapipeline/venv_city_street_data
 /datapipeline/dags/__pycache__
 scratch.sql
 project

@@ -1,0 +1,493 @@
+[
+  {
+    "id": "sf_streets_and_intersections",
+    "api_endpoint": "https://data.sfgov.org/resource/3psu-pn9h.json",
+    "params": {
+      "$limit": 1
+    },
+    "fields": [
+      {
+        "name": "cnn",
+        "type": "int"
+      },
+      {
+        "name": "lf_fadd",
+        "type": "int"
+      },
+      {
+        "name": "lf_toadd",
+        "type": "int"
+      },
+      {
+        "name": "rt_fadd",
+        "type": "int"
+      },
+      {
+        "name": "rt_toadd",
+        "type": "int"
+      },
+      {
+        "name": "street",
+        "type": "str"
+      },
+      {
+        "name": "st_type",
+        "type": "str"
+      },
+      {
+        "name": "f_st",
+        "type": "str"
+      },
+      {
+        "name": "t_st",
+        "type": "str"
+      },
+      {
+        "name": "f_node_cnn",
+        "type": "int"
+      },
+      {
+        "name": "t_node_cnn",
+        "type": "int"
+      },
+      {
+        "name": "accepted",
+        "type": "bool"
+      },
+      {
+        "name": "active",
+        "type": "bool"
+      },
+      {
+        "name": "classcode",
+        "type": "int"
+      },
+      {
+        "name": "date_added",
+        "type": "datetime"
+      },
+      {
+        "name": "date_altered",
+        "type": "datetime"
+      },
+      {
+        "name": "date_dropped",
+        "type": "datetime"
+      },
+      {
+        "name": "gds_chg_id_add",
+        "type": "str"
+      },
+      {
+        "name": "gds_chg_id_altered",
+        "type": "str"
+      },
+      {
+        "name": "gds_chg_id_dropped",
+        "type": "str"
+      },
+      {
+        "name": "jurisdiction",
+        "type": "str"
+      },
+      {
+        "name": "layer",
+        "type": "str"
+      },
+      {
+        "name": "nhood",
+        "type": "str"
+      },
+      {
+        "name": "oneway",
+        "type": "str"
+      },
+      {
+        "name": "street_gc",
+        "type": "str"
+      },
+      {
+        "name": "streetname",
+        "type": "str"
+      },
+      {
+        "name": "streetname_gc",
+        "type": "str"
+      },
+      {
+        "name": "zip_code",
+        "type": "int"
+      },
+      {
+        "name": "analysis_neighborhood",
+        "type": "str"
+      },
+      {
+        "name": "supervisor_district",
+        "type": "str"
+      },
+      {
+        "name": "line",
+        "type": "geometry"
+      },
+      {
+        "name": "data_as_of",
+        "type": "datetime"
+      },
+      {
+        "name": "data_loaded_at",
+        "type": "datetime"
+      }
+    ]
+  },
+  {
+    "id": "sf_traffic_crashes",
+    "api_endpoint": "https://data.sfgov.org/resource/ubvf-ztfx.json",
+    "params": {
+      "$limit": 1
+    },
+    "fields": [
+      {
+        "name": "unique_id",
+        "type": "string"
+      },
+      {
+        "name": "cnn_intrsctn_fkey",
+        "type": "int"
+      },
+      {
+        "name": "cnn_sgmt_fkey",
+        "type": "int"
+      },
+      {
+        "name": "case_id_pkey",
+        "type": "string"
+      },
+      {
+        "name": "tb_latitude",
+        "type": "float"
+      },
+      {
+        "name": "tb_longitude",
+        "type": "float"
+      },
+      {
+        "name": "geocode_source",
+        "type": "string"
+      },
+      {
+        "name": "geocode_location",
+        "type": "string"
+      },
+      {
+        "name": "collision_datetime",
+        "type": "datetime"
+      },
+      {
+        "name": "collision_date",
+        "type": "datetime"
+      },
+      {
+        "name": "collision_time",
+        "type": "string"
+      },
+      {
+        "name": "accident_year",
+        "type": "string"
+      },
+      {
+        "name": "month",
+        "type": "string"
+      },
+      {
+        "name": "day_of_week",
+        "type": "string"
+      },
+      {
+        "name": "time_cat",
+        "type": "string"
+      },
+      {
+        "name": "juris",
+        "type": "string"
+      },
+      {
+        "name": "officer_id",
+        "type": "string"
+      },
+      {
+        "name": "reporting_district",
+        "type": "string"
+      },
+      {
+        "name": "beat_number",
+        "type": "string"
+      },
+      {
+        "name": "primary_rd",
+        "type": "string"
+      },
+      {
+        "name": "secondary_rd",
+        "type": "string"
+      },
+      {
+        "name": "distance",
+        "type": "int"
+      },
+      {
+        "name": "direction",
+        "type": "string"
+      },
+      {
+        "name": "weather_1",
+        "type": "string"
+      },
+      {
+        "name": "weather_2",
+        "type": "string"
+      },
+      {
+        "name": "collision_severity",
+        "type": "string"
+      },
+      {
+        "name": "type_of_collision",
+        "type": "string"
+      },
+      {
+        "name": "mviw",
+        "type": "string"
+      },
+      {
+        "name": "ped_action",
+        "type": "string"
+      },
+      {
+        "name": "road_surface",
+        "type": "string"
+      },
+      {
+        "name": "road_cond_1",
+        "type": "string"
+      },
+      {
+        "name": "road_cond_2",
+        "type": "string"
+      },
+      {
+        "name": "lighting",
+        "type": "string"
+      },
+      {
+        "name": "control_device",
+        "type": "string"
+      },
+      {
+        "name": "intersection",
+        "type": "string"
+      },
+      {
+        "name": "vz_pcf_code",
+        "type": "string"
+      },
+      {
+        "name": "vz_pcf_group",
+        "type": "string"
+      },
+      {
+        "name": "vz_pcf_description",
+        "type": "string"
+      },
+      {
+        "name": "vz_pcf_link",
+        "type": "string"
+      },
+      {
+        "name": "number_killed",
+        "type": "int"
+      },
+      {
+        "name": "number_injured",
+        "type": "int"
+      },
+      {
+        "name": "street_view",
+        "type": "string"
+      },
+      {
+        "name": "dph_col_grp",
+        "type": "string"
+      },
+      {
+        "name": "dph_col_grp_description",
+        "type": "string"
+      },
+      {
+        "name": "party_at_fault",
+        "type": "string"
+      },
+      {
+        "name": "party1_type",
+        "type": "string"
+      },
+      {
+        "name": "party1_dir_of_travel",
+        "type": "string"
+      },
+      {
+        "name": "party1_move_pre_acc",
+        "type": "string"
+      },
+      {
+        "name": "party2_type",
+        "type": "string"
+      },
+      {
+        "name": "party2_dir_of_travel",
+        "type": "string"
+      },
+      {
+        "name": "party2_move_pre_acc",
+        "type": "string"
+      },
+      {
+        "name": "point",
+        "type": "geometry"
+      },
+      {
+        "name": "data_as_of",
+        "type": "datetime"
+      },
+      {
+        "name": "data_updated_at",
+        "type": "datetime"
+      },
+      {
+        "name": "data_loaded_at",
+        "type": "datetime"
+      },
+      {
+        "name": "analysis_neighborhood",
+        "type": "string"
+      },
+      {
+        "name": "supervisor_district",
+        "type": "string"
+      },
+      {
+        "name": "police_district",
+        "type": "string"
+      },
+      {
+        "name": "current_police_districts",
+        "type": "int"
+      },
+      {
+        "name": "current_supervisor_districts",
+        "type": "int"
+      },
+      {
+        "name": "analysis_neighborhoods",
+        "type": "int"
+      },
+      {
+        "name": "neighborhoods",
+        "type": "int"
+      },
+      {
+        "name": "sf_find_neighborhoods",
+        "type": "int"
+      }
+    ]
+  },
+  {
+    "id": "sf_speed_limits_per_street_segment",
+    "api_endpoint": "https://data.sfgov.org/resource/3t7b-gebn.json",
+    "params": {
+      "$limit": 1 
+    },
+    "fields": [
+      {
+        "name": "objectid",
+        "type": "string"
+      },
+      {
+        "name": "cnn",
+        "type": "int"
+      },
+      {
+        "name": "street",
+        "type": "string"
+      },
+      {
+        "name": "st_type",
+        "type": "string"
+      },
+      {
+        "name": "from_st",
+        "type": "string"
+      },
+      {
+        "name": "to_st",
+        "type": "string"
+      },
+      {
+        "name": "speedlimit",
+        "type": "int"
+      },
+      {
+        "name": "schoolzone",
+        "type": "string"
+      },
+      {
+        "name": "schoolzone_limit",
+        "type": "int"
+      },
+      {
+        "name": "mtab_date",
+        "type": "datetime"
+      },
+      {
+        "name": "mtab_motion",
+        "type": "string"
+      },
+      {
+        "name": "mtab_reso_text",
+        "type": "string"
+      },
+      {
+        "name": "status",
+        "type": "string"
+      },
+      {
+        "name": "workorder",
+        "type": "string"
+      },
+      {
+        "name": "install_date",
+        "type": "string"
+      },
+      {
+        "name": "shape",
+        "type": "geometry"
+      },
+      {
+        "name": "data_as_of",
+        "type": "datetime"
+      },
+      {
+        "name": "data_loaded_at",
+        "type": "datetime"
+      },
+      {
+        "name": "analysis_neighborhood",
+        "type": "string"
+      },
+      {
+        "name": "supervisor_district",
+        "type": "string"
+      }
+    ]
+  }
+]
