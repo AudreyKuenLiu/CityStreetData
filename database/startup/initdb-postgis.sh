@@ -5,6 +5,11 @@ set -e
 # Perform all actions as $POSTGRES_USER
 export PGUSER="$POSTGRES_USER"
 
+# Create the 'airflow_db' 
+"${psql[@]}" <<- EOSQL
+CREATE DATABASE $AIRFLOW_POSTGRES_DB IS_TEMPLATE true;
+EOSQL
+
 # Create the 'template_postgis' template db
 "${psql[@]}" <<- 'EOSQL'
 CREATE DATABASE template_postgis IS_TEMPLATE true;

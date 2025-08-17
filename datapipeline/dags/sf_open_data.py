@@ -32,8 +32,6 @@ def pull_from_data_sf(api_endpoint: str, params:dict):
 
 @task
 def load_data_to_postgres(data: list[dict], fields:list[dict]):
-    hook = PostgresHook(postgres_conn_id="")
-    conn = hook.get_conn()
     return 
 
 @dag(
