@@ -1,493 +1,829 @@
 [
   {
     "id": "sf_streets_and_intersections",
-    "api_endpoint": "https://data.sfgov.org/resource/3psu-pn9h.json",
+    "api_endpoint": "https://data.sfgov.org/resource/3psu-pn9h.csv",
     "params": {
       "$limit": 1
     },
-    "fields": [
+    "sql_fields": [
       {
         "name": "cnn",
-        "type": "int"
+        "type": "INTEGER"
       },
       {
         "name": "lf_fadd",
-        "type": "int"
+        "type": "SMALLINT"
       },
       {
         "name": "lf_toadd",
-        "type": "int"
+        "type": "SMALLINT"
       },
       {
         "name": "rt_fadd",
-        "type": "int"
+        "type": "SMALLINT"
       },
       {
         "name": "rt_toadd",
-        "type": "int"
+        "type": "SMALLINT"
       },
       {
         "name": "street",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "st_type",
-        "type": "str"
+        "type": "VARCHAR(8)"
       },
       {
         "name": "f_st",
-        "type": "str"
+        "type": "VARCHAR(64)"
       },
       {
         "name": "t_st",
-        "type": "str"
+        "type": "VARCHAR(64)"
       },
       {
         "name": "f_node_cnn",
-        "type": "int"
+        "type": "INTEGER"
       },
       {
         "name": "t_node_cnn",
-        "type": "int"
+        "type": "INTEGER"
       },
       {
         "name": "accepted",
-        "type": "bool"
+        "type": "BOOLEAN"
       },
       {
         "name": "active",
-        "type": "bool"
+        "type": "BOOLEAN"
       },
       {
         "name": "classcode",
-        "type": "int"
+        "type": "SMALLINT"
       },
       {
         "name": "date_added",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "date_altered",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "date_dropped",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "gds_chg_id_add",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "gds_chg_id_altered",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "gds_chg_id_dropped",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "jurisdiction",
-        "type": "str"
+        "type": "VARCHAR(8)"
       },
       {
         "name": "layer",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "nhood",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "oneway",
-        "type": "str"
+        "type": "VARCHAR(4)"
       },
       {
         "name": "street_gc",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "streetname",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "streetname_gc",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "zip_code",
-        "type": "int"
+        "type": "INTEGER"
       },
       {
         "name": "analysis_neighborhood",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "supervisor_district",
-        "type": "str"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "line",
-        "type": "geometry"
+        "type": "geometry(LineString, 4326)"
       },
       {
         "name": "data_as_of",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "data_loaded_at",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       }
     ]
   },
   {
     "id": "sf_traffic_crashes",
-    "api_endpoint": "https://data.sfgov.org/resource/ubvf-ztfx.json",
+    "api_endpoint": "https://data.sfgov.org/resource/ubvf-ztfx.csv",
     "params": {
       "$limit": 1
     },
-    "fields": [
+    "sql_fields": [
       {
         "name": "unique_id",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "cnn_intrsctn_fkey",
-        "type": "int"
+        "type": "INTEGER"
       },
       {
         "name": "cnn_sgmt_fkey",
-        "type": "int"
+        "type": "INTEGER"
       },
       {
         "name": "case_id_pkey",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "tb_latitude",
-        "type": "float"
+        "type": "DOUBLE PRECISION"
       },
       {
         "name": "tb_longitude",
-        "type": "float"
+        "type": "DOUBLE PRECISION"
       },
       {
         "name": "geocode_source",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "geocode_location",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "collision_datetime",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "collision_date",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "collision_time",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "accident_year",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "month",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "day_of_week",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "time_cat",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "juris",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "officer_id",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "reporting_district",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "beat_number",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "primary_rd",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "secondary_rd",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "distance",
-        "type": "int"
+        "type": "SMALLINT"
       },
       {
         "name": "direction",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "weather_1",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "weather_2",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "collision_severity",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "type_of_collision",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "mviw",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "ped_action",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "road_surface",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "road_cond_1",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "road_cond_2",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "lighting",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "control_device",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "intersection",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "vz_pcf_code",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "vz_pcf_group",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "vz_pcf_description",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "vz_pcf_link",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "number_killed",
-        "type": "int"
+        "type": "INTEGER"
       },
       {
         "name": "number_injured",
-        "type": "int"
+        "type": "INTEGER"
       },
       {
         "name": "street_view",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "dph_col_grp",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "dph_col_grp_description",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "party_at_fault",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "party1_type",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "party1_dir_of_travel",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "party1_move_pre_acc",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "party2_type",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "party2_dir_of_travel",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "party2_move_pre_acc",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "point",
-        "type": "geometry"
+        "type": "geometry(Point, 4326)"
       },
       {
         "name": "data_as_of",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "data_updated_at",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "data_loaded_at",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "analysis_neighborhood",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "supervisor_district",
-        "type": "string"
+        "type": "TEXT"
       },
       {
         "name": "police_district",
-        "type": "string"
-      },
-      {
-        "name": "current_police_districts",
-        "type": "int"
-      },
-      {
-        "name": "current_supervisor_districts",
-        "type": "int"
-      },
-      {
-        "name": "analysis_neighborhoods",
-        "type": "int"
-      },
-      {
-        "name": "neighborhoods",
-        "type": "int"
-      },
-      {
-        "name": "sf_find_neighborhoods",
-        "type": "int"
+        "type": "TEXT"
       }
     ]
   },
   {
     "id": "sf_speed_limits_per_street_segment",
-    "api_endpoint": "https://data.sfgov.org/resource/3t7b-gebn.json",
+    "api_endpoint": "https://data.sfgov.org/resource/3t7b-gebn.csv",
     "params": {
-      "$limit": 1 
+      "$limit": 1
     },
-    "fields": [
+    "sql_fields": [
       {
         "name": "objectid",
-        "type": "string"
+        "type": "VARCHAR(64)"
       },
       {
         "name": "cnn",
-        "type": "int"
+        "type": "INTEGER"
       },
       {
         "name": "street",
-        "type": "string"
+        "type": "VARCHAR(64)"
       },
       {
         "name": "st_type",
-        "type": "string"
+        "type": "VARCHAR(8)"
       },
       {
         "name": "from_st",
-        "type": "string"
+        "type": "VARCHAR(64)"
       },
       {
         "name": "to_st",
-        "type": "string"
+        "type": "VARCHAR(64)"
       },
       {
         "name": "speedlimit",
-        "type": "int"
+        "type": "SMALLINT"
       },
       {
         "name": "schoolzone",
-        "type": "string"
+        "type": "VARCHAR(8)"
       },
       {
         "name": "schoolzone_limit",
-        "type": "int"
+        "type": "SMALLINT"
       },
       {
         "name": "mtab_date",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "mtab_motion",
-        "type": "string"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "mtab_reso_text",
-        "type": "string"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "status",
-        "type": "string"
+        "type": "VARCHAR(32)"
       },
       {
         "name": "workorder",
-        "type": "string"
+        "type": "VARCHAR(16)"
       },
       {
         "name": "install_date",
-        "type": "string"
+        "type": "TIMESTAMP"
       },
       {
         "name": "shape",
-        "type": "geometry"
+        "type": "geometry(MultiLineString, 4326)"
       },
       {
         "name": "data_as_of",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "data_loaded_at",
-        "type": "datetime"
+        "type": "TIMESTAMP"
       },
       {
         "name": "analysis_neighborhood",
-        "type": "string"
+        "type": "VARCHAR(64)"
       },
       {
         "name": "supervisor_district",
-        "type": "string"
+        "type": "VARCHAR(32)"
       }
     ]
+  },
+  {
+    "id": "sf_intersection_level_traffic_calming_devices",
+    "api_endpoint": "https://data.sfgov.org/resource/bp3t-bd4t.csv",
+    "params": {
+      "$limit": 1
+    },
+    "sql_fields": [
+      {
+        "name": "row_id",
+        "type": "INTEGER"
+      },
+      {
+        "name": "objectid",
+        "type": "INTEGER"
+      },
+      {
+        "name": "cnn",
+        "type": "INTEGER"
+      },
+      {
+        "name": "streetname",
+        "type": "TEXT"
+      },
+      {
+        "name": "project_lo",
+        "type": "TEXT"
+      },
+      {
+        "name": "from_st",
+        "type": "TEXT"
+      },
+      {
+        "name": "tc_measure",
+        "type": "TEXT"
+      },
+      {
+        "name": "units",
+        "type": "INTEGER"
+      },
+      {
+        "name": "install_mo",
+        "type": "SMALLINT"
+      },
+      {
+        "name": "install_yr",
+        "type": "INTEGER"
+      },
+      {
+        "name": "install_date",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "fiscal_yr",
+        "type": "TEXT"
+      },
+      {
+        "name": "program",
+        "type": "TEXT"
+      },
+      {
+        "name": "current_status",
+        "type": "TEXT"
+      },
+      {
+        "name": "supervisor_district",
+        "type": "VARCHAR(32)"
+      },
+      {
+        "name": "analysis_neighborhood",
+        "type": "TEXT"
+      },
+      {
+        "name": "shape",
+        "type": "geometry(Point, 4326)"
+      },
+      {
+        "name": "data_as_of",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "data_loaded_at",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "id": "sf_mid_block_traffic_calming_areas",
+    "api_endpoint": "https://data.sfgov.org/resource/abhw-ffzx.csv",
+    "params": {
+      "$limit": 1
+    },
+    "sql_fields": [
+      {
+        "name": "row_id",
+        "type": "INTEGER"
+      },
+      {
+        "name": "objectid",
+        "type": "INTEGER"
+      },
+      {
+        "name": "cnn",
+        "type": "INTEGER"
+      },
+      {
+        "name": "nhood",
+        "type": "TEXT"
+      },
+      {
+        "name": "streetname",
+        "type": "TEXT"
+      },
+      {
+        "name": "district",
+        "type": "VARCHAR(32)"
+      },
+      {
+        "name": "from_st",
+        "type": "TEXT"
+      },
+      {
+        "name": "to_st",
+        "type": "TEXT"
+      },
+      {
+        "name": "project_location",
+        "type": "TEXT"
+      },
+      {
+        "name": "tc_measure",
+        "type": "TEXT"
+      },
+      {
+        "name": "units",
+        "type": "SMALLINT"
+      },
+      {
+        "name": "install_mo",
+        "type": "SMALLINT"
+      },
+      {
+        "name": "install_yr",
+        "type": "SMALLINT"
+      },
+      {
+        "name": "install_datetime",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "fiscal_yr",
+        "type": "TEXT"
+      },
+      {
+        "name": "program",
+        "type": "TEXT"
+      },
+      {
+        "name": "current_status",
+        "type": "TEXT"
+      },
+      {
+        "name": "current_ti",
+        "type": "TEXT"
+      },
+      {
+        "name": "next_step",
+        "type": "TEXT"
+      },
+      {
+        "name": "next_step_2",
+        "type": "TEXT"
+      },
+      {
+        "name": "shape",
+        "type": "geometry(LineString, 4326)"
+      },
+      {
+        "name": "data_as_of",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "data_loaded_at",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "id": "sf_slow_streets",
+    "api_endpoint": "https://data.sfgov.org/resource/hkz3-itiu.csv",
+    "params": {
+      "$limit": 1
+    },
+    "sql_fields": [
+      {
+        "name": "objectid",
+        "type": "INTEGER"
+      },
+      {
+        "name": "shape",
+        "type": "geometry(LineString, 4326)"
+      },
+      {
+        "name": "classcode",
+        "type": "INTEGER"
+      },
+      {
+        "name": "cnn",
+        "type": "INTEGER"
+      },
+      {
+        "name": "f_node_cnn",
+        "type": "INTEGER"
+      },
+      {
+        "name": "f_st",
+        "type": "TEXT"
+      },
+      {
+        "name": "nhood",
+        "type": "TEXT"
+      },
+      {
+        "name": "oneway",
+        "type": "VARCHAR(4)"
+      },
+      {
+        "name": "st_type",
+        "type": "VARCHAR(16)"
+      },
+      {
+        "name": "streetname",
+        "type": "TEXT"
+      },
+      {
+        "name": "t_st",
+        "type": "TEXT"
+      },
+      {
+        "name": "zip_code",
+        "type": "INT"
+      },
+      {
+        "name": "slw_st",
+        "type": "INTEGER"
+      },
+      {
+        "name": "length",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "extents",
+        "type": "TEXT"
+      },
+      {
+        "name": "status",
+        "type": "TEXT"
+      },
+      {
+        "name": "phase",
+        "type": "INTEGER"
+      },
+      {
+        "name": "install_date",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "agency",
+        "type": "VARCHAR(16)"
+      },
+      {
+        "name": "type",
+        "type": "TEXT"
+      },
+      {
+        "name": "supervisor_district",
+        "type": "VARCHAR(32)"
+      },
+      {
+        "name": "data_as_of",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "data_loaded_at",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "id": "sf_vision_zero_high_injury_network",
+    "api_endpoint": "https://data.sfgov.org/resource/8vtn-qytr.csv",
+    "params": {
+      "$limit": 1
+    },
+    "sql_fields": 
+    [
+    {"name": "objectid", "type": "INTEGER"},
+    {"name": "geom_length", "type": "DECIMAL"},
+    {"name": "cnn_sgmt_pkey", "type": "INTEGER"},
+    {"name": "street_name", "type": "TEXT"},
+    {"name": "street_type", "type": "TEXT"},
+    {"name": "street_layer", "type": "TEXT"},
+    {"name": "full_street_name", "type": "TEXT"},
+    {"name": "class_code", "type": "SMALLINT"},
+    {"name": "gis_length_miles", "type": "DECIMAL"},
+    {"name": "duel_car_way_yn", "type": "TEXT"},
+    {"name": "duel_car_way_id", "type": "INTEGER"},
+    {"name": "f_node_cnn_intrsctn_fkey", "type": "INTEGER"},
+    {"name": "t_node_cnn_intrsctn_fkey", "type": "INTEGER"},
+    {"name": "shape_length", "type": "INTEGER"},
+    {"name": "corrected_length_miles", "type": "DECIMAL"},
+    {"name": "direction", "type": "TEXT"},
+    {"name": "from_intrsctn", "type": "TEXT"},
+    {"name": "to_intrsctn", "type": "TEXT"},
+    {"name": "geom", "type": "geometry(LineString, 4326)"},
+    {"name": "data_as_of", "type": "TIMESTAMP"},
+    {"name": "data_loaded_at", "type": "TIMESTAMP"}
+]
+  },
+  {
+    "id": "sf_pd_incident_reports_2018_to_Present",
+    "api_endpoint": "https://data.sfgov.org/resource/wg3w-h783.csv",
+    "params": {
+      "$limit": 1
+    },
+    "sql_fields":[
+    {"name": "row_id", "type": "BIGINT"},
+    {"name": "incident_datetime", "type": "TIMESTAMP"},
+    {"name": "incident_date", "type": "DATE"},
+    {"name": "incident_time", "type": "VARCHAR(8)"},
+    {"name": "incident_year", "type": "SMALLINT"},
+    {"name": "incident_day_of_week", "type": "TEXT"},
+    {"name": "report_datetime", "type": "TIMESTAMP"},
+    {"name": "incident_id", "type": "INTEGER"},
+    {"name": "incident_number", "type": "INTEGER"},
+    {"name": "cad_number", "type": "INTEGER"},
+    {"name": "report_type_code", "type": "VARCHAR(4)"},
+    {"name": "report_type_description", "type": "TEXT"},
+    {"name": "filed_online", "type": "BOOLEAN"},
+    {"name": "incident_code", "type": "TEXT"},
+    {"name": "incident_category", "type": "TEXT"},
+    {"name": "incident_subcategory", "type": "TEXT"},
+    {"name": "incident_description", "type": "TEXT"},
+    {"name": "resolution", "type": "TEXT"},
+    {"name": "intersection", "type": "TEXT"},
+    {"name": "cnn", "type": "INTEGER"},
+    {"name": "police_district", "type": "TEXT"},
+    {"name": "analysis_neighborhood", "type": "TEXT"},
+    {"name": "supervisor_district", "type": "TEXT"},
+    {"name": "supervisor_district_2012", "type": "TEXT"},
+    {"name": "latitude", "type": "DOUBLE PRECISION"},
+    {"name": "longitude", "type": "DOUBLE PRECISION"},
+    {"name": "point", "type": "geometry(Point, 4326)"},
+    {"name": "data_as_of", "type": "TIMESTAMP"},
+    {"name": "data_loaded_at", "type": "TIMESTAMP"}
+]
   }
 ]
