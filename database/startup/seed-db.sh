@@ -36,9 +36,7 @@ SELECT
  zip_code, 
  analysis_neighborhood, 
  supervisor_district, 
- line, 
- data_as_of as sf_data_updated_at, 
- data_loaded_at as sf_data_created_at
+ line
 FROM
  sf_streets_active_and_retired_streets_20250730_raw
 )
@@ -56,9 +54,9 @@ INSERT INTO sf_streets_and_intersections (
  t_node_cnn,
  accepted,
  active,
- date_added,
- date_altered,
- date_dropped,
+ date_public_works_added,
+ date_public_works_altered,
+ date_public_works_dropped,
  jurisdiction,
  layer,
  nhood,
@@ -69,9 +67,7 @@ INSERT INTO sf_streets_and_intersections (
  zip_code,
  analysis_neighborhood,
  supervisor_district,
- line,
- sf_data_updated_at,
- sf_data_created_at 
+ line
 )
 SELECT
   dta.*
@@ -107,11 +103,11 @@ WHERE
   OR
   sfsi.active != dta.active 
   OR
-  sfsi.date_added != dta.date_added 
+  sfsi.date_public_works_added != dta.date_added 
   OR
-  sfsi.date_altered != dta.date_altered 
+  sfsi.date_public_works_altered != dta.date_altered 
   OR
-  sfsi.date_dropped != dta.date_dropped 
+  sfsi.date_public_works_dropped != dta.date_dropped 
   OR
   sfsi.jurisdiction != dta.jurisdiction 
   OR

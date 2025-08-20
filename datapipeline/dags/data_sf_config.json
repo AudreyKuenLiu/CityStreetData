@@ -763,30 +763,92 @@
     "params": {
       "$limit": 1
     },
-    "sql_fields": 
-    [
-    {"name": "objectid", "type": "INTEGER"},
-    {"name": "geom_length", "type": "DECIMAL"},
-    {"name": "cnn_sgmt_pkey", "type": "INTEGER"},
-    {"name": "street_name", "type": "TEXT"},
-    {"name": "street_type", "type": "TEXT"},
-    {"name": "street_layer", "type": "TEXT"},
-    {"name": "full_street_name", "type": "TEXT"},
-    {"name": "class_code", "type": "SMALLINT"},
-    {"name": "gis_length_miles", "type": "DECIMAL"},
-    {"name": "duel_car_way_yn", "type": "TEXT"},
-    {"name": "duel_car_way_id", "type": "INTEGER"},
-    {"name": "f_node_cnn_intrsctn_fkey", "type": "INTEGER"},
-    {"name": "t_node_cnn_intrsctn_fkey", "type": "INTEGER"},
-    {"name": "shape_length", "type": "INTEGER"},
-    {"name": "corrected_length_miles", "type": "DECIMAL"},
-    {"name": "direction", "type": "TEXT"},
-    {"name": "from_intrsctn", "type": "TEXT"},
-    {"name": "to_intrsctn", "type": "TEXT"},
-    {"name": "geom", "type": "geometry(LineString, 4326)"},
-    {"name": "data_as_of", "type": "TIMESTAMP"},
-    {"name": "data_loaded_at", "type": "TIMESTAMP"}
-]
+    "sql_fields": [
+      {
+        "name": "objectid",
+        "type": "INTEGER"
+      },
+      {
+        "name": "geom_length",
+        "type": "DECIMAL"
+      },
+      {
+        "name": "cnn_sgmt_pkey",
+        "type": "INTEGER"
+      },
+      {
+        "name": "street_name",
+        "type": "TEXT"
+      },
+      {
+        "name": "street_type",
+        "type": "TEXT"
+      },
+      {
+        "name": "street_layer",
+        "type": "TEXT"
+      },
+      {
+        "name": "full_street_name",
+        "type": "TEXT"
+      },
+      {
+        "name": "class_code",
+        "type": "SMALLINT"
+      },
+      {
+        "name": "gis_length_miles",
+        "type": "DECIMAL"
+      },
+      {
+        "name": "duel_car_way_yn",
+        "type": "TEXT"
+      },
+      {
+        "name": "duel_car_way_id",
+        "type": "INTEGER"
+      },
+      {
+        "name": "f_node_cnn_intrsctn_fkey",
+        "type": "INTEGER"
+      },
+      {
+        "name": "t_node_cnn_intrsctn_fkey",
+        "type": "INTEGER"
+      },
+      {
+        "name": "shape_length",
+        "type": "INTEGER"
+      },
+      {
+        "name": "corrected_length_miles",
+        "type": "DECIMAL"
+      },
+      {
+        "name": "direction",
+        "type": "TEXT"
+      },
+      {
+        "name": "from_intrsctn",
+        "type": "TEXT"
+      },
+      {
+        "name": "to_intrsctn",
+        "type": "TEXT"
+      },
+      {
+        "name": "geom",
+        "type": "geometry(LineString, 4326)"
+      },
+      {
+        "name": "data_as_of",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "data_loaded_at",
+        "type": "TIMESTAMP"
+      }
+    ]
   },
   {
     "id": "sf_pd_incident_reports_2018_to_Present",
@@ -794,36 +856,123 @@
     "params": {
       "$limit": 1
     },
-    "sql_fields":[
-    {"name": "row_id", "type": "BIGINT"},
-    {"name": "incident_datetime", "type": "TIMESTAMP"},
-    {"name": "incident_date", "type": "DATE"},
-    {"name": "incident_time", "type": "VARCHAR(8)"},
-    {"name": "incident_year", "type": "SMALLINT"},
-    {"name": "incident_day_of_week", "type": "TEXT"},
-    {"name": "report_datetime", "type": "TIMESTAMP"},
-    {"name": "incident_id", "type": "INTEGER"},
-    {"name": "incident_number", "type": "INTEGER"},
-    {"name": "cad_number", "type": "INTEGER"},
-    {"name": "report_type_code", "type": "VARCHAR(4)"},
-    {"name": "report_type_description", "type": "TEXT"},
-    {"name": "filed_online", "type": "BOOLEAN"},
-    {"name": "incident_code", "type": "TEXT"},
-    {"name": "incident_category", "type": "TEXT"},
-    {"name": "incident_subcategory", "type": "TEXT"},
-    {"name": "incident_description", "type": "TEXT"},
-    {"name": "resolution", "type": "TEXT"},
-    {"name": "intersection", "type": "TEXT"},
-    {"name": "cnn", "type": "INTEGER"},
-    {"name": "police_district", "type": "TEXT"},
-    {"name": "analysis_neighborhood", "type": "TEXT"},
-    {"name": "supervisor_district", "type": "TEXT"},
-    {"name": "supervisor_district_2012", "type": "TEXT"},
-    {"name": "latitude", "type": "DOUBLE PRECISION"},
-    {"name": "longitude", "type": "DOUBLE PRECISION"},
-    {"name": "point", "type": "geometry(Point, 4326)"},
-    {"name": "data_as_of", "type": "TIMESTAMP"},
-    {"name": "data_loaded_at", "type": "TIMESTAMP"}
-]
+    "sql_fields": [
+      {
+        "name": "row_id",
+        "type": "BIGINT"
+      },
+      {
+        "name": "incident_datetime",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "incident_date",
+        "type": "DATE"
+      },
+      {
+        "name": "incident_time",
+        "type": "VARCHAR(8)"
+      },
+      {
+        "name": "incident_year",
+        "type": "SMALLINT"
+      },
+      {
+        "name": "incident_day_of_week",
+        "type": "TEXT"
+      },
+      {
+        "name": "report_datetime",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "incident_id",
+        "type": "INTEGER"
+      },
+      {
+        "name": "incident_number",
+        "type": "INTEGER"
+      },
+      {
+        "name": "cad_number",
+        "type": "INTEGER"
+      },
+      {
+        "name": "report_type_code",
+        "type": "VARCHAR(4)"
+      },
+      {
+        "name": "report_type_description",
+        "type": "TEXT"
+      },
+      {
+        "name": "filed_online",
+        "type": "BOOLEAN"
+      },
+      {
+        "name": "incident_code",
+        "type": "TEXT"
+      },
+      {
+        "name": "incident_category",
+        "type": "TEXT"
+      },
+      {
+        "name": "incident_subcategory",
+        "type": "TEXT"
+      },
+      {
+        "name": "incident_description",
+        "type": "TEXT"
+      },
+      {
+        "name": "resolution",
+        "type": "TEXT"
+      },
+      {
+        "name": "intersection",
+        "type": "TEXT"
+      },
+      {
+        "name": "cnn",
+        "type": "INTEGER"
+      },
+      {
+        "name": "police_district",
+        "type": "TEXT"
+      },
+      {
+        "name": "analysis_neighborhood",
+        "type": "TEXT"
+      },
+      {
+        "name": "supervisor_district",
+        "type": "TEXT"
+      },
+      {
+        "name": "supervisor_district_2012",
+        "type": "TEXT"
+      },
+      {
+        "name": "latitude",
+        "type": "DOUBLE PRECISION"
+      },
+      {
+        "name": "longitude",
+        "type": "DOUBLE PRECISION"
+      },
+      {
+        "name": "point",
+        "type": "geometry(Point, 4326)"
+      },
+      {
+        "name": "data_as_of",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "data_loaded_at",
+        "type": "TIMESTAMP"
+      }
+    ]
   }
 ]

@@ -1,3 +1,4 @@
+import csv
 import os
 import requests
 import json
@@ -27,6 +28,17 @@ def read_config():
     return config
 config = read_config()
 
+def read_sql_file(table_id):
+    sql_file_path = f"{project_dir}/dags/sql/{table_id}.sql"
+    try:
+        with open(sql_file_path, 'r') as file:
+            file_contents = file.read()
+    except FileNotFoundError:
+        logging.warn(f"couldn't find file {sql_file_path}")
+        return ""
+
+    return file_contents
+
 @task
 def pull_from_data_sf(api_endpoint: str, params:dict):
     logging.info(f"Pulling data from {api_endpoint} with params {params}")
@@ -43,10 +55,9 @@ def pull_from_data_sf(api_endpoint: str, params:dict):
     return 
 
 @task
-def load_to_db(csv_string: str, sql_fields: list[dict], task_instance: TaskInstance, logical_date: datetime):
-    logging.info(f"loading data to db {sql_fields} with this data {csv_string}")
+def load_to_db(table_id: str, csv_string: str, sql_fields: list[dict], logical_date: datetime):
     file_date = logical_date.strftime("%Y%m%d")
-    task_id = task_instance.task_id
+    data_table_name = f"{table_id}_{file_date}_raw"
     csv_IO = StringIO(csv_string)
     csv_IO_to_load = StringIO()
 
@@ -57,7 +68,13 @@ def load_to_db(csv_string: str, sql_fields: list[dict], task_instance: TaskInsta
 
     df = pd.read_csv(csv_IO)
     df = df[sql_fields_arr_copy]
-    df.to_csv(csv_IO_to_load, index=False)
+    df.to_csv(csv_IO_to_load, index=False, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    csv_IO_to_load.seek(0) #YOU MUST SEEK THE POINTER TO 0 OR ELSE COPY_EXPERT WON'T COPY IN THE END
+
+    sql_load_file = read_sql_file(table_id)
+    sql_load_file = sql_load_file.format(data_table_name=data_table_name)
+
+    logging.info(f"loading data to db table {data_table_name} ({sql_fields_copy_str})")
 
     conn = psycopg2.connect(
         dbname=pg_database,
@@ -67,10 +84,16 @@ def load_to_db(csv_string: str, sql_fields: list[dict], task_instance: TaskInsta
         port=pg_port
     )
     cur = conn.cursor()
-    cur.execute(f"DROP TABLE IF EXISTS {task_id}_{file_date}")
-    cur.execute(f"CREATE TABLE IF NOT EXISTS {task_id}_{file_date} ({sql_fields_str})")
+    cur.execute(f"DROP TABLE IF EXISTS {data_table_name}")
+    cur.execute(f"CREATE TABLE IF NOT EXISTS {data_table_name} ({sql_fields_str})")
+    cur.copy_expert(sql=f"COPY {data_table_name} ({sql_fields_copy_str}) FROM STDIN WITH CSV HEADER", file=csv_IO_to_load, size=MAX_FILE_SIZE_IN_BYTES)
+    cur.execute(f"select * from {data_table_name}")
+    res = cur.fetchall()
+    logging.info(f"this is the query result after insertion {res}")
 
-    cur.copy_expert(sql=f"COPY {task_id}_{file_date} ({sql_fields_copy_str}) FROM STDIN WITH CSV HEADER", file=csv_IO_to_load, size=MAX_FILE_SIZE_IN_BYTES)
+    if len(sql_load_file) > 0:
+        cur.execute(sql_load_file)
+
     conn.commit()
     cur.close()
     conn.close()
@@ -89,8 +112,9 @@ def get_sf_data_dag():
             params=table.get("params", {})
         )
         load_to_db.override(task_id=f"load_{table['id']}")(
+            table_id=table['id'],
             csv_string=result,
-            sql_fields=table["sql_fields"]
+            sql_fields=table["sql_fields"],
         )
     return
 

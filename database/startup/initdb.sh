@@ -301,9 +301,9 @@ CREATE TABLE IF NOT EXISTS sf_streets_and_intersections (
   t_node_cnn             INTEGER,
   accepted               BOOLEAN,
   active                 BOOLEAN,
-  date_added             TIMESTAMP,
-  date_altered           TIMESTAMP,
-  date_dropped           TIMESTAMP,
+  date_public_works_added TIMESTAMP,
+  date_public_works_altered TIMESTAMP,
+  date_public_works_dropped TIMESTAMP,
   jurisdiction           VARCHAR(8),
   layer                  VARCHAR(32),
   nhood                  VARCHAR(32),
@@ -314,9 +314,7 @@ CREATE TABLE IF NOT EXISTS sf_streets_and_intersections (
   zip_code               INTEGER,
   analysis_neighborhood  VARCHAR(32),
   supervisor_district    VARCHAR(32),
-  line                   geometry(LineString, 4326),
-  sf_data_updated_at     TIMESTAMP,
-  sf_data_created_at     TIMESTAMP
+  line                   geometry(LineString, 4326)
 );
 CREATE TRIGGER update_sf_streets_and_intersections_time BEFORE UPDATE ON sf_streets_and_intersections FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
@@ -358,8 +356,8 @@ CREATE TYPE feature_type AS ENUM (
 
 CREATE TABLE IF NOT EXISTS sf_street_features (
   id           BIGINT GENERATED ALWAYS AS IDENTITY primary key,
-  updated_at   TIMESTAMP NOT NULL,
-  created_at   TIMESTAMP NOT NULL,
+  updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMP NOT NULL,
   removed_at   TIMESTAMP, -- should be when the feature is completely gone physically not just no longer maintained.
   feature_type feature_type NOT NULL, 
@@ -378,8 +376,8 @@ CREATE TYPE event_type AS ENUM (
 
 CREATE TABLE IF NOT EXISTS sf_events (
   id         BIGINT GENERATED ALWAYS AS IDENTITY primary key,
-  updated_at TIMESTAMP NOT NULL,
-  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   occured_at TIMESTAMP NOT NULL,
   event_type event_type NOT NULL, 
   cnn        INTEGER NOT NULL,
