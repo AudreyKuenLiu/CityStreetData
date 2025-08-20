@@ -87,9 +87,6 @@ def load_to_db(table_id: str, csv_string: str, sql_fields: list[dict], logical_d
     cur.execute(f"DROP TABLE IF EXISTS {data_table_name}")
     cur.execute(f"CREATE TABLE IF NOT EXISTS {data_table_name} ({sql_fields_str})")
     cur.copy_expert(sql=f"COPY {data_table_name} ({sql_fields_copy_str}) FROM STDIN WITH CSV HEADER", file=csv_IO_to_load, size=MAX_FILE_SIZE_IN_BYTES)
-    cur.execute(f"select * from {data_table_name}")
-    res = cur.fetchall()
-    logging.info(f"this is the query result after insertion {res}")
 
     if len(sql_load_file) > 0:
         cur.execute(sql_load_file)
