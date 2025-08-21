@@ -295,7 +295,9 @@ FROM
 WHERE
   sfe.metadata->>'unique_id' = dtu.unique_id
   AND (
+    sfe.occured_at != dtu.collision_datetime OR
     (cnn != COALESCE(dtu.cnn_intrsctn_fkey, 0) and cnn != COALESCE(dtu.cnn_sgmt_fkey, 0)) OR
+    NOT ST_OrderingEquals(sfe.point, dtu.point) OR
     sfe.metadata->>'case_id_pkey' != dtu.case_id_pkey OR
     (sfe.metadata->>'tb_latitude')::double precision != dtu.tb_latitude OR
     (sfe.metadata->>'tb_longitude')::double precision != dtu.tb_longitude OR
@@ -339,7 +341,6 @@ WHERE
     sfe.metadata->>'party2_type' != dtu.party2_type OR
     sfe.metadata->>'party2_dir_of_travel' != dtu.party2_dir_of_travel OR
     sfe.metadata->>'party2_move_pre_acc' != dtu.party2_move_pre_acc OR
-    NOT ST_OrderingEquals(sfe.point, dtu.point) OR
     (sfe.metadata->>'data_as_of')::timestamp != dtu.data_as_of OR
     sfe.metadata->>'analysis_neighborhood' != dtu.analysis_neighborhood OR
     sfe.metadata->>'supervisor_district' != dtu.supervisor_district OR
