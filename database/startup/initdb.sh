@@ -381,6 +381,7 @@ CREATE TABLE IF NOT EXISTS sf_events (
   occured_at TIMESTAMP NOT NULL,
   event_type event_type NOT NULL, 
   cnn        INTEGER NOT NULL,
+  point      geometry(Point, 4326),
   metadata   JSONB
 );
 CREATE TRIGGER update_sf_events_time BEFORE UPDATE ON sf_events FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

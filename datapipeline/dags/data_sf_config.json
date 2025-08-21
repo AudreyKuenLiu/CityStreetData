@@ -233,7 +233,7 @@
       },
       {
         "name": "distance",
-        "type": "SMALLINT"
+        "type": "INTEGER"
       },
       {
         "name": "direction",
