@@ -340,8 +340,7 @@ CREATE TYPE feature_type AS ENUM (
   'ped_refuge_island',
   'raised_crosswalk',
   'road_diet',
-  'schoolzone',
-  'schoolzone_speed_limit',
+  'school_zone',
   'slow_street', 
   'speed_bump',
   'speed_cushion',
@@ -359,7 +358,6 @@ CREATE TABLE IF NOT EXISTS sf_street_features (
   updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
   created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMP NOT NULL,
-  removed_at   TIMESTAMP, -- should be when the feature is completely gone physically not just no longer maintained.
   feature_type feature_type NOT NULL, 
   cnn          INTEGER NOT NULL,
   is_on_intersection BOOLEAN NOT NULL, 
