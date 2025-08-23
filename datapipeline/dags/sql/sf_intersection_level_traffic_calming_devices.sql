@@ -1,5 +1,5 @@
-CREATE OR REPLACE FUNCTION tc_measure_to_feature_type(tc_measure text)
-RETURNS feature_type AS $$
+CREATE OR REPLACE FUNCTION intersection_tc_measure_to_calming_measure(tc_measure text)
+RETURNS text AS $$
 BEGIN
     RETURN CASE TRIM(LOWER(tc_measure))
         WHEN 'median extension' THEN 'median_extension'
@@ -65,24 +65,9 @@ most_recent_intersection_level_change AS (
         FROM
             sf_street_features
         WHERE
-            feature_type in (
-                'median_extension',
-                'channelization',
-                'speed_hump',
-                'ped_refuge_island',
-                'chicane',
-                'median_island',
-                'traffic_circle',
-                'left_turn_traffic_calming',
-                'painted_traffic_circle',
-                'traffic_island',
-                'speed_table',
-                'painted_island',
-                'raised_crosswalk',
-                'centerline_hardening_w_rubber_humps',
-                'speed_radar_sign',
-                'choker'
-            )
+            feature_type = 'calming_measure'
+            AND
+            is_on_intersection = true
     )
     WHERE
         rn = 1
@@ -100,32 +85,62 @@ SELECT
         to_timestamp(substring(fiscal_yr FROM '\\d{{4}}$') || '-01-01', 'YYYY-MM-DD')
     ELSE 
         dta.install_date END as completed_at,
-    tc_measure_to_feature_type(dta.tc_measure) as feature_type,
+    'calming_measure' as feature_type,
     dta.cnn as cnn,
     true as is_on_intersection,
-    format('{{"type": "integer", "value": %s }}', dta.units)::JSON as value,
-    format('{{
-        "unit": "unit",
-        "fiscal_yr": "%s", 
-        "install_date": "%s", 
-        "program": "%s", 
-        "shape": "%s",
-        "streetname": "%s",
-        "from_st": "%s",
-        "objectid": "%s"
-    }}', 
-    dta.fiscal_yr, 
-    dta.install_date, 
-    dta.program, 
-    ST_AsText(dta.shape),
-    dta.streetname,
-    replace(dta.from_st, '\', '\\'),
-    dta.objectid)::JSON as metadata
+    json_build_object('type', 'calming_measure', 'value', intersection_tc_measure_to_calming_measure(dta.tc_measure)) as value,
+    json_build_object(
+        'num_units', dta.units,
+        'fiscal_yr', dta.fiscal_yr,
+        'install_date', dta.install_date,
+        'program', dta.program,
+        'shape', ST_AsText(dta.shape),
+        'streetname', dta.streetname,
+        'from_st', replace(dta.from_st, '\', '\\'),
+        'current_status', TRIM(LOWER(dta.current_status)),
+        'row_id', dta.row_id,
+        'objectid', dta.objectid
+    ) as metadata
 FROM
     data_to_add as dta
     LEFT JOIN 
-    sf_street_features as sf ON sf.cnn = dta.cnn AND sf.feature_type::text = COALESCE(tc_measure_to_feature_type(dta.tc_measure)::text, 'NONE')
+    sf_street_features as sf ON sf.cnn = dta.cnn 
 WHERE
     sf.cnn IS NULL
     OR
     sf.completed_at < dta.install_date;
+
+
+UPDATE sf_street_features AS sf
+SET
+    metadata = json_build_object(
+        'num_units', dta.units,
+        'fiscal_yr', dta.fiscal_yr,
+        'install_date', dta.install_date,
+        'program', dta.program,
+        'shape', ST_AsText(dta.shape),
+        'streetname', dta.streetname,
+        'from_st', replace(dta.from_st, '\', '\\'),
+        'current_status', TRIM(LOWER(dta.current_status)),
+        'row_id', dta.row_id,
+        'objectid', dta.objectid
+    )
+FROM
+     {data_table_name} as dta
+WHERE
+    (sf.metadata->>'row_id')::INTEGER = dta.row_id
+    AND
+    sf.metadata != json_build_object(
+        'num_units', dta.units,
+        'fiscal_yr', dta.fiscal_yr,
+        'install_date', dta.install_date,
+        'program', dta.program,
+        'shape', ST_AsText(dta.shape),
+        'streetname', dta.streetname,
+        'from_st', replace(dta.from_st, '\', '\\'),
+        'current_status', TRIM(LOWER(dta.current_status)),
+        'row_id', dta.row_id,
+        'objectid', dta.objectid
+    )::JSONB;
+
+DROP FUNCTION intersection_tc_measure_to_calming_measure;

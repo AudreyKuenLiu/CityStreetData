@@ -319,38 +319,11 @@ CREATE TABLE IF NOT EXISTS sf_streets_and_intersections (
 CREATE TRIGGER update_sf_streets_and_intersections_time BEFORE UPDATE ON sf_streets_and_intersections FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 CREATE TYPE feature_type AS ENUM (
-  '2_lump_speed_cushion',
-  '3_lump_speed_cushion',
-  '4_lump_speed_cushion',
-  '5_lump_speed_cushion',
-  '6_lump_speed_cushion',
-  '7_lump_speed_cushion',
-  'centerline_hardening_w_rubber_humps',
-  'channelization',
-  'chicane',
-  'choker',
   'classcode',
-  'edgeline',
-  'left_turn_traffic_calming',
-  'median_extension',
-  'median_island',
-  'one_way_conversion',
-  'painted_island',
-  'painted_traffic_circle',
-  'ped_refuge_island',
-  'raised_crosswalk',
-  'road_diet',
   'school_zone',
   'slow_street', 
-  'speed_bump',
-  'speed_cushion',
-  'speed_hump',
   'speed_limit',
-  'speed_radar_sign',
-  'speed_table',
-  'striping',
-  'traffic_circle',
-  'traffic_island'
+  'calming_measure'
 );
 
 CREATE TABLE IF NOT EXISTS sf_street_features (

@@ -203,8 +203,8 @@ SELECT
   END as completed_at,
   'classcode' as feature_type,
   false as is_on_intersection,
-  format('{{"type": "integer", "value": %s }}', dta.classcode)::JSON as value,
-  format('{{"active": %s }}', CASE WHEN dta.active THEN 'true' ELSE 'false' END)::JSON as metadata
+  json_build_object('type', 'integer', 'value', dta.classcode) as value,
+  json_build_object('active', dta.active) as metadata
 FROM
   data_to_add dta
   LEFT JOIN

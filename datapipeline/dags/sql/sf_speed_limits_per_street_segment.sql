@@ -81,31 +81,20 @@ SELECT
     'speed_limit' as feature_type,
     dta.cnn as cnn,
     false as is_on_intersection,
-    format('{{"type": "integer", "value": %s }}', dta.speedlimit)::JSON as value,
-    format('{{
-        "unit": "mph",  
-        "use_defacto_limit": %s,
-        "mtab_date": "%s", 
-        "mtab_motion": "%s", 
-        "mtab_reso_text": "%s", 
-        "status": "%s", 
-        "workorder": "%s",
-        "install_date": "%s",
-        "shape": "%s",
-        "data_as_of": "%s",
-        "data_loaded_at": "%s"
-        }}', 
-        CASE WHEN COALESCE(dta.speedlimit, 0) = 0 THEN 'true' ELSE 'false' END, --if there is no speed limit defined we need to use defacto limit
-        mtab_date, 
-        mtab_motion, 
-        mtab_reso_text, 
-        status, 
-        workorder, 
-        install_date, 
-        ST_AsText(shape), 
-        data_as_of, 
-        data_loaded_at
-    )::JSON as metadata
+    json_build_object('type', '"integer"', 'value', COALESCE(dta.speedlimit, 0)) as value,
+    json_build_object(
+        'unit', 'mph', 
+        'use_defacto_limit', CASE WHEN COALESCE(dta.speedlimit, 0) = 0 THEN true ELSE false END, --if there is no speed limit defined we need to use defacto limit
+        'mtab_date', mtab_date, 
+        'mtab_motion', mtab_motion, 
+        'mtab_reso_text', mtab_reso_text, 
+        'status', status, 
+        'workorder', workorder, 
+        'install_date', install_date, 
+        'shape', ST_AsText(shape), 
+        'data_as_of', data_as_of, 
+        'data_loaded_at', data_loaded_at
+    ) as metadata
 FROM
     data_to_add as dta
     LEFT JOIN
@@ -178,31 +167,20 @@ SELECT
     'school_zone' as feature_type,
     dta.cnn as cnn,
     false as is_on_intersection,
-    format('{{"type": "integer", "value": %s }}', dta.schoolzone_limit)::JSON as value, -- schoolzone_limit of 0 means there is no school zone
-    format('{{
-        "unit": "mph",  
-        "schoolzone_active": %s,
-        "mtab_date": "%s", 
-        "mtab_motion": "%s", 
-        "mtab_reso_text": "%s", 
-        "status": "%s", 
-        "workorder": "%s",
-        "install_date": "%s",
-        "shape": "%s",
-        "data_as_of": "%s",
-        "data_loaded_at": "%s"
-        }}', 
-        CASE WHEN COALESCE(dta.schoolzone_limit, 0) > 0 THEN 'true' ELSE 'false' END,
-        mtab_date, 
-        mtab_motion, 
-        mtab_reso_text, 
-        status, 
-        workorder, 
-        install_date, 
-        ST_AsText(shape), 
-        data_as_of, 
-        data_loaded_at
-    )::JSON as metadata
+    json_build_object('type', 'integer', 'value', COALESCE(dta.schoolzone_limit, 0)) as value, -- schoolzone_limit of 0 means there is no school zone
+    json_build_object(
+        'unit', 'mph',
+        'schoolzone_active', CASE WHEN COALESCE(dta.schoolzone_limit, 0) > 0 THEN true ELSE false END,
+        'mtab_date', mtab_date,
+        'mtab_motion', mtab_motion,
+        'mtab_reso_text', mtab_reso_text,
+        'status', status,
+        'workorder', workorder,
+        'install_date', install_date,
+        'shape', ST_AsText(shape),
+        'data_as_of', data_as_of,
+        'data_loaded_at', data_loaded_at
+    ) as metadata
 FROM
     data_to_add as dta
     LEFT JOIN
