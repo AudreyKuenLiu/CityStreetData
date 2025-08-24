@@ -49,7 +49,7 @@ WITH data_to_add as (
         LEFT JOIN
         sf_streets_and_intersections sfi ON LOWER(CONCAT(sfi.streetname, ' ', sfi.st_type)) = LOWER(dtn.streetname) AND LOWER(sfi.f_st) = LOWER(replace(dtn.from_st, '\', '\\'))
     WHERE
-        dtn.current_status = 'Complete'
+        lower(dtn.current_status) = 'complete'
         AND
         (dtn.cnn IS NOT NULL OR sfi.cnn IS NOT NULL) -- if no cnn can be found we should not put it in the db
 ),
@@ -82,7 +82,7 @@ INSERT INTO sf_street_features (
 )
 SELECT
     CASE WHEN dta.install_date = '1900-01-01' AND fiscal_yr is NOT NULL THEN
-        to_timestamp(substring(fiscal_yr FROM '\\d{{4}}$') || '-01-01', 'YYYY-MM-DD')
+        to_timestamp(substring(fiscal_yr FROM '(\d{{4}})$') || '-01-01', 'YYYY-MM-DD')
     ELSE 
         dta.install_date END as completed_at,
     'calming_measure' as feature_type,

@@ -1,0 +1,83 @@
+WITH data_to_add as (
+    SELECT
+        objectid,
+        shape,
+        classcode,
+        cnn,
+        f_node_cnn,
+        f_st,
+        nhood,
+        oneway,
+        st_type,
+        streetname,
+        t_st,
+        zip_code,
+        slw_st,
+        length,
+        extents,
+        status,
+        phase,
+        install_date,
+        agency,
+        type,
+        supervisor_district,
+        data_as_of,
+        data_loaded_at
+    FROM
+        {data_table_name} as dtn
+    WHERE
+        LOWER(TRIM(dtn.status)) = 'implemented'
+),
+most_recent_slowstreet AS (
+    SELECT *
+    FROM (
+        SELECT 
+            cnn,
+            completed_at,
+            value,
+            metadata,
+            ROW_NUMBER() OVER (PARTITION BY cnn ORDER BY completed_at DESC) as rn 
+        FROM
+            sf_street_features
+        WHERE
+            feature_type = 'slow_street'
+    )
+    WHERE
+        rn = 1
+)
+INSERT INTO sf_street_features (
+    completed_at,
+    feature_type,
+    cnn,
+    is_on_intersection,
+    value,
+    metadata
+)
+SELECT
+    dta.install_date as completed_at,
+    'slow_street' as feature_type,
+    dta.cnn as cnn,
+    false as is_on_intersection,
+    json_build_object('type', 'boolean', 'value', true) as value,
+    json_build_object(
+        'objectid', dta.objectid,
+        'length', dta.length,
+        'shape', ST_AsText(dta.shape),
+        'classcode', dta.classcode,
+        'f_node_cnn', dta.f_node_cnn,
+        'f_st', dta.f_st,
+        'oneway', dta.oneway,
+        'extents', dta.extents,
+        'status', dta.status,
+        'phase', dta.phase,
+        'agency', dta.agency,
+        'type', dta.type
+    ) as metadata
+FROM
+    data_to_add as dta
+    LEFT JOIN 
+    sf_street_features as sf ON sf.cnn = dta.cnn 
+WHERE
+    sf.cnn IS NULL
+    OR
+    sf.completed_at < dta.install_date;

@@ -340,8 +340,8 @@ CREATE TABLE IF NOT EXISTS sf_street_features (
 CREATE TRIGGER update_sf_street_features_time BEFORE UPDATE ON sf_street_features FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 CREATE TYPE event_type AS ENUM (
-  'traffic_crash',
-  'police_incident',
+  'traffic_crash_resulting_in_injury',
+  'police_traffic_arrest',
   'emergency_service'
 );
 

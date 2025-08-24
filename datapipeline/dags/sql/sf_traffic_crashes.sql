@@ -70,7 +70,7 @@ INSERT INTO sf_events(
 )
 SELECT
     collision_datetime as occured_at,
-    'traffic_crash' as event_type,
+    'traffic_crash_resulting_in_injury' as event_type,
     CASE WHEN cnn_sgmt_fkey IS NULL THEN cnn_intrsctn_fkey ELSE cnn_sgmt_fkey END as cnn,
     dta.point as point,
     json_build_object(

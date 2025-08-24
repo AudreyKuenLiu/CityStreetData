@@ -3,7 +3,7 @@
     "id": "sf_streets_and_intersections",
     "api_endpoint": "https://data.sfgov.org/resource/3psu-pn9h.csv",
     "params": {
-      "$limit": 1
+      "$limit": 10
     },
     "sql_fields": [
       {
@@ -144,7 +144,7 @@
     "id": "sf_traffic_crashes",
     "api_endpoint": "https://data.sfgov.org/resource/ubvf-ztfx.csv",
     "params": {
-      "$limit": 1
+      "$limit": 10
     },
     "sql_fields": [
       {
@@ -153,11 +153,11 @@
       },
       {
         "name": "cnn_intrsctn_fkey",
-        "type": "INTEGER"
+        "type": "NUMERIC"
       },
       {
         "name": "cnn_sgmt_fkey",
-        "type": "INTEGER"
+        "type": "NUMERIC"
       },
       {
         "name": "case_id_pkey",
@@ -385,7 +385,7 @@
     "id": "sf_speed_limits_per_street_segment",
     "api_endpoint": "https://data.sfgov.org/resource/3t7b-gebn.csv",
     "params": {
-      "$limit": 1
+      "$limit": 10
     },
     "sql_fields": [
       {
@@ -474,7 +474,7 @@
     "id": "sf_intersection_level_traffic_calming_devices",
     "api_endpoint": "https://data.sfgov.org/resource/bp3t-bd4t.csv",
     "params": {
-      "$limit": 1
+      "$limit": 10
     },
     "sql_fields": [
       {
@@ -559,7 +559,7 @@
     "id": "sf_mid_block_traffic_calming_areas",
     "api_endpoint": "https://data.sfgov.org/resource/abhw-ffzx.csv",
     "params": {
-      "$limit": 1
+      "$limit": 10
     },
     "sql_fields": [
       {
@@ -604,15 +604,15 @@
       },
       {
         "name": "units",
-        "type": "SMALLINT"
+        "type": "NUMERIC"
       },
       {
         "name": "install_mo",
-        "type": "SMALLINT"
+        "type": "NUMERIC"
       },
       {
         "name": "install_yr",
-        "type": "SMALLINT"
+        "type": "NUMERIC"
       },
       {
         "name": "install_datetime",
@@ -660,7 +660,7 @@
     "id": "sf_slow_streets",
     "api_endpoint": "https://data.sfgov.org/resource/hkz3-itiu.csv",
     "params": {
-      "$limit": 1
+      "$limit": 10
     },
     "sql_fields": [
       {
@@ -758,10 +758,136 @@
     ]
   },
   {
+    "id": "sf_pd_incident_reports_2018_to_present",
+    "api_endpoint": "https://data.sfgov.org/resource/wg3w-h783.csv",
+    "params": {
+      "$limit": 10,
+      "$where": "incident_category IN ('Traffic Violation Arrest', 'Traffic Collision') AND resolution LIKE 'Cite or Arrest%'"
+    },
+    "sql_fields": [
+      {
+        "name": "row_id",
+        "type": "BIGINT"
+      },
+      {
+        "name": "incident_datetime",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "incident_date",
+        "type": "DATE"
+      },
+      {
+        "name": "incident_time",
+        "type": "VARCHAR(8)"
+      },
+      {
+        "name": "incident_year",
+        "type": "SMALLINT"
+      },
+      {
+        "name": "incident_day_of_week",
+        "type": "TEXT"
+      },
+      {
+        "name": "report_datetime",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "incident_id",
+        "type": "INTEGER"
+      },
+      {
+        "name": "incident_number",
+        "type": "INTEGER"
+      },
+      {
+        "name": "cad_number",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "report_type_code",
+        "type": "VARCHAR(4)"
+      },
+      {
+        "name": "report_type_description",
+        "type": "TEXT"
+      },
+      {
+        "name": "filed_online",
+        "type": "BOOLEAN"
+      },
+      {
+        "name": "incident_code",
+        "type": "TEXT"
+      },
+      {
+        "name": "incident_category",
+        "type": "TEXT"
+      },
+      {
+        "name": "incident_subcategory",
+        "type": "TEXT"
+      },
+      {
+        "name": "incident_description",
+        "type": "TEXT"
+      },
+      {
+        "name": "resolution",
+        "type": "TEXT"
+      },
+      {
+        "name": "intersection",
+        "type": "TEXT"
+      },
+      {
+        "name": "cnn",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "police_district",
+        "type": "TEXT"
+      },
+      {
+        "name": "analysis_neighborhood",
+        "type": "TEXT"
+      },
+      {
+        "name": "supervisor_district",
+        "type": "TEXT"
+      },
+      {
+        "name": "supervisor_district_2012",
+        "type": "TEXT"
+      },
+      {
+        "name": "latitude",
+        "type": "DOUBLE PRECISION"
+      },
+      {
+        "name": "longitude",
+        "type": "DOUBLE PRECISION"
+      },
+      {
+        "name": "point",
+        "type": "geometry(Point, 4326)"
+      },
+      {
+        "name": "data_as_of",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "data_loaded_at",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
     "id": "sf_vision_zero_high_injury_network",
     "api_endpoint": "https://data.sfgov.org/resource/8vtn-qytr.csv",
     "params": {
-      "$limit": 1
+      "$limit": 0
     },
     "sql_fields": [
       {
@@ -839,131 +965,6 @@
       {
         "name": "geom",
         "type": "geometry(LineString, 4326)"
-      },
-      {
-        "name": "data_as_of",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_loaded_at",
-        "type": "TIMESTAMP"
-      }
-    ]
-  },
-  {
-    "id": "sf_pd_incident_reports_2018_to_Present",
-    "api_endpoint": "https://data.sfgov.org/resource/wg3w-h783.csv",
-    "params": {
-      "$limit": 1
-    },
-    "sql_fields": [
-      {
-        "name": "row_id",
-        "type": "BIGINT"
-      },
-      {
-        "name": "incident_datetime",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "incident_date",
-        "type": "DATE"
-      },
-      {
-        "name": "incident_time",
-        "type": "VARCHAR(8)"
-      },
-      {
-        "name": "incident_year",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "incident_day_of_week",
-        "type": "TEXT"
-      },
-      {
-        "name": "report_datetime",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "incident_id",
-        "type": "INTEGER"
-      },
-      {
-        "name": "incident_number",
-        "type": "INTEGER"
-      },
-      {
-        "name": "cad_number",
-        "type": "INTEGER"
-      },
-      {
-        "name": "report_type_code",
-        "type": "VARCHAR(4)"
-      },
-      {
-        "name": "report_type_description",
-        "type": "TEXT"
-      },
-      {
-        "name": "filed_online",
-        "type": "BOOLEAN"
-      },
-      {
-        "name": "incident_code",
-        "type": "TEXT"
-      },
-      {
-        "name": "incident_category",
-        "type": "TEXT"
-      },
-      {
-        "name": "incident_subcategory",
-        "type": "TEXT"
-      },
-      {
-        "name": "incident_description",
-        "type": "TEXT"
-      },
-      {
-        "name": "resolution",
-        "type": "TEXT"
-      },
-      {
-        "name": "intersection",
-        "type": "TEXT"
-      },
-      {
-        "name": "cnn",
-        "type": "INTEGER"
-      },
-      {
-        "name": "police_district",
-        "type": "TEXT"
-      },
-      {
-        "name": "analysis_neighborhood",
-        "type": "TEXT"
-      },
-      {
-        "name": "supervisor_district",
-        "type": "TEXT"
-      },
-      {
-        "name": "supervisor_district_2012",
-        "type": "TEXT"
-      },
-      {
-        "name": "latitude",
-        "type": "DOUBLE PRECISION"
-      },
-      {
-        "name": "longitude",
-        "type": "DOUBLE PRECISION"
-      },
-      {
-        "name": "point",
-        "type": "geometry(Point, 4326)"
       },
       {
         "name": "data_as_of",
