@@ -4,6 +4,7 @@
 /datapipeline/config
 /datapipeline/logs
 /datapipeline/data
+/datapipeline/dags/initdata
 /datapipeline/plugins
 /datapipeline/venv_city_street_data
 /datapipeline/dags/__pycache__

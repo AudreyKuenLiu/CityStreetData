@@ -1,0 +1,26 @@
+DROP TABLE IF EXISTS sf_slow_streets_{suffix};
+CREATE TABLE sf_slow_streets_{suffix} (
+    objectid INTEGER,
+    shape geometry(LineString, 4326),
+    classcode INTEGER,
+    cnn INTEGER,
+    f_node_cnn INTEGER,
+    f_st TEXT,
+    nhood TEXT,
+    oneway VARCHAR(4),
+    st_type VARCHAR(16),
+    streetname TEXT,
+    t_st TEXT,
+    zip_code INT,
+    slw_st INTEGER,
+    length NUMERIC,
+    extents TEXT,
+    status TEXT,
+    phase INTEGER,
+    install_date TIMESTAMP,
+    agency VARCHAR(16),
+    type TEXT,
+    supervisor_district VARCHAR(32),
+    data_as_of TIMESTAMP,
+    data_loaded_at TIMESTAMP
+);

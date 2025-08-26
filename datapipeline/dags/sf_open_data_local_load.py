@@ -1,6 +1,5 @@
 import csv
 import os
-import requests
 import json
 import logging
 import psycopg2
@@ -9,6 +8,7 @@ from io import StringIO
 from airflow.decorators import dag, task
 from airflow.models.taskinstance import TaskInstance
 from datetime import datetime, timedelta
+from utils import csvIO_to_stringIO
 
 sf_app_token = os.environ.get("SF_DATA_APP_TOKEN")
 project_dir = os.environ.get("AIRFLOW_PROJ_DIR", ".")
@@ -19,8 +19,16 @@ pg_port = os.environ.get("PGPORT")
 pg_database = os.environ.get("PGDATABASE")
 
 CONFIG_FILE=f"{project_dir}/dags/data_sf_config.json"
-DATA_DIR=f"{project_dir}/data"
 MAX_FILE_SIZE_IN_BYTES =100*2**20
+ID_TO_CSV_FILE = {
+    "sf_streets_and_intersections": "sf_streets_active_and_retired_streets_20250730_raw.csv",
+    "sf_traffic_crashes": "sf_traffic_crashes_resulting_in_injury_20250729_raw.csv",
+    "sf_speed_limits_per_street_segment": "sf_speed_limits_per_street_segment_20240225_raw.csv",
+    "sf_intersection_level_traffic_calming_devices": "sf_intersection_level_traffic_calming_devices_20250802_raw.csv",
+    "sf_mid_block_traffic_calming_areas": "sf_mid_block_traffic_calming_areas_20250802_raw.csv",
+    "sf_slow_streets": "sf_slow_streets_20250802_raw.csv",
+    "sf_pd_incident_reports_2018_to_present": "sf_pd_incident_reports_2018_to_present_20250802_raw.csv"
+}
 
 def read_config():
     with open(CONFIG_FILE, 'r') as file:
@@ -39,40 +47,21 @@ def read_sql_file(sql_file_path: str):
     return file_contents
 
 @task
-def pull_from_data_sf(api_endpoint: str, params:dict):
-    logging.info(f"Pulling data from {api_endpoint} with params {params}")
-    headers = {
-        "Accept": "application/json",
-        "X-App-Token": sf_app_token
-    }
-    response = requests.get(api_endpoint, headers=headers, params=params)
-    if response.status_code == 200:
-        data = response.text
-        return data
-    else:
-        raise ValueError(json.dumps({"error": "Failed to retrieve data", "resp": response.text}))
-    return 
-
-@task
-def load_to_db(table_id: str, csv_string: str, staging_fields: list[dict], logical_date: datetime):
-    file_date = logical_date.strftime("%Y%m%d")
-    csv_IO = StringIO(csv_string)
-    csv_IO_to_load = StringIO()
-
-    df = pd.read_csv(csv_IO)
-    df = df[staging_fields]
-    for field in staging_fields:
-        if field not in df.columns:
-            df[field] = None
-    df.to_csv(csv_IO_to_load, index=False, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    csv_IO_to_load.seek(0) #YOU MUST SEEK THE POINTER TO 0 OR ELSE COPY_EXPERT WON'T COPY IN THE END
-
+def load_to_db(table_id: str, staging_fields: list[dict]):
     sql_data_staging_file = read_sql_file(f"{project_dir}/dags/sql/staging_tables/{table_id}_staging.sql")
-    sql_data_staging_file = sql_data_staging_file.format(suffix=f"{file_date}_raw")
+    sql_data_staging_file = sql_data_staging_file.format(suffix=f"initdata_raw")
     if len(sql_data_staging_file) == 0:
         return 
+    
+    csv_IO_to_load = StringIO()
+    with open(f"{project_dir}/dags/initdata/{ID_TO_CSV_FILE[table_id]}", "r") as f:
+        csv_IO_to_load = csvIO_to_stringIO(f, staging_fields)
+    #     df = pd.read_csv(f)
+    # for field in staging_fields:
+    #     if field not in df.columns:
+    #         df[field] = None
 
-    data_table_name = f"{table_id}_{file_date}_raw"
+    data_table_name = f"{table_id}_initdata_raw"
     sql_load_file = read_sql_file(f"{project_dir}/dags/sql/{table_id}.sql")
     sql_load_file = sql_load_file.format(data_table_name=data_table_name)
 
@@ -98,22 +87,15 @@ def load_to_db(table_id: str, csv_string: str, staging_fields: list[dict], logic
     return
 
 @dag(
-    dag_id="sf_open_data_elt", 
-    start_date=datetime(2025, 1, 1), 
-    schedule="@weekly",
-    catchup=False,
+    dag_id="sf_local_load", 
+    start_date=datetime(2025, 1, 1)
 )
-def get_sf_data_dag():
+def load_local_data_dag():
     for table in config:
-        result = pull_from_data_sf.override(task_id=f"pull_{table['id']}")(
-            api_endpoint=table["api_endpoint"],
-            params=table.get("params", {})
-        )
         load_to_db.override(task_id=f"load_{table['id']}")(
             table_id=table['id'],
-            csv_string=result,
             staging_fields=table["staging_fields"],
         )
     return
 
-get_sf_data_dag()
+load_local_data_dag()

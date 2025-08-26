@@ -5,139 +5,40 @@
     "params": {
       "$limit": 10
     },
-    "sql_fields": [
-      {
-        "name": "cnn",
-        "type": "INTEGER"
-      },
-      {
-        "name": "lf_fadd",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "lf_toadd",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "rt_fadd",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "rt_toadd",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "street",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "st_type",
-        "type": "VARCHAR(8)"
-      },
-      {
-        "name": "f_st",
-        "type": "VARCHAR(64)"
-      },
-      {
-        "name": "t_st",
-        "type": "VARCHAR(64)"
-      },
-      {
-        "name": "f_node_cnn",
-        "type": "INTEGER"
-      },
-      {
-        "name": "t_node_cnn",
-        "type": "INTEGER"
-      },
-      {
-        "name": "accepted",
-        "type": "BOOLEAN"
-      },
-      {
-        "name": "active",
-        "type": "BOOLEAN"
-      },
-      {
-        "name": "classcode",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "date_added",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "date_altered",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "date_dropped",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "gds_chg_id_add",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "gds_chg_id_altered",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "gds_chg_id_dropped",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "jurisdiction",
-        "type": "VARCHAR(8)"
-      },
-      {
-        "name": "layer",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "nhood",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "oneway",
-        "type": "VARCHAR(4)"
-      },
-      {
-        "name": "street_gc",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "streetname",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "streetname_gc",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "zip_code",
-        "type": "INTEGER"
-      },
-      {
-        "name": "analysis_neighborhood",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "supervisor_district",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "line",
-        "type": "geometry(LineString, 4326)"
-      },
-      {
-        "name": "data_as_of",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_loaded_at",
-        "type": "TIMESTAMP"
-      }
+    "staging_fields": [
+      "cnn",
+      "lf_fadd",
+      "lf_toadd",
+      "rt_fadd",
+      "rt_toadd",
+      "street",
+      "st_type",
+      "f_st",
+      "t_st",
+      "f_node_cnn",
+      "t_node_cnn",
+      "accepted",
+      "active",
+      "classcode",
+      "date_added",
+      "date_altered",
+      "date_dropped",
+      "gds_chg_id_add",
+      "gds_chg_id_altered",
+      "gds_chg_id_dropped",
+      "jurisdiction",
+      "layer",
+      "nhood",
+      "oneway",
+      "street_gc",
+      "streetname",
+      "streetname_gc",
+      "zip_code",
+      "analysis_neighborhood",
+      "supervisor_district",
+      "line",
+      "data_as_of",
+      "data_loaded_at"
     ]
   },
   {
@@ -146,239 +47,65 @@
     "params": {
       "$limit": 10
     },
-    "sql_fields": [
-      {
-        "name": "unique_id",
-        "type": "TEXT"
-      },
-      {
-        "name": "cnn_intrsctn_fkey",
-        "type": "NUMERIC"
-      },
-      {
-        "name": "cnn_sgmt_fkey",
-        "type": "NUMERIC"
-      },
-      {
-        "name": "case_id_pkey",
-        "type": "TEXT"
-      },
-      {
-        "name": "tb_latitude",
-        "type": "DOUBLE PRECISION"
-      },
-      {
-        "name": "tb_longitude",
-        "type": "DOUBLE PRECISION"
-      },
-      {
-        "name": "geocode_source",
-        "type": "TEXT"
-      },
-      {
-        "name": "geocode_location",
-        "type": "TEXT"
-      },
-      {
-        "name": "collision_datetime",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "collision_date",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "collision_time",
-        "type": "TEXT"
-      },
-      {
-        "name": "accident_year",
-        "type": "TEXT"
-      },
-      {
-        "name": "month",
-        "type": "TEXT"
-      },
-      {
-        "name": "day_of_week",
-        "type": "TEXT"
-      },
-      {
-        "name": "time_cat",
-        "type": "TEXT"
-      },
-      {
-        "name": "juris",
-        "type": "TEXT"
-      },
-      {
-        "name": "officer_id",
-        "type": "TEXT"
-      },
-      {
-        "name": "reporting_district",
-        "type": "TEXT"
-      },
-      {
-        "name": "beat_number",
-        "type": "TEXT"
-      },
-      {
-        "name": "primary_rd",
-        "type": "TEXT"
-      },
-      {
-        "name": "secondary_rd",
-        "type": "TEXT"
-      },
-      {
-        "name": "distance",
-        "type": "INTEGER"
-      },
-      {
-        "name": "direction",
-        "type": "TEXT"
-      },
-      {
-        "name": "weather_1",
-        "type": "TEXT"
-      },
-      {
-        "name": "weather_2",
-        "type": "TEXT"
-      },
-      {
-        "name": "collision_severity",
-        "type": "TEXT"
-      },
-      {
-        "name": "type_of_collision",
-        "type": "TEXT"
-      },
-      {
-        "name": "mviw",
-        "type": "TEXT"
-      },
-      {
-        "name": "ped_action",
-        "type": "TEXT"
-      },
-      {
-        "name": "road_surface",
-        "type": "TEXT"
-      },
-      {
-        "name": "road_cond_1",
-        "type": "TEXT"
-      },
-      {
-        "name": "road_cond_2",
-        "type": "TEXT"
-      },
-      {
-        "name": "lighting",
-        "type": "TEXT"
-      },
-      {
-        "name": "control_device",
-        "type": "TEXT"
-      },
-      {
-        "name": "intersection",
-        "type": "TEXT"
-      },
-      {
-        "name": "vz_pcf_code",
-        "type": "TEXT"
-      },
-      {
-        "name": "vz_pcf_group",
-        "type": "TEXT"
-      },
-      {
-        "name": "vz_pcf_description",
-        "type": "TEXT"
-      },
-      {
-        "name": "vz_pcf_link",
-        "type": "TEXT"
-      },
-      {
-        "name": "number_killed",
-        "type": "INTEGER"
-      },
-      {
-        "name": "number_injured",
-        "type": "INTEGER"
-      },
-      {
-        "name": "street_view",
-        "type": "TEXT"
-      },
-      {
-        "name": "dph_col_grp",
-        "type": "TEXT"
-      },
-      {
-        "name": "dph_col_grp_description",
-        "type": "TEXT"
-      },
-      {
-        "name": "party_at_fault",
-        "type": "TEXT"
-      },
-      {
-        "name": "party1_type",
-        "type": "TEXT"
-      },
-      {
-        "name": "party1_dir_of_travel",
-        "type": "TEXT"
-      },
-      {
-        "name": "party1_move_pre_acc",
-        "type": "TEXT"
-      },
-      {
-        "name": "party2_type",
-        "type": "TEXT"
-      },
-      {
-        "name": "party2_dir_of_travel",
-        "type": "TEXT"
-      },
-      {
-        "name": "party2_move_pre_acc",
-        "type": "TEXT"
-      },
-      {
-        "name": "point",
-        "type": "geometry(Point, 4326)"
-      },
-      {
-        "name": "data_as_of",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_updated_at",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_loaded_at",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "analysis_neighborhood",
-        "type": "TEXT"
-      },
-      {
-        "name": "supervisor_district",
-        "type": "TEXT"
-      },
-      {
-        "name": "police_district",
-        "type": "TEXT"
-      }
+    "staging_fields": [
+      "unique_id",
+      "cnn_intrsctn_fkey",
+      "cnn_sgmt_fkey",
+      "case_id_pkey",
+      "tb_latitude",
+      "tb_longitude",
+      "geocode_source",
+      "geocode_location",
+      "collision_datetime",
+      "collision_date",
+      "collision_time",
+      "accident_year",
+      "month",
+      "day_of_week",
+      "time_cat",
+      "juris",
+      "officer_id",
+      "reporting_district",
+      "beat_number",
+      "primary_rd",
+      "secondary_rd",
+      "distance",
+      "direction",
+      "weather_1",
+      "weather_2",
+      "collision_severity",
+      "type_of_collision",
+      "mviw",
+      "ped_action",
+      "road_surface",
+      "road_cond_1",
+      "road_cond_2",
+      "lighting",
+      "control_device",
+      "intersection",
+      "vz_pcf_code",
+      "vz_pcf_group",
+      "vz_pcf_description",
+      "vz_pcf_link",
+      "number_killed",
+      "number_injured",
+      "street_view",
+      "dph_col_grp",
+      "dph_col_grp_description",
+      "party_at_fault",
+      "party1_type",
+      "party1_dir_of_travel",
+      "party1_move_pre_acc",
+      "party2_type",
+      "party2_dir_of_travel",
+      "party2_move_pre_acc",
+      "point",
+      "data_as_of",
+      "data_updated_at",
+      "data_loaded_at",
+      "analysis_neighborhood",
+      "supervisor_district",
+      "police_district"
     ]
   },
   {
@@ -387,87 +114,27 @@
     "params": {
       "$limit": 10
     },
-    "sql_fields": [
-      {
-        "name": "objectid",
-        "type": "VARCHAR(64)"
-      },
-      {
-        "name": "cnn",
-        "type": "INTEGER"
-      },
-      {
-        "name": "street",
-        "type": "VARCHAR(64)"
-      },
-      {
-        "name": "st_type",
-        "type": "VARCHAR(8)"
-      },
-      {
-        "name": "from_st",
-        "type": "VARCHAR(64)"
-      },
-      {
-        "name": "to_st",
-        "type": "VARCHAR(64)"
-      },
-      {
-        "name": "speedlimit",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "schoolzone",
-        "type": "VARCHAR(8)"
-      },
-      {
-        "name": "schoolzone_limit",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "mtab_date",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "mtab_motion",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "mtab_reso_text",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "status",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "workorder",
-        "type": "VARCHAR(16)"
-      },
-      {
-        "name": "install_date",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "shape",
-        "type": "geometry(MultiLineString, 4326)"
-      },
-      {
-        "name": "data_as_of",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_loaded_at",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "analysis_neighborhood",
-        "type": "VARCHAR(64)"
-      },
-      {
-        "name": "supervisor_district",
-        "type": "VARCHAR(32)"
-      }
+    "staging_fields": [
+      "objectid",
+      "cnn",
+      "street",
+      "st_type",
+      "from_st",
+      "to_st",
+      "speedlimit",
+      "schoolzone",
+      "schoolzone_limit",
+      "mtab_date",
+      "mtab_motion",
+      "mtab_reso_text",
+      "status",
+      "workorder",
+      "install_date",
+      "shape",
+      "data_as_of",
+      "data_loaded_at",
+      "analysis_neighborhood",
+      "supervisor_district"
     ]
   },
   {
@@ -476,83 +143,26 @@
     "params": {
       "$limit": 10
     },
-    "sql_fields": [
-      {
-        "name": "row_id",
-        "type": "INTEGER"
-      },
-      {
-        "name": "objectid",
-        "type": "INTEGER"
-      },
-      {
-        "name": "cnn",
-        "type": "INTEGER"
-      },
-      {
-        "name": "streetname",
-        "type": "TEXT"
-      },
-      {
-        "name": "project_lo",
-        "type": "TEXT"
-      },
-      {
-        "name": "from_st",
-        "type": "TEXT"
-      },
-      {
-        "name": "tc_measure",
-        "type": "TEXT"
-      },
-      {
-        "name": "units",
-        "type": "INTEGER"
-      },
-      {
-        "name": "install_mo",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "install_yr",
-        "type": "INTEGER"
-      },
-      {
-        "name": "install_date",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "fiscal_yr",
-        "type": "TEXT"
-      },
-      {
-        "name": "program",
-        "type": "TEXT"
-      },
-      {
-        "name": "current_status",
-        "type": "TEXT"
-      },
-      {
-        "name": "supervisor_district",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "analysis_neighborhood",
-        "type": "TEXT"
-      },
-      {
-        "name": "shape",
-        "type": "geometry(Point, 4326)"
-      },
-      {
-        "name": "data_as_of",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_loaded_at",
-        "type": "TIMESTAMP"
-      }
+    "staging_fields": [
+      "row_id",
+      "objectid",
+      "cnn",
+      "streetname",
+      "project_lo",
+      "from_st",
+      "tc_measure",
+      "units",
+      "install_mo",
+      "install_yr",
+      "install_date",
+      "fiscal_yr",
+      "program",
+      "current_status",
+      "supervisor_district",
+      "analysis_neighborhood",
+      "shape",
+      "data_as_of",
+      "data_loaded_at"
     ]
   },
   {
@@ -561,99 +171,30 @@
     "params": {
       "$limit": 10
     },
-    "sql_fields": [
-      {
-        "name": "row_id",
-        "type": "INTEGER"
-      },
-      {
-        "name": "objectid",
-        "type": "INTEGER"
-      },
-      {
-        "name": "cnn",
-        "type": "INTEGER"
-      },
-      {
-        "name": "nhood",
-        "type": "TEXT"
-      },
-      {
-        "name": "streetname",
-        "type": "TEXT"
-      },
-      {
-        "name": "district",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "from_st",
-        "type": "TEXT"
-      },
-      {
-        "name": "to_st",
-        "type": "TEXT"
-      },
-      {
-        "name": "project_location",
-        "type": "TEXT"
-      },
-      {
-        "name": "tc_measure",
-        "type": "TEXT"
-      },
-      {
-        "name": "units",
-        "type": "NUMERIC"
-      },
-      {
-        "name": "install_mo",
-        "type": "NUMERIC"
-      },
-      {
-        "name": "install_yr",
-        "type": "NUMERIC"
-      },
-      {
-        "name": "install_datetime",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "fiscal_yr",
-        "type": "TEXT"
-      },
-      {
-        "name": "program",
-        "type": "TEXT"
-      },
-      {
-        "name": "current_status",
-        "type": "TEXT"
-      },
-      {
-        "name": "current_ti",
-        "type": "TEXT"
-      },
-      {
-        "name": "next_step",
-        "type": "TEXT"
-      },
-      {
-        "name": "next_step_2",
-        "type": "TEXT"
-      },
-      {
-        "name": "shape",
-        "type": "geometry(LineString, 4326)"
-      },
-      {
-        "name": "data_as_of",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_loaded_at",
-        "type": "TIMESTAMP"
-      }
+    "staging_fields": [
+      "row_id",
+      "objectid",
+      "cnn",
+      "nhood",
+      "streetname",
+      "district",
+      "from_st",
+      "to_st",
+      "project_location",
+      "tc_measure",
+      "units",
+      "install_mo",
+      "install_yr",
+      "install_datetime",
+      "fiscal_yr",
+      "program",
+      "current_status",
+      "current_ti",
+      "next_step",
+      "next_step_2",
+      "shape",
+      "data_as_of",
+      "data_loaded_at"
     ]
   },
   {
@@ -662,99 +203,30 @@
     "params": {
       "$limit": 10
     },
-    "sql_fields": [
-      {
-        "name": "objectid",
-        "type": "INTEGER"
-      },
-      {
-        "name": "shape",
-        "type": "geometry(LineString, 4326)"
-      },
-      {
-        "name": "classcode",
-        "type": "INTEGER"
-      },
-      {
-        "name": "cnn",
-        "type": "INTEGER"
-      },
-      {
-        "name": "f_node_cnn",
-        "type": "INTEGER"
-      },
-      {
-        "name": "f_st",
-        "type": "TEXT"
-      },
-      {
-        "name": "nhood",
-        "type": "TEXT"
-      },
-      {
-        "name": "oneway",
-        "type": "VARCHAR(4)"
-      },
-      {
-        "name": "st_type",
-        "type": "VARCHAR(16)"
-      },
-      {
-        "name": "streetname",
-        "type": "TEXT"
-      },
-      {
-        "name": "t_st",
-        "type": "TEXT"
-      },
-      {
-        "name": "zip_code",
-        "type": "INT"
-      },
-      {
-        "name": "slw_st",
-        "type": "INTEGER"
-      },
-      {
-        "name": "length",
-        "type": "NUMERIC"
-      },
-      {
-        "name": "extents",
-        "type": "TEXT"
-      },
-      {
-        "name": "status",
-        "type": "TEXT"
-      },
-      {
-        "name": "phase",
-        "type": "INTEGER"
-      },
-      {
-        "name": "install_date",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "agency",
-        "type": "VARCHAR(16)"
-      },
-      {
-        "name": "type",
-        "type": "TEXT"
-      },
-      {
-        "name": "supervisor_district",
-        "type": "VARCHAR(32)"
-      },
-      {
-        "name": "data_as_of",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_loaded_at",
-        "type": "TIMESTAMP"
-      }
+    "staging_fields": [
+      "objectid",
+      "shape",
+      "classcode",
+      "cnn",
+      "f_node_cnn",
+      "f_st",
+      "nhood",
+      "oneway",
+      "st_type",
+      "streetname",
+      "t_st",
+      "zip_code",
+      "slw_st",
+      "length",
+      "extents",
+      "status",
+      "phase",
+      "install_date",
+      "agency",
+      "type",
+      "supervisor_district",
+      "data_as_of",
+      "data_loaded_at"
     ]
   },
   {
@@ -764,123 +236,36 @@
       "$limit": 10,
       "$where": "incident_category IN ('Traffic Violation Arrest', 'Traffic Collision') AND resolution LIKE 'Cite or Arrest%'"
     },
-    "sql_fields": [
-      {
-        "name": "row_id",
-        "type": "BIGINT"
-      },
-      {
-        "name": "incident_datetime",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "incident_date",
-        "type": "DATE"
-      },
-      {
-        "name": "incident_time",
-        "type": "VARCHAR(8)"
-      },
-      {
-        "name": "incident_year",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "incident_day_of_week",
-        "type": "TEXT"
-      },
-      {
-        "name": "report_datetime",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "incident_id",
-        "type": "INTEGER"
-      },
-      {
-        "name": "incident_number",
-        "type": "INTEGER"
-      },
-      {
-        "name": "cad_number",
-        "type": "NUMERIC"
-      },
-      {
-        "name": "report_type_code",
-        "type": "VARCHAR(4)"
-      },
-      {
-        "name": "report_type_description",
-        "type": "TEXT"
-      },
-      {
-        "name": "filed_online",
-        "type": "BOOLEAN"
-      },
-      {
-        "name": "incident_code",
-        "type": "TEXT"
-      },
-      {
-        "name": "incident_category",
-        "type": "TEXT"
-      },
-      {
-        "name": "incident_subcategory",
-        "type": "TEXT"
-      },
-      {
-        "name": "incident_description",
-        "type": "TEXT"
-      },
-      {
-        "name": "resolution",
-        "type": "TEXT"
-      },
-      {
-        "name": "intersection",
-        "type": "TEXT"
-      },
-      {
-        "name": "cnn",
-        "type": "NUMERIC"
-      },
-      {
-        "name": "police_district",
-        "type": "TEXT"
-      },
-      {
-        "name": "analysis_neighborhood",
-        "type": "TEXT"
-      },
-      {
-        "name": "supervisor_district",
-        "type": "TEXT"
-      },
-      {
-        "name": "supervisor_district_2012",
-        "type": "TEXT"
-      },
-      {
-        "name": "latitude",
-        "type": "DOUBLE PRECISION"
-      },
-      {
-        "name": "longitude",
-        "type": "DOUBLE PRECISION"
-      },
-      {
-        "name": "point",
-        "type": "geometry(Point, 4326)"
-      },
-      {
-        "name": "data_as_of",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_loaded_at",
-        "type": "TIMESTAMP"
-      }
+    "staging_fields": [
+      "row_id",
+      "incident_datetime",
+      "incident_date",
+      "incident_time",
+      "incident_year",
+      "incident_day_of_week",
+      "report_datetime",
+      "incident_id",
+      "incident_number",
+      "cad_number",
+      "report_type_code",
+      "report_type_description",
+      "filed_online",
+      "incident_code",
+      "incident_category",
+      "incident_subcategory",
+      "incident_description",
+      "resolution",
+      "intersection",
+      "cnn",
+      "police_district",
+      "analysis_neighborhood",
+      "supervisor_district",
+      "supervisor_district_2012",
+      "latitude",
+      "longitude",
+      "point",
+      "data_as_of",
+      "data_loaded_at"
     ]
   },
   {
@@ -889,91 +274,28 @@
     "params": {
       "$limit": 0
     },
-    "sql_fields": [
-      {
-        "name": "objectid",
-        "type": "INTEGER"
-      },
-      {
-        "name": "geom_length",
-        "type": "DECIMAL"
-      },
-      {
-        "name": "cnn_sgmt_pkey",
-        "type": "INTEGER"
-      },
-      {
-        "name": "street_name",
-        "type": "TEXT"
-      },
-      {
-        "name": "street_type",
-        "type": "TEXT"
-      },
-      {
-        "name": "street_layer",
-        "type": "TEXT"
-      },
-      {
-        "name": "full_street_name",
-        "type": "TEXT"
-      },
-      {
-        "name": "class_code",
-        "type": "SMALLINT"
-      },
-      {
-        "name": "gis_length_miles",
-        "type": "DECIMAL"
-      },
-      {
-        "name": "duel_car_way_yn",
-        "type": "TEXT"
-      },
-      {
-        "name": "duel_car_way_id",
-        "type": "INTEGER"
-      },
-      {
-        "name": "f_node_cnn_intrsctn_fkey",
-        "type": "INTEGER"
-      },
-      {
-        "name": "t_node_cnn_intrsctn_fkey",
-        "type": "INTEGER"
-      },
-      {
-        "name": "shape_length",
-        "type": "INTEGER"
-      },
-      {
-        "name": "corrected_length_miles",
-        "type": "DECIMAL"
-      },
-      {
-        "name": "direction",
-        "type": "TEXT"
-      },
-      {
-        "name": "from_intrsctn",
-        "type": "TEXT"
-      },
-      {
-        "name": "to_intrsctn",
-        "type": "TEXT"
-      },
-      {
-        "name": "geom",
-        "type": "geometry(LineString, 4326)"
-      },
-      {
-        "name": "data_as_of",
-        "type": "TIMESTAMP"
-      },
-      {
-        "name": "data_loaded_at",
-        "type": "TIMESTAMP"
-      }
+    "staging_fields": [
+      "objectid",
+      "geom_length",
+      "cnn_sgmt_pkey",
+      "street_name",
+      "street_type",
+      "street_layer",
+      "full_street_name",
+      "class_code",
+      "gis_length_miles",
+      "duel_car_way_yn",
+      "duel_car_way_id",
+      "f_node_cnn_intrsctn_fkey",
+      "t_node_cnn_intrsctn_fkey",
+      "shape_length",
+      "corrected_length_miles",
+      "direction",
+      "from_intrsctn",
+      "to_intrsctn",
+      "geom",
+      "data_as_of",
+      "data_loaded_at"
     ]
   }
 ]

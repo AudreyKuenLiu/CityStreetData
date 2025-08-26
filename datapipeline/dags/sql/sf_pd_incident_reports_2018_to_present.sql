@@ -31,6 +31,8 @@ WITH data_to_add as (
         data_loaded_at
     FROM
         {data_table_name} as dtn
+    WHERE
+        dtn.cnn IS NOT NULL
 )
 INSERT INTO sf_events(
     occured_at,

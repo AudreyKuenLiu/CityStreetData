@@ -1,0 +1,26 @@
+DROP TABLE IF EXISTS sf_mid_block_traffic_calming_areas_{suffix};
+CREATE TABLE sf_mid_block_traffic_calming_areas_{suffix} (
+    row_id INTEGER,
+    objectid INTEGER,
+    cnn INTEGER,
+    nhood TEXT,
+    streetname TEXT,
+    district VARCHAR(32),
+    from_st TEXT,
+    to_st TEXT,
+    project_location TEXT,
+    tc_measure TEXT,
+    units NUMERIC,
+    install_mo NUMERIC,
+    install_yr NUMERIC,
+    install_datetime TIMESTAMP,
+    fiscal_yr TEXT,
+    program TEXT,
+    current_status TEXT,
+    current_ti TEXT,
+    next_step TEXT,
+    next_step_2 TEXT,
+    shape geometry(LineString, 4326),
+    data_as_of TIMESTAMP,
+    data_loaded_at TIMESTAMP
+);
