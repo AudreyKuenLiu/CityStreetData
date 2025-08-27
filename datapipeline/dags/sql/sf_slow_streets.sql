@@ -27,6 +27,8 @@ WITH data_to_add as (
         {data_table_name} as dtn
     WHERE
         LOWER(TRIM(dtn.status)) = 'implemented'
+        AND
+        dtn.cnn is NOT NULL
 ),
 most_recent_slowstreet AS (
     SELECT *
@@ -76,8 +78,8 @@ SELECT
 FROM
     data_to_add as dta
     LEFT JOIN 
-    sf_street_features as sf ON sf.cnn = dta.cnn 
+    most_recent_slowstreet as mrs ON mrs.cnn = dta.cnn 
 WHERE
-    sf.cnn IS NULL
+    mrs.cnn IS NULL
     OR
-    sf.completed_at < dta.install_date;
+    mrs.completed_at < dta.install_date;

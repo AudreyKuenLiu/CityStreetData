@@ -1,8 +1,8 @@
 DROP TABLE IF EXISTS sf_mid_block_traffic_calming_areas_{suffix};
 CREATE TABLE sf_mid_block_traffic_calming_areas_{suffix} (
-    row_id INTEGER,
-    objectid INTEGER,
-    cnn INTEGER,
+    row_id NUMERIC,
+    objectid NUMERIC,
+    cnn NUMERIC,
     nhood TEXT,
     streetname TEXT,
     district VARCHAR(32),

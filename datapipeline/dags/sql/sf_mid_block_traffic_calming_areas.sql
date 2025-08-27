@@ -61,6 +61,10 @@ WITH data_to_add as (
             {data_table_name} as dtn
         WHERE
             dtn.current_status = 'Complete'
+            AND
+            dtn.cnn IS NOT NULL
+            AND
+            dtn.install_datetime IS NOT NULL
     )
     WHERE
         rn = 1
@@ -93,10 +97,7 @@ INSERT INTO sf_street_features (
     metadata
 )
 SELECT
-    CASE WHEN dta.install_datetime = '1900-01-01' AND fiscal_yr is NOT NULL THEN
-        to_timestamp(substring(fiscal_yr FROM '\\d{{4}}$') || '-01-01', 'YYYY-MM-DD')
-    ELSE 
-        dta.install_datetime END as completed_at,
+    dta.install_datetime as completed_at,
     'calming_measure' as feature_type,
     dta.cnn as cnn,
     false as is_on_intersection,
@@ -108,20 +109,20 @@ SELECT
         'program', dta.program,
         'shape', ST_AsText(dta.shape),
         'streetname', dta.streetname,
-        'to_st', replace(dta.to_st, '\', '\\'),
-        'from_st', replace(dta.from_st, '\', '\\'),
+        'to_st', dta.to_st,
+        'from_st', dta.from_st,
         'current_status', TRIM(LOWER(dta.current_status)),
-        'row_id', dta.row_id,
+        'mid_block_row_id', dta.row_id,
         'objectid', dta.objectid
     ) as metadata
 FROM
     data_to_add as dta
     LEFT JOIN 
-    sf_street_features as sf ON sf.cnn = dta.cnn 
+    most_recent_mid_block_level_change as mrmblc ON mrmblc.cnn = dta.cnn 
 WHERE
-    sf.cnn IS NULL
+    mrmblc.cnn IS NULL
     OR
-    sf.completed_at < dta.install_datetime;
+    mrmblc.completed_at < dta.install_datetime; 
 
 UPDATE sf_street_features AS sf
 SET
@@ -132,16 +133,18 @@ SET
         'program', dta.program,
         'shape', ST_AsText(dta.shape),
         'streetname', dta.streetname,
-        'to_st', replace(dta.to_st, '\', '\\'),
-        'from_st', replace(dta.from_st, '\', '\\'),
+        'to_st', dta.to_st,
+        'from_st', dta.from_st,
         'current_status', TRIM(LOWER(dta.current_status)),
-        'row_id', dta.row_id,
+        'mid_block_row_id', dta.row_id,
         'objectid', dta.objectid
     )
 FROM
      {data_table_name} as dta
 WHERE
-    (sf.metadata->>'row_id')::INTEGER = dta.row_id
+    sf.cnn = dta.cnn
+    AND
+    (sf.metadata->>'mid_block_row_id')::INTEGER = dta.row_id
     AND
     sf.metadata != json_build_object(
         'num_units', dta.units,
@@ -150,10 +153,10 @@ WHERE
         'program', dta.program,
         'shape', ST_AsText(dta.shape),
         'streetname', dta.streetname,
-        'to_st', replace(dta.to_st, '\', '\\'),
-        'from_st', replace(dta.from_st, '\', '\\'),
+        'to_st', dta.to_st,
+        'from_st', dta.from_st,
         'current_status', TRIM(LOWER(dta.current_status)),
-        'row_id', dta.row_id,
+        'mid_block_row_id', dta.row_id,
         'objectid', dta.objectid
     )::JSONB;
 

@@ -86,16 +86,23 @@ def load_to_db(table_id: str, staging_fields: list[dict]):
     conn.close()
     return
 
+@task
+def dummy():
+    pass
+
 @dag(
     dag_id="sf_local_load", 
     start_date=datetime(2025, 1, 1)
 )
 def load_local_data_dag():
+    it = dummy()
     for table in config:
-        load_to_db.override(task_id=f"load_{table['id']}")(
+        result = load_to_db.override(task_id=f"load_{table['id']}")(
             table_id=table['id'],
             staging_fields=table["staging_fields"],
         )
+        result.set_upstream(it)
+        it = result
     return
 
 load_local_data_dag()

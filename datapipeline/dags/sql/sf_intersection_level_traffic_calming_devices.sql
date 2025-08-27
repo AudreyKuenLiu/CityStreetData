@@ -96,7 +96,7 @@ SELECT
         'program', dta.program,
         'shape', ST_AsText(dta.shape),
         'streetname', dta.streetname,
-        'from_st', replace(dta.from_st, '\', '\\'),
+        'from_st', dta.from_st,
         'current_status', TRIM(LOWER(dta.current_status)),
         'row_id', dta.row_id,
         'objectid', dta.objectid
@@ -104,11 +104,11 @@ SELECT
 FROM
     data_to_add as dta
     LEFT JOIN 
-    sf_street_features as sf ON sf.cnn = dta.cnn 
+    most_recent_intersection_level_change as mrilc ON mrilc.cnn = dta.cnn 
 WHERE
-    sf.cnn IS NULL
+    mrilc.cnn IS NULL
     OR
-    sf.completed_at < dta.install_date;
+    mrilc.completed_at < dta.install_date;
 
 
 UPDATE sf_street_features AS sf
@@ -120,15 +120,17 @@ SET
         'program', dta.program,
         'shape', ST_AsText(dta.shape),
         'streetname', dta.streetname,
-        'from_st', replace(dta.from_st, '\', '\\'),
+        'from_st', dta.from_st,
         'current_status', TRIM(LOWER(dta.current_status)),
-        'row_id', dta.row_id,
+        'intersection_row_id', dta.row_id,
         'objectid', dta.objectid
     )
 FROM
      {data_table_name} as dta
 WHERE
-    (sf.metadata->>'row_id')::INTEGER = dta.row_id
+    sf.cnn = dta.cnn
+    AND
+    (sf.metadata->>'intersection_row_id')::INTEGER = dta.row_id
     AND
     sf.metadata != json_build_object(
         'num_units', dta.units,
@@ -137,9 +139,9 @@ WHERE
         'program', dta.program,
         'shape', ST_AsText(dta.shape),
         'streetname', dta.streetname,
-        'from_st', replace(dta.from_st, '\', '\\'),
+        'from_st', dta.from_st,
         'current_status', TRIM(LOWER(dta.current_status)),
-        'row_id', dta.row_id,
+        'intersection_row_id', dta.row_id,
         'objectid', dta.objectid
     )::JSONB;
 

@@ -9,11 +9,11 @@ def csvIO_to_stringIO(input_io: IO, fields: list[str]) -> StringIO:
     """
     csv_IO_to_load = StringIO()
 
-    df = pd.read_csv(input_io)
-    df = df[fields]
+    df = pd.read_csv(input_io, low_memory=False)
     for field in fields:
         if field not in df.columns:
             df[field] = None
+    df = df[fields]
     df.to_csv(csv_IO_to_load, index=False, quotechar='"', quoting=csv.QUOTE_MINIMAL)
     csv_IO_to_load.seek(0) #YOU MUST SEEK THE POINTER TO 0 OR ELSE COPY_EXPERT WON'T COPY IN THE END
 

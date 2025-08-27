@@ -28,7 +28,9 @@ SELECT
   supervisor_district, 
   line
 FROM
-  {data_table_name}
+  {data_table_name} as dtn
+WHERE
+  dtn.cnn IS NOT NULL
 )
 INSERT INTO sf_streets_and_intersections (
   cnn,
@@ -165,7 +167,9 @@ SELECT
   data_as_of,
   active
 FROM
-  {data_table_name}
+  {data_table_name} as dtn
+WHERE
+  dtn.cnn IS NOT NULL
 ),
 most_recent_classcode AS (
   SELECT
@@ -213,5 +217,5 @@ FROM
 WHERE
   mrc.cnn is NULL
   OR
-  dta.classcode != (mrc.value->>'value')::INTEGER
+  dta.classcode != (mrc.value->>'value')::NUMERIC
 ;

@@ -104,6 +104,8 @@ def load_to_db(table_id: str, csv_string: str, staging_fields: list[dict], logic
     catchup=False,
 )
 def get_sf_data_dag():
+    #I should make this sequential instead of parallel, it's okay if it takes longer...
+    #It will use less connections and be easier to debug
     for table in config:
         result = pull_from_data_sf.override(task_id=f"pull_{table['id']}")(
             api_endpoint=table["api_endpoint"],

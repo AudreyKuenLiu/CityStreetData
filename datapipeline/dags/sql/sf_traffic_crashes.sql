@@ -60,6 +60,10 @@ SELECT
     police_district
 FROM
     {data_table_name}
+WHERE
+    cnn_intrsctn_fkey IS NOT NULL 
+    OR 
+    cnn_sgmt_fkey IS NOT NULL
 )
 INSERT INTO sf_events(
     occured_at,
@@ -74,7 +78,7 @@ SELECT
     CASE WHEN cnn_sgmt_fkey IS NULL THEN cnn_intrsctn_fkey ELSE cnn_sgmt_fkey END as cnn,
     dta.point as point,
     json_build_object(
-        'unique_id', unique_id,
+        'crash_unique_id', unique_id,
         'case_id_pkey', case_id_pkey,
         'tb_latitude', tb_latitude,
         'tb_longitude', tb_longitude,
@@ -128,9 +132,9 @@ SELECT
 FROM
     data_to_add as dta
     LEFT JOIN 
-    sf_events ON dta.unique_id = sf_events.metadata->>'unique_id'
+    sf_events ON dta.unique_id = sf_events.metadata->>'crash_unique_id'
 WHERE
-    sf_events.metadata->>'unique_id' IS NULL
+    sf_events.metadata->>'crash_unique_id' IS NULL
 ;
 
 UPDATE sf_events AS sfe
@@ -139,7 +143,7 @@ SET
     cnn = CASE WHEN cnn_sgmt_fkey IS NULL THEN cnn_intrsctn_fkey ELSE cnn_sgmt_fkey END,
     point = dtu.point,
     metadata = json_build_object(
-        'unique_id', unique_id,
+        'crash_unique_id', unique_id,
         'case_id_pkey', case_id_pkey,
         'tb_latitude', tb_latitude,
         'tb_longitude', tb_longitude,
@@ -193,13 +197,13 @@ SET
 FROM
   {data_table_name} as dtu
 WHERE
-  sfe.metadata->>'unique_id' = dtu.unique_id
+  sfe.metadata->>'crash_unique_id' = dtu.unique_id
   AND (
     sfe.occured_at != dtu.collision_datetime OR
     (cnn != CASE WHEN dtu.cnn_sgmt_fkey IS NULL THEN COALESCE(dtu.cnn_intrsctn_fkey, 0) ELSE COALESCE(dtu.cnn_sgmt_fkey, 0) END) OR
     NOT ST_OrderingEquals(sfe.point, dtu.point) OR
     sfe.metadata::JSONB != json_build_object(
-        'unique_id', unique_id,
+        'crash_unique_id', unique_id,
         'case_id_pkey', case_id_pkey,
         'tb_latitude', tb_latitude,
         'tb_longitude', tb_longitude,
