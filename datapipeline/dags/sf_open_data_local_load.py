@@ -18,8 +18,8 @@ pg_host = os.environ.get("PGHOST")
 pg_port = os.environ.get("PGPORT")
 pg_database = os.environ.get("PGDATABASE")
 
-CONFIG_FILE=f"{project_dir}/dags/data_sf_config.json"
-MAX_FILE_SIZE_IN_BYTES =100*2**20
+CONFIG_FILE = f"{project_dir}/dags/data_sf_config.json"
+MAX_FILE_SIZE_IN_BYTES = 100*2**20
 ID_TO_CSV_FILE = {
     "sf_streets_and_intersections": "sf_streets_active_and_retired_streets_20250730_raw.csv",
     "sf_traffic_crashes": "sf_traffic_crashes_resulting_in_injury_20250729_raw.csv",
@@ -56,10 +56,6 @@ def load_to_db(table_id: str, staging_fields: list[dict]):
     csv_IO_to_load = StringIO()
     with open(f"{project_dir}/dags/initdata/{ID_TO_CSV_FILE[table_id]}", "r") as f:
         csv_IO_to_load = csvIO_to_stringIO(f, staging_fields)
-    #     df = pd.read_csv(f)
-    # for field in staging_fields:
-    #     if field not in df.columns:
-    #         df[field] = None
 
     data_table_name = f"{table_id}_initdata_raw"
     sql_load_file = read_sql_file(f"{project_dir}/dags/sql/{table_id}.sql")
