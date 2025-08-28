@@ -7,6 +7,7 @@
 -- the exceptions are (4216000, 7553000, 0, 5769000) 
 -- There are actually cases where the same street segment can have two speed limits
 -- which is honestly really rare.
+-- what I could do is just join on cnn and shape instead of just the cnn.
 
 -- there are different statuses that the speed limit can have. which are Implemented(I) and Legislated(L)
 -- however it is not uncommon to see something legislated but actually implemented :(
@@ -77,7 +78,7 @@ INSERT INTO sf_street_features (
     metadata
 )
 SELECT
-    CASE WHEN dta.install_date IS NOT NULL THEN dta.install_date ELSE dta.data_as_of END as completed_at,
+    COALESCE(dta.install_date, dta.mtab_date, '1900-01-01') as completed_at,
     'speed_limit' as feature_type,
     dta.cnn as cnn,
     false as is_on_intersection,
@@ -102,7 +103,7 @@ FROM
 WHERE
     slc.cnn IS NULL
     OR
-    (slc.value->>'value')::INTEGER != dta.speedlimit;
+    ((slc.value->>'value')::INTEGER != dta.speedlimit AND slc.completed_at < COALESCE(dta.install_date, dta.mtab_date, '1900-01-01'));
 
 WITH data_to_add AS (
     SELECT * 
@@ -163,7 +164,7 @@ INSERT INTO sf_street_features (
     metadata
 )
 SELECT
-    CASE WHEN dta.install_date IS NOT NULL THEN dta.install_date ELSE dta.data_as_of END as completed_at,
+    COALESCE(dta.install_date, dta.mtab_date, '1900-01-01') as completed_at,
     'school_zone' as feature_type,
     dta.cnn as cnn,
     false as is_on_intersection,
@@ -188,5 +189,5 @@ FROM
 WHERE
     szc.cnn IS NULL
     OR
-    (szc.value->>'value')::INTEGER != COALESCE(dta.schoolzone_limit, 0);
+    ((szc.value->>'value')::INTEGER != COALESCE(dta.schoolzone_limit, 0) AND szc.completed_at < COALESCE(dta.install_date, dta.mtab_date, '1900-01-01'));
 

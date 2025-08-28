@@ -23,7 +23,7 @@ MAX_FILE_SIZE_IN_BYTES = 100*2**20
 ID_TO_CSV_FILE = {
     "sf_streets_and_intersections": "sf_streets_active_and_retired_streets_20250730_raw.csv",
     "sf_traffic_crashes": "sf_traffic_crashes_resulting_in_injury_20250729_raw.csv",
-    "sf_speed_limits_per_street_segment": "sf_speed_limits_per_street_segment_20240225_raw.csv",
+    "sf_speed_limits_per_street_segment": "sf_speed_limits_per_street_segment_20250729_raw.csv",
     "sf_intersection_level_traffic_calming_devices": "sf_intersection_level_traffic_calming_devices_20250802_raw.csv",
     "sf_mid_block_traffic_calming_areas": "sf_mid_block_traffic_calming_areas_20250802_raw.csv",
     "sf_slow_streets": "sf_slow_streets_20250802_raw.csv",

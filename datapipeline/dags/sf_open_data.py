@@ -97,6 +97,10 @@ def load_to_db(table_id: str, csv_string: str, staging_fields: list[dict], logic
     conn.close()
     return
 
+@task
+def dummy():
+    pass
+
 @dag(
     dag_id="sf_open_data_elt", 
     start_date=datetime(2025, 1, 1), 
@@ -104,18 +108,19 @@ def load_to_db(table_id: str, csv_string: str, staging_fields: list[dict], logic
     catchup=False,
 )
 def get_sf_data_dag():
-    #I should make this sequential instead of parallel, it's okay if it takes longer...
-    #It will use less connections and be easier to debug
+    it = dummy()
     for table in config:
         result = pull_from_data_sf.override(task_id=f"pull_{table['id']}")(
             api_endpoint=table["api_endpoint"],
             params=table.get("params", {})
         )
-        load_to_db.override(task_id=f"load_{table['id']}")(
+        result.set_upstream(it)
+        loadDBResult = load_to_db.override(task_id=f"load_{table['id']}")(
             table_id=table['id'],
             csv_string=result,
             staging_fields=table["staging_fields"],
         )
+        it = loadDBResult 
     return
 
 get_sf_data_dag()
