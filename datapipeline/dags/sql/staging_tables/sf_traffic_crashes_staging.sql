@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS sf_traffic_crashes_{suffix};
 CREATE TABLE sf_traffic_crashes_{suffix} (
     unique_id TEXT,
     cnn_intrsctn_fkey NUMERIC,

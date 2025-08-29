@@ -18,3 +18,12 @@ def csvIO_to_stringIO(input_io: IO, fields: list[str]) -> StringIO:
     csv_IO_to_load.seek(0) #YOU MUST SEEK THE POINTER TO 0 OR ELSE COPY_EXPERT WON'T COPY IN THE END
 
     return csv_IO_to_load
+
+def get_num_rows(csv_io: IO) -> int:
+    """
+    Get the number of rows in a CSV IO object.
+    """
+    csv_io.seek(0)
+    df = pd.read_csv(csv_io, low_memory=False)
+    csv_io.seek(0)
+    return df.shape[0]

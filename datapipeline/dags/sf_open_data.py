@@ -9,6 +9,7 @@ from io import StringIO
 from airflow.decorators import dag, task
 from airflow.models.taskinstance import TaskInstance
 from datetime import datetime, timedelta
+from utils import csvIO_to_stringIO, get_num_rows
 
 sf_app_token = os.environ.get("SF_DATA_APP_TOKEN")
 project_dir = os.environ.get("AIRFLOW_PROJ_DIR", ".")
@@ -38,7 +39,6 @@ def read_sql_file(sql_file_path: str):
 
     return file_contents
 
-@task
 def pull_from_data_sf(api_endpoint: str, params:dict):
     logging.info(f"Pulling data from {api_endpoint} with params {params}")
     headers = {
@@ -54,47 +54,55 @@ def pull_from_data_sf(api_endpoint: str, params:dict):
     return 
 
 @task
-def load_to_db(table_id: str, csv_string: str, staging_fields: list[dict], logical_date: datetime):
+def load_to_db(table_id: str, api_endpoint: str, staging_fields: list[dict], params: dict, logical_date: datetime):
     file_date = logical_date.strftime("%Y%m%d")
-    csv_IO = StringIO(csv_string)
-    csv_IO_to_load = StringIO()
-
-    df = pd.read_csv(csv_IO)
-    df = df[staging_fields]
-    for field in staging_fields:
-        if field not in df.columns:
-            df[field] = None
-    df.to_csv(csv_IO_to_load, index=False, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    csv_IO_to_load.seek(0) #YOU MUST SEEK THE POINTER TO 0 OR ELSE COPY_EXPERT WON'T COPY IN THE END
-
-    sql_data_staging_file = read_sql_file(f"{project_dir}/dags/sql/staging_tables/{table_id}_staging.sql")
-    sql_data_staging_file = sql_data_staging_file.format(suffix=f"{file_date}_raw")
-    if len(sql_data_staging_file) == 0:
-        return 
-
     data_table_name = f"{table_id}_{file_date}_raw"
-    sql_load_file = read_sql_file(f"{project_dir}/dags/sql/{table_id}.sql")
-    sql_load_file = sql_load_file.format(data_table_name=data_table_name)
-
-    staging_fields_str = ", ".join(staging_fields)
-    logging.info(f"loading data to db table {data_table_name} ({staging_fields_str})")
-
-    conn = psycopg2.connect(
+    params["$offset"] = 0
+    with psycopg2.connect(
         dbname=pg_database,
         user=pg_user,
         password=pg_password,
         host=pg_host,
         port=pg_port
-    )
-    cur = conn.cursor()
-    cur.execute(sql_data_staging_file)
-    cur.copy_expert(sql=f"COPY {data_table_name} ({staging_fields_str}) FROM STDIN WITH CSV HEADER", file=csv_IO_to_load, size=MAX_FILE_SIZE_IN_BYTES)
-    if len(sql_load_file) > 0:
-        cur.execute(sql_load_file)
+    ) as conn:
+        cur = conn.cursor()
+        cur.execute(f"DROP TABLE IF EXISTS {data_table_name}")
+        sql_data_staging_file = read_sql_file(f"{project_dir}/dags/sql/staging_tables/{table_id}_staging.sql")
+        sql_data_staging_file = sql_data_staging_file.format(suffix=f"{file_date}_raw")
+        if len(sql_data_staging_file) == 0:
+            return 
+        cur.execute(sql_data_staging_file)
 
-    conn.commit()
-    cur.close()
-    conn.close()
+        while True:
+            result_str = pull_from_data_sf(api_endpoint, params)
+            if (result_str is None or len(result_str) == 0):
+                break
+
+            file_date = logical_date.strftime("%Y%m%d")
+            csv_IO = StringIO(result_str)
+            csv_IO_to_load = StringIO()
+
+            csv_IO_to_load = csvIO_to_stringIO(csv_IO, staging_fields)
+
+            # Break if no more data or only 1 row is returned (which is the header)
+            numRowsToLoad = get_num_rows(csv_IO_to_load)
+            if (numRowsToLoad == 0):
+                break
+
+            staging_fields_str = ", ".join(staging_fields)
+            logging.info(f"loading data to db table {data_table_name} ({staging_fields_str}): {numRowsToLoad} rows")
+
+            cur.copy_expert(sql=f"COPY {data_table_name} ({staging_fields_str}) FROM STDIN WITH CSV HEADER", file=csv_IO_to_load, size=MAX_FILE_SIZE_IN_BYTES)
+            params["$offset"] += params["$limit"]
+
+        sql_load_file = read_sql_file(f"{project_dir}/dags/sql/{table_id}.sql")
+        sql_load_file = sql_load_file.format(data_table_name=data_table_name)
+        if len(sql_load_file) > 0:
+            cur.execute(sql_load_file)
+
+        conn.commit()
+        cur.close()
+
     return
 
 @task
@@ -110,16 +118,13 @@ def dummy():
 def get_sf_data_dag():
     it = dummy()
     for table in config:
-        result = pull_from_data_sf.override(task_id=f"pull_{table['id']}")(
-            api_endpoint=table["api_endpoint"],
-            params=table.get("params", {})
-        )
-        result.set_upstream(it)
         loadDBResult = load_to_db.override(task_id=f"load_{table['id']}")(
             table_id=table['id'],
-            csv_string=result,
+            api_endpoint=table["api_endpoint"],
             staging_fields=table["staging_fields"],
+            params=table.get("params", {})
         )
+        loadDBResult.set_upstream(it)
         it = loadDBResult 
     return
 

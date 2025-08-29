@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS sf_mid_block_traffic_calming_areas_{suffix};
 CREATE TABLE sf_mid_block_traffic_calming_areas_{suffix} (
     row_id NUMERIC,
     objectid NUMERIC,

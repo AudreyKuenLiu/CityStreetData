@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS sf_pd_incident_reports_2018_to_present_{suffix};
 CREATE TABLE sf_pd_incident_reports_2018_to_present_{suffix} (
     row_id BIGINT,
     incident_datetime TIMESTAMP,

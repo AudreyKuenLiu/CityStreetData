@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS sf_intersection_level_traffic_calming_devices_{suffix};
 CREATE TABLE sf_intersection_level_traffic_calming_devices_{suffix} (
     row_id NUMERIC,
     objectid NUMERIC,

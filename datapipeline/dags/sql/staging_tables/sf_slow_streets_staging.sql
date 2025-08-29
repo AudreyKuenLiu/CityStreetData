@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS sf_slow_streets_{suffix};
 CREATE TABLE sf_slow_streets_{suffix} (
     objectid NUMERIC,
     shape geometry(LineString, 4326),

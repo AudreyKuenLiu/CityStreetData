@@ -72,6 +72,7 @@ def load_to_db(table_id: str, staging_fields: list[dict]):
         port=pg_port
     )
     cur = conn.cursor()
+    cur.execute(f"DROP TABLE IF EXISTS {data_table_name}")
     cur.execute(sql_data_staging_file)
     cur.copy_expert(sql=f"COPY {data_table_name} ({staging_fields_str}) FROM STDIN WITH CSV HEADER", file=csv_IO_to_load, size=MAX_FILE_SIZE_IN_BYTES)
     if len(sql_load_file) > 0:

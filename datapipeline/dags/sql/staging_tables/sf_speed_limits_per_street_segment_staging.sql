@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS sf_speed_limits_per_street_segment_{suffix};
 CREATE TABLE sf_speed_limits_per_street_segment_{suffix} (
     objectid VARCHAR(64),
     cnn INTEGER,

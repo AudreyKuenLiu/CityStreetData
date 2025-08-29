@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS sf_streets_and_intersections_{suffix};
 CREATE TABLE sf_streets_and_intersections_{suffix} (
     cnn NUMERIC,
     lf_fadd NUMERIC,

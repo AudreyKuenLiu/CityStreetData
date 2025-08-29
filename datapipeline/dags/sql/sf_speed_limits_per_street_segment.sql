@@ -8,16 +8,16 @@
 -- There are actually cases where the same street segment can have two speed limits
 -- which is honestly really rare.
 -- what I could do is just join on cnn and shape instead of just the cnn.
+-- I also need to write code to backfill the historical speed limits on these streets.
 
 -- there are different statuses that the speed limit can have. which are Implemented(I) and Legislated(L)
 -- however it is not uncommon to see something legislated but actually implemented :(
 -- it is also possible to have something implemented but no install date :(
 
--- to be honest maybe the reliable way to do this is the following
--- if the speed limit changes then that is when it is implemented
-
 -- i'm going to have to say that if it is legislated it is going to be implemented - even though it might not actually be
--- we may have to make an assuption here that data_as_of will be the completed at date if there is no install_date :(
+-- we may have to make an assuption here that mtab_date will be the completed at date if there is no install_date :(
+-- I am going to have to make more assumptions here that the data I get from SF will always have the most up-to-date 
+-- speed limits for every street segment including subsegments.
 
 WITH data_to_add AS (
     SELECT * 
@@ -32,18 +32,19 @@ WITH data_to_add AS (
             speedlimit, 
             schoolzone, 
             schoolzone_limit, 
-            mtab_date, 
+            mtab_date,
             mtab_motion, 
             mtab_reso_text, 
+            install_date,
+            MAX(COALESCE(install_date, mtab_date, '1900-01-01')) OVER(PARTITION BY cnn) as assumed_install_date, 
             status, 
             workorder, 
-            install_date, 
             shape, 
             data_as_of, 
             data_loaded_at, 
             analysis_neighborhood, 
             supervisor_district,
-            ROW_NUMBER() OVER (PARTITION BY cnn ORDER BY objectid DESC) as rn
+            DENSE_RANK() OVER (PARTITION BY cnn, shape ORDER BY objectid DESC) as rn
         FROM
             {data_table_name}
         WHERE
@@ -60,7 +61,7 @@ most_recent_speedlimit_change AS (
             completed_at,
             value,
             metadata,
-            ROW_NUMBER() OVER (PARTITION BY cnn ORDER BY completed_at DESC) as rn 
+            DENSE_RANK() OVER (PARTITION BY cnn ORDER BY completed_at DESC) as rn 
         FROM
             sf_street_features
         WHERE
@@ -78,7 +79,7 @@ INSERT INTO sf_street_features (
     metadata
 )
 SELECT
-    COALESCE(dta.install_date, dta.mtab_date, '1900-01-01') as completed_at,
+    dta.assumed_install_date as completed_at,
     'speed_limit' as feature_type,
     dta.cnn as cnn,
     false as is_on_intersection,
@@ -99,11 +100,11 @@ SELECT
 FROM
     data_to_add as dta
     LEFT JOIN
-    most_recent_speedlimit_change as slc ON slc.cnn = dta.cnn
+    most_recent_speedlimit_change as slc ON slc.cnn = dta.cnn AND ST_Equals(ST_GeomFromText(slc.metadata->>'shape', 4326), dta.shape)
 WHERE
     slc.cnn IS NULL
     OR
-    ((slc.value->>'value')::INTEGER != dta.speedlimit AND slc.completed_at < COALESCE(dta.install_date, dta.mtab_date, '1900-01-01'));
+    ((slc.value->>'value')::INTEGER != dta.speedlimit AND slc.completed_at < dta.assumed_install_date);
 
 WITH data_to_add AS (
     SELECT * 
@@ -124,12 +125,13 @@ WITH data_to_add AS (
             status, 
             workorder, 
             install_date, 
+            MAX(COALESCE(install_date, mtab_date, '1900-01-01')) OVER(PARTITION BY cnn) as assumed_install_date, 
             shape, 
             data_as_of, 
             data_loaded_at, 
             analysis_neighborhood, 
             supervisor_district,
-            ROW_NUMBER() OVER (PARTITION BY cnn ORDER BY objectid DESC) as rn
+            DENSE_RANK() OVER (PARTITION BY cnn, shape ORDER BY objectid DESC) as rn
         FROM
             {data_table_name}
         WHERE
@@ -146,7 +148,7 @@ most_recent_schoolzone_change AS (
             completed_at,
             value,
             metadata,
-            ROW_NUMBER() OVER (PARTITION BY cnn ORDER BY completed_at DESC) as rn 
+            DENSE_RANK() OVER (PARTITION BY cnn ORDER BY completed_at DESC) as rn 
         FROM
             sf_street_features
         WHERE
@@ -164,7 +166,7 @@ INSERT INTO sf_street_features (
     metadata
 )
 SELECT
-    COALESCE(dta.install_date, dta.mtab_date, '1900-01-01') as completed_at,
+    dta.assumed_install_date as completed_at,
     'school_zone' as feature_type,
     dta.cnn as cnn,
     false as is_on_intersection,
@@ -185,9 +187,9 @@ SELECT
 FROM
     data_to_add as dta
     LEFT JOIN
-    most_recent_schoolzone_change as szc ON szc.cnn = dta.cnn
+    most_recent_schoolzone_change as szc ON szc.cnn = dta.cnn AND ST_Equals(ST_GeomFromText(szc.metadata->>'shape', 4326), dta.shape)
 WHERE
     szc.cnn IS NULL
     OR
-    ((szc.value->>'value')::INTEGER != COALESCE(dta.schoolzone_limit, 0) AND szc.completed_at < COALESCE(dta.install_date, dta.mtab_date, '1900-01-01'));
+    ((szc.value->>'value')::INTEGER != COALESCE(dta.schoolzone_limit, 0) AND szc.completed_at < dta.assumed_install_date);
 
