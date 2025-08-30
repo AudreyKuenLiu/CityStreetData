@@ -45,7 +45,7 @@
     "id": "sf_traffic_crashes",
     "api_endpoint": "https://data.sfgov.org/resource/ubvf-ztfx.csv",
     "params": {
-      "$limit": 0
+      "$limit": 0 
     },
     "staging_fields": [
       "unique_id",
@@ -112,7 +112,7 @@
     "id": "sf_speed_limits_per_street_segment",
     "api_endpoint": "https://data.sfgov.org/resource/3t7b-gebn.csv",
     "params": {
-      "$limit": 1000 
+      "$limit": 0
     },
     "staging_fields": [
       "objectid",
@@ -201,7 +201,7 @@
     "id": "sf_slow_streets",
     "api_endpoint": "https://data.sfgov.org/resource/hkz3-itiu.csv",
     "params": {
-      "$limit": 0
+      "$limit":  0
     },
     "staging_fields": [
       "objectid",

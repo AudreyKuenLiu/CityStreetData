@@ -112,7 +112,7 @@ def dummy():
 @dag(
     dag_id="sf_open_data_elt", 
     start_date=datetime(2025, 1, 1), 
-    schedule="@weekly",
+    schedule="@monthly",
     catchup=False,
 )
 def get_sf_data_dag():

@@ -10,6 +10,11 @@ export PGUSER="$POSTGRES_USER"
 CREATE DATABASE $AIRFLOW_POSTGRES_DB IS_TEMPLATE true;
 EOSQL
 
+# Create the 'test_db'
+"${psql[@]}" <<- EOSQL
+CREATE DATABASE $TEST_DB IS_TEMPLATE true;
+EOSQL
+
 # Create the 'template_postgis' template db
 "${psql[@]}" <<- 'EOSQL'
 CREATE DATABASE template_postgis IS_TEMPLATE true;
