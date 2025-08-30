@@ -80,7 +80,7 @@ services:
         retries: 5
         start_period: 5s
     volumes:
-      - city-street-data-db:/var/lib/pgsql/data
+      - city-street-data-database:/var/lib/postgresql/data
     environment:
       - AIRFLOW_POSTGRES_DB=${AIRFLOW_POSTGRES_DB}
       - TEST_DB=${TEST_DB}
@@ -88,21 +88,6 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
       - PGPORT=${POSTGRES_DB_PORT}
-  # airflow_db:
-  #   image: postgres:13
-  #   environment:
-  #     POSTGRES_USER: ${AIRFLOW_POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${AIRFLOW_POSTGRES_PASSWORD}
-  #     POSTGRES_DB: ${AIRFLOW_POSTGRES_DB}
-  #   volumes:
-  #     - airflow_db:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ["CMD", "pg_isready", "-U", "airflow"]
-  #     interval: 10s
-  #     retries: 5
-  #     start_period: 5s
-  #   restart: always
-
   airflow-apiserver:
     <<: *airflow-common
     command: api-server
@@ -273,7 +258,7 @@ services:
       <<: *airflow-common-depends-on
 
 volumes:
-  city-street-data-db:
+  city-street-data-database:
   # airflow_db:
 
 networks:
