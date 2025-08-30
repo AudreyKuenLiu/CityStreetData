@@ -19,6 +19,22 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	//Starting fileserver for webapp
+	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+		Skipper: nil,
+		// Root directory from where the static content is served.
+		Root: "app/build/client",
+		// Index file for serving a directory.
+		// Optional. Default value "index.html".
+		Index: "index.html",
+		// Enable HTML5 mode by forwarding all not-found requests to root so that
+		// SPA (single-page application) can handle the routing.
+		HTML5:      true,
+		Browse:     false,
+		IgnoreBase: false,
+		Filesystem: nil,
+	}))
+
 	// Routes
 	h := handlers.NewHandlers(handlers.Params{EchoInstance: e})
 	h.InitHandlers()
