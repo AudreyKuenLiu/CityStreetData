@@ -40,7 +40,7 @@ RUN apt install -y libc6
 COPY --from=build-stage /citystreetdata /citystreetdata
 COPY ./frontend/package.json ./frontend/package-lock.json /app/
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-COPY --from=build-env /app/build /app/build
+COPY --from=build-env /app/dist /app/dist
 EXPOSE 8080
 
 ENTRYPOINT ["/citystreetdata"]

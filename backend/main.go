@@ -23,7 +23,7 @@ func main() {
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Skipper: nil,
 		// Root directory from where the static content is served.
-		Root: "app/build/client",
+		Root: "app/dist",
 		// Index file for serving a directory.
 		// Optional. Default value "index.html".
 		Index: "index.html",

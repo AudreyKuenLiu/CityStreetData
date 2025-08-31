@@ -62,6 +62,8 @@ services:
       - PGHOST=${PGHOST}
       - PGPORT=${POSTGRES_DB_PORT}
       - PGDATABASE=${POSTGRES_DB}
+    volumes:
+      - ./frontend:/app
     deploy:
       restart_policy:
         condition: on-failure
