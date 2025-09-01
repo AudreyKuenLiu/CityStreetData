@@ -7,13 +7,19 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "watch-build": "chokidar 'src/**/*' -c 'npm run build'"
   },
   "dependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@tanstack/react-router": "^1.131.30",
     "@tanstack/react-router-devtools": "^1.131.30",
+    "allotment": "^1.20.4",
+    "antd": "^5.27.1",
+    "maplibre-gl": "^5.7.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-map-gl": "^8.0.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
@@ -21,10 +27,15 @@
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
+    "chokidar-cli": "^3.0.0",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "postcss": "^8.5.6",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
+    "prettier": "^3.6.2",
     "vite": "^7.1.2"
   }
 }
