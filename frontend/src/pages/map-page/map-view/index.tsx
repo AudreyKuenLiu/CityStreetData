@@ -8,6 +8,7 @@ import {
 } from "./constants.ts";
 import { ControlPanel } from "../control-panel";
 import { MapRef } from "react-map-gl/maplibre";
+import { useStreetSegmentsForViewport } from "./queries.ts";
 
 export const MapView: React.FC = () => {
   const mapRef = useRef<MapRef | null>(null);
@@ -20,10 +21,13 @@ export const MapView: React.FC = () => {
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
 
+  const { data } = useStreetSegmentsForViewport();
+
   console.log(
     "this is the map bounds",
     mapRef.current?.getBounds().getNorthEast(),
-    mapRef.current?.getBounds().getSouthWest()
+    mapRef.current?.getBounds().getSouthWest(),
+    data
   );
 
   return (

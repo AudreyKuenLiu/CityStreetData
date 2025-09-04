@@ -13,6 +13,9 @@ project
 # Environment variables
 .env
 
+# backend
+/backend/tmp/*
+/backend/tmp
 
 # Logs
 /frontend/logs
