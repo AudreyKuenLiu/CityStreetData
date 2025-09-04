@@ -32,15 +32,21 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o /citystreetdata
 # RUN go test -v ./...
 
 # Deploy the application binary into a lean image
-FROM ubuntu:22.04 AS build-release-stage
+#FROM ubuntu:22.04 AS build-release-stage
+FROM golang:1.24 AS build-release-stage
 WORKDIR /
 RUN apt-get update
 RUN apt-get install -y libgeos-dev
 RUN apt install -y libc6
-COPY --from=build-stage /citystreetdata /citystreetdata
-COPY ./frontend/package.json ./frontend/package-lock.json /app/
-COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-COPY --from=build-env /app/dist /app/dist
+RUN apt-get install -y git
+#ENV GOPROXY=direct
+#RUN apt install -y golang
+RUN go install github.com/air-verse/air@latest
+# COPY --from=build-stage /citystreetdata /citystreetdata
+COPY --from=build-stage /citystreetdata /backend/citystreetdata
+COPY ./frontend/package.json ./frontend/package-lock.json /frontend/
+COPY --from=production-dependencies-env /app/node_modules /frontend/node_modules
+COPY --from=build-env /app/dist /frontend/dist
 EXPOSE 8080
 
-ENTRYPOINT ["/citystreetdata"]
+#ENTRYPOINT ["/backend/citystreetdata"]

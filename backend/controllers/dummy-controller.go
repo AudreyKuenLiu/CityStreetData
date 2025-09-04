@@ -1,4 +1,4 @@
-package dummycontroller
+package controllers
 
 import (
 	"context"
@@ -33,7 +33,6 @@ type Waypoint struct {
 func (dc *DummyController) PingDB() ([]Waypoint, error) {
 	ctx := context.Background()
 
-	//connectionStr := os.Getenv("DATABASE_URL")
 	connString := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
 		os.Getenv("PGUSER"),
 		os.Getenv("PGPASSWORD"),

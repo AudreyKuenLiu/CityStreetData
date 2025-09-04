@@ -23,7 +23,7 @@ func main() {
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Skipper: nil,
 		// Root directory from where the static content is served.
-		Root: "app/dist",
+		Root: "/frontend/dist",
 		// Index file for serving a directory.
 		// Optional. Default value "index.html".
 		Index: "index.html",
@@ -36,7 +36,11 @@ func main() {
 	}))
 
 	// Routes
-	h := handlers.NewHandlers(handlers.Params{EchoInstance: e})
+	h, err := handlers.NewHandlers(handlers.Params{EchoInstance: e})
+	if err != nil {
+		slog.Error("failed to initialize handlers", "error", err)
+		return
+	}
 	h.InitHandlers()
 
 	// Start server

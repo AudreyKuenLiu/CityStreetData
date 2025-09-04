@@ -1,35 +1,33 @@
-x-airflow-common:
-  &airflow-common
+x-airflow-common: &airflow-common
   image: apache/airflow:3.0.3
   networks:
     - mynet
-  environment:
-    &airflow-common-env
+  environment: &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
     #AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@airflow_db/${AIRFLOW_POSTGRES_DB}"
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${PGHOST}/${AIRFLOW_POSTGRES_DB}"
-    AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
-    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
+    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "true"
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-apiserver:8080/execution/"
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
     # yamllint enable rule:line-length
-    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
     # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     SF_DATA_APP_TOKEN: ${SF_DATA_APP_TOKEN}
-    AIRFLOW_PROJ_DIR: "/opt/airflow/" 
+    AIRFLOW_PROJ_DIR: "/opt/airflow/"
     PGUSER: ${POSTGRES_USER}
     PGPASSWORD: ${POSTGRES_PASSWORD}
     PGHOST: ${PGHOST}
     PGPORT: ${POSTGRES_DB_PORT}
     PGDATABASE: ${POSTGRES_DB}
     # The following line can be used to set a custom config file, stored in the local config folder
-    AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
+    AIRFLOW_CONFIG: "/opt/airflow/config/airflow.cfg"
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
@@ -37,8 +35,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
-  depends_on:
-    &airflow-common-depends-on
+  depends_on: &airflow-common-depends-on
     city-street-data-db:
       condition: service_healthy
     # airflow_db:
@@ -52,6 +49,7 @@ services:
       context: .
     container_name: city-street-data
     hostname: city-street-data
+    command: bash -c "cd /backend && air"
     networks:
       - mynet
     ports:
@@ -63,7 +61,8 @@ services:
       - PGPORT=${POSTGRES_DB_PORT}
       - PGDATABASE=${POSTGRES_DB}
     volumes:
-      - ./frontend:/app
+      - ./frontend:/frontend
+      - ./backend:/backend
     deploy:
       restart_policy:
         condition: on-failure
@@ -77,16 +76,24 @@ services:
     ports:
       - ${POSTGRES_DB_PORT}:5432
     healthcheck:
-        test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${AIRFLOW_POSTGRES_DB}"]
-        interval: 10s
-        retries: 5
-        start_period: 5s
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${POSTGRES_USER}",
+          "-d",
+          "${AIRFLOW_POSTGRES_DB}",
+        ]
+      interval: 10s
+      retries: 5
+      start_period: 5s
     volumes:
       - city-street-data-database:/var/lib/postgresql/data
     environment:
       - AIRFLOW_POSTGRES_DB=${AIRFLOW_POSTGRES_DB}
       - TEST_DB=${TEST_DB}
-      - POSTGRES_USER=${POSTGRES_USER} 
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
       - PGPORT=${POSTGRES_DB_PORT}
@@ -126,7 +133,11 @@ services:
     <<: *airflow-common
     command: dag-processor
     healthcheck:
-      test: ["CMD-SHELL", 'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"']
+      test:
+        [
+          "CMD-SHELL",
+          'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"',
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -141,7 +152,11 @@ services:
     <<: *airflow-common
     command: triggerer
     healthcheck:
-      test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
+      test:
+        [
+          "CMD-SHELL",
+          'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"',
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -237,11 +252,11 @@ services:
     # yamllint enable rule:line-length
     environment:
       <<: *airflow-common-env
-      _AIRFLOW_DB_MIGRATE: 'true'
-      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD}
-      _PIP_ADDITIONAL_REQUIREMENTS: ''
+      _PIP_ADDITIONAL_REQUIREMENTS: ""
     user: "0:0"
 
   airflow-cli:
@@ -266,4 +281,3 @@ volumes:
 networks:
   mynet:
     driver: bridge
-
