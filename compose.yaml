@@ -38,8 +38,6 @@ x-airflow-common: &airflow-common
   depends_on: &airflow-common-depends-on
     city-street-data-db:
       condition: service_healthy
-    # airflow_db:
-    #   condition: service_healthy
 
 services:
   city-street-data:
@@ -67,7 +65,6 @@ services:
       restart_policy:
         condition: on-failure
   city-street-data-db:
-    # image: postgis/postgis:17-3.5
     image: city-street-data-db
     container_name: city-street-data-db
     hostname: ${PGHOST}
@@ -276,7 +273,6 @@ services:
 
 volumes:
   city-street-data-database:
-  # airflow_db:
 
 networks:
   mynet:

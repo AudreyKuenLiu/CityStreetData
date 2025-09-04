@@ -39,10 +39,7 @@ RUN apt-get update
 RUN apt-get install -y libgeos-dev
 RUN apt install -y libc6
 RUN apt-get install -y git
-#ENV GOPROXY=direct
-#RUN apt install -y golang
 RUN go install github.com/air-verse/air@latest
-# COPY --from=build-stage /citystreetdata /citystreetdata
 COPY --from=build-stage /citystreetdata /backend/citystreetdata
 COPY ./frontend/package.json ./frontend/package-lock.json /frontend/
 COPY --from=production-dependencies-env /app/node_modules /frontend/node_modules
