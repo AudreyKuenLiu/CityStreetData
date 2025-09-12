@@ -5,6 +5,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+
+	"github.com/twpayne/go-geos"
+	"github.com/twpayne/go-geos/geometry"
 )
 
 type SfDataController struct {
@@ -26,17 +29,22 @@ func NewSFDataController(logger *slog.Logger) (*SfDataController, error) {
 
 
 type GetSegmentsForViewportParams struct {
-	NEPoint [2]float64
-	SWPoint [2]float64
+	NEPoint []float64
+	SWPoint []float64
 	ZoomLevel float64
 }
 
-func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params *GetSegmentsForViewportParams) ([]repo.Waypoint, error) {
+func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params *GetSegmentsForViewportParams) ([]repo.StreetSegment, error) {
 	if params == nil {
 		return nil, fmt.Errorf("no params passed to GetSegmentsForViewport")
 	}
+	NWPoint := []float64{params.NEPoint[0], params.SWPoint[1]}
+	SEPoint := []float64{params.SWPoint[0], params.NEPoint[1]}
+	polygon := geometry.NewGeometry(geos.NewPolygon([][][]float64{{params.NEPoint, NWPoint, params.SWPoint, SEPoint, params.NEPoint}})).SetSRID(4326)
 
-	ret, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx)
+	ret, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &repo.GetSegmentsWithinPolygonParams{
+		Polygon: polygon,
+	})
 	if err != nil {
 		return nil, err
 	}

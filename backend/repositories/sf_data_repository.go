@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/twpayne/go-geos"
+	"github.com/twpayne/go-geos/geometry"
 )
 
 type SfDataRepository struct {
@@ -37,20 +37,57 @@ func NewSFDataRepository(logger *slog.Logger) (*SfDataRepository, error) {
 	}, nil
 }
 
-// A Waypoint is a location with an identifier and a name.
-type Waypoint struct {
-	ID       int
-	Name     string
-	Geometry *geos.Geom
+type StreetSegment struct {
+	CNN int `json:"cnn"`
+	StreetName string `json:"street"`
+	Line *geometry.Geometry `json:"line"`
 }
 
+type GetSegmentsWithinPolygonParams struct {
+	Polygon *geometry.Geometry
+}
 
-func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context) ([]Waypoint, error) {
+func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, params *GetSegmentsWithinPolygonParams) ([]StreetSegment, error) {
+	if params.Polygon == nil || params.Polygon.Area() == 0 {
+		return nil, fmt.Errorf("invalid polygon: %v", params.Polygon)
+	}
+
 	dbpool, err := pgxpool.NewWithConfig(ctx, sfr.config)
 	if err != nil {
 		return nil, err
 	}
 	defer dbpool.Close()
+	row, err := dbpool.Query(ctx, `
+	SELECT DISTINCT
+		si.cnn,
+		TRIM(si.street || ' ' || COALESCE(si.st_type, '')) as street, 
+		si.line
+	FROM 
+		sf_streets_and_intersections as si 
+		JOIN
+		sf_street_features as sf
+		on si.cnn = sf.cnn
+	WHERE
+		si.active = 'true'
+		AND
+		(ST_WITHIN(si.line, $1) OR ST_INTERSECTS(si.line, $2))
+	`, params.Polygon, params.Polygon)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
 
-	return nil, nil
+	segmentArr := []StreetSegment{}
+
+	for row.Next() {
+		var segment = StreetSegment{}
+
+		err := row.Scan(&segment.CNN, &segment.StreetName, &segment.Line)
+		if err != nil {
+			return nil, err
+		}
+		segmentArr = append(segmentArr, segment)
+	}
+
+	return segmentArr, nil
 }

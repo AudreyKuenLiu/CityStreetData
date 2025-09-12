@@ -1,29 +1,40 @@
-import js from "@eslint/js";
-import globals from "globals";
+import pluginQuery from "@tanstack/eslint-plugin-query";
+import tsParser from "@typescript-eslint/parser";
+import typescript from "@typescript-eslint/eslint-plugin";
 import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
-import { defineConfig, globalIgnores } from "eslint/config";
+import { defineConfig } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist"]),
+  ...pluginQuery.configs["flat/recommended"],
   {
-    files: ["**/*.{js,jsx}"],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs["recommended-latest"],
-      reactRefresh.configs.vite,
-    ],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      parser: tsParser,
+      ecmaVersion: "latest",
+      sourceType: "module",
       parserOptions: {
         ecmaVersion: "latest",
-        ecmaFeatures: { jsx: true },
         sourceType: "module",
+        project: "./tsconfig.json", // optional, for type-aware linting
       },
     },
+    plugins: {
+      "@typescript-eslint": typescript,
+      "react-hooks": reactHooks,
+    },
+    extends: ["@typescript-eslint/recommended"],
     rules: {
-      "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],
+      "@typescript-eslint/explicit-function-return-type": "error",
+      eqeqeq: ["error", "smart"],
+      "no-var": "error",
+      "prefer-const": "error",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "error",
     },
   },
 ]);

@@ -55,11 +55,11 @@ func (h *handlers) getSegmentsForViewport(c echo.Context) error {
 	if nePointStr == "" || swPointStr == "" || zoomLevelStr == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("missing required query parameters - nePoint: %v - swPoint: %v - zoomLevel: %v", nePointStr, swPointStr, zoomLevelStr))
 	}
-	nePoints, err := utils.StringArrayToNumberArray[float64](nePointStr)
+	nePoints, err := utils.PointArrayToNumberArray(nePointStr)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing nePoint: %v, format must be [float, float]", err))
 	}
-	swPoints, err := utils.StringArrayToNumberArray[float64](swPointStr)
+	swPoints, err := utils.PointArrayToNumberArray(swPointStr)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing swPoint: %v, format must be [float, float]", err))
 	}
@@ -69,8 +69,8 @@ func (h *handlers) getSegmentsForViewport(c echo.Context) error {
 	}
 
 	result, err := h.sfDataController.GetSegmentsForViewport(c.Request().Context(), &dc.GetSegmentsForViewportParams{
-		NEPoint:   [2]float64{nePoints[0], nePoints[1]},
-		SWPoint:   [2]float64{swPoints[0], swPoints[1]},
+		NEPoint:   []float64{nePoints[0], nePoints[1]},
+		SWPoint:   []float64{swPoints[0], swPoints[1]},
 		ZoomLevel: zoomLevel,
 	})
 	if err != nil {

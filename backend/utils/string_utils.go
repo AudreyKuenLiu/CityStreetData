@@ -1,16 +1,25 @@
 package utils
 
 import (
-	"encoding/json"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
-// StringArrayToNumberArray converts a string of an array of digits [n1, n2, n3] into a slice of integers.
-func StringArrayToNumberArray[T int | float32 | float64](s string) ([]T, error){
-	var numbers []T
-	err := json.Unmarshal([]byte(s), &numbers)
+// PointArrayToNumberArray converts a coordinate point -123.4132,48.23141 to an array of type [float, float]
+func PointArrayToNumberArray(s string) ([]float64, error){
+	sArr := strings.Split(s, ",")
+	if len(sArr) != 2 {
+		return nil, fmt.Errorf("array length is not 2")
+	}
+	p1, err := strconv.ParseFloat(sArr[0], 64)
+	if err != nil {
+		return nil, err
+	}
+	p2, err := strconv.ParseFloat(sArr[1], 64)
 	if err != nil {
 		return nil, err
 	}
 
-	return numbers, nil
+	return []float64{p1, p2}, nil
 }
