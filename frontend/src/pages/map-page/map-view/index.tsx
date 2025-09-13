@@ -1,25 +1,22 @@
-import React from "react";
-import Map, { Layer, Source, ViewState } from "react-map-gl/maplibre";
-import { useRef } from "react";
-import "maplibre-gl/dist/maplibre-gl.css";
-import type { LineLayerSpecification } from "react-map-gl/maplibre";
+import React, { useRef } from "react";
+import Map, { Layer, Source, ViewState, MapRef } from "react-map-gl/maplibre";
+import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {
   SanFranciscoBoundsLatLon,
   SanFranciscoCenterLatLon,
+  streetLayerId,
+  streetLayerStyle,
+  highlightedStreetLayerStyle,
+  highlightedStreetLayerId,
 } from "./constants";
 import { ControlPanel } from "../control-panel";
-import { MapRef } from "react-map-gl/maplibre";
 import { useStreetSegmentsForViewport } from "./queries";
 import type { FeatureCollection } from "geojson";
-
-const layerStyle: LineLayerSpecification = {
-  id: "streetSegmentLayer",
-  type: "line",
-  source: "sfData",
-};
+import "maplibre-gl/dist/maplibre-gl.css";
 
 export const MapView: React.FC = () => {
   const mapRef = useRef<MapRef | null>(null);
+  const [clickedStreet, setClickedStreet] = React.useState("");
   const [viewState, setViewState] = React.useState<ViewState>({
     longitude: SanFranciscoCenterLatLon[0],
     latitude: SanFranciscoCenterLatLon[1],
@@ -29,7 +26,7 @@ export const MapView: React.FC = () => {
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
 
-  const data = useStreetSegmentsForViewport({
+  const { streetSegments, isLoading } = useStreetSegmentsForViewport({
     nePoint: mapRef.current?.getBounds().getNorthEast().toArray(),
     swPoint: mapRef.current?.getBounds().getSouthWest().toArray(),
     zoomLevel: mapRef.current?.getZoom(),
@@ -37,7 +34,7 @@ export const MapView: React.FC = () => {
 
   const geoJson: FeatureCollection = {
     type: "FeatureCollection",
-    features: data.streetSegments.map((streetSegment) => {
+    features: streetSegments.map((streetSegment) => {
       return {
         type: "Feature",
         geometry: {
@@ -51,13 +48,18 @@ export const MapView: React.FC = () => {
       };
     }),
   };
+  const filter: ["in", string, string] = React.useMemo(
+    () => ["in", "cnn", clickedStreet],
+    [clickedStreet]
+  );
 
   console.log(
     "this is the map bounds",
     mapRef.current?.getBounds().getNorthEast(),
     mapRef.current?.getBounds().getSouthWest(),
     mapRef.current?.getZoom(),
-    data
+    streetSegments,
+    isLoading
   );
 
   return (
@@ -69,10 +71,19 @@ export const MapView: React.FC = () => {
         onMove={(evt) => setViewState(evt.viewState)}
         maxBounds={SanFranciscoBoundsLatLon}
         style={{ width: "100%", height: "100%" }}
+        onClick={(event: MapLayerMouseEvent) => {
+          const features = event.features;
+          if (features?.[0]?.properties?.cnn != null) {
+            console.log("clickedStreet", features[0].properties.cnn);
+            setClickedStreet(features[0].properties.cnn);
+          }
+        }}
+        interactiveLayerIds={[highlightedStreetLayerId, streetLayerId]}
         mapStyle="https://tiles.openfreemap.org/styles/positron"
       >
         <Source id="streets" type="geojson" data={geoJson}>
-          <Layer {...layerStyle} />
+          <Layer {...streetLayerStyle} />
+          <Layer {...highlightedStreetLayerStyle} filter={filter} />
         </Source>
       </Map>
     </>

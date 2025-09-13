@@ -18,6 +18,7 @@ type useStreetSegmentsForViewportParams = {
 
 type useStreetSegmentsForViewportReturn = {
   streetSegments: ApiSegmentsReturnObj[];
+  isLoading: boolean;
 };
 
 export const useStreetSegmentsForViewport = ({
@@ -40,10 +41,12 @@ export const useStreetSegmentsForViewport = ({
       });
     },
   });
-  const { data } = result;
+  const { data, isLoading } = result;
   const streetSegments = data?.data ?? [];
+  console.log("this is the result", result);
 
   return {
     streetSegments,
+    isLoading,
   };
 };
