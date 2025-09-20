@@ -15,6 +15,7 @@
     "@tanstack/react-query": "^5.85.9",
     "@tanstack/react-router": "^1.131.30",
     "@tanstack/react-router-devtools": "^1.131.30",
+    "@turf/turf": "^7.2.0",
     "allotment": "^1.20.4",
     "antd": "^5.27.1",
     "axios": "^1.11.0",

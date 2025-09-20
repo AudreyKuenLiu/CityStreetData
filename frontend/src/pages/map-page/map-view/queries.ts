@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { getCellsInSanFranciscoBoundingBox } from "./utils/mapControls";
 import axios from "axios";
 
 type ApiSegmentsReturnObj = {
@@ -11,9 +12,9 @@ type ApiSegmentsReturnObj = {
 };
 
 type useStreetSegmentsForViewportParams = {
-  nePoint?: [number, number];
-  swPoint?: [number, number];
-  zoomLevel?: number;
+  nePoint: [number, number];
+  swPoint: [number, number];
+  zoomLevel: number;
 };
 
 type useStreetSegmentsForViewportReturn = {
@@ -26,12 +27,14 @@ export const useStreetSegmentsForViewport = ({
   swPoint,
   zoomLevel,
 }: useStreetSegmentsForViewportParams): useStreetSegmentsForViewportReturn => {
+  const viewedCells = getCellsInSanFranciscoBoundingBox({
+    bbox: [...nePoint, ...swPoint],
+    zoomLevel,
+  });
+  console.log("viewedCells", viewedCells);
   const result = useQuery({
     queryKey: ["ping", nePoint, swPoint, zoomLevel],
     queryFn: async () => {
-      if (nePoint == null || swPoint == null || zoomLevel == null) {
-        return null;
-      }
       return await axios.get<ApiSegmentsReturnObj[]>(`/api/segments`, {
         params: {
           nePoint: nePoint.toString(),
@@ -44,7 +47,6 @@ export const useStreetSegmentsForViewport = ({
   });
   const { data, isLoading } = result;
   const streetSegments = data?.data ?? [];
-  console.log("this is the result", result);
 
   return {
     streetSegments,

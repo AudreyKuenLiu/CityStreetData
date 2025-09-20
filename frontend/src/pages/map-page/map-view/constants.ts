@@ -5,6 +5,8 @@ export const SanFranciscoBoundsLatLon = [
 ] satisfies [number, number, number, number];
 
 export const SanFranciscoCenterLatLon = [37.756212, -122.443696] as const;
+export const MAX_ZOOM = 18;
+export const DEFAULT_ZOOM = 5;
 
 export const streetLayerId = "streetSegmentLayer";
 export const streetLayerStyle: LineLayerSpecification = {
