@@ -40,6 +40,7 @@ export const useStreetSegmentsForViewport = ({
         },
       });
     },
+    gcTime: 0, // don't cache data in react tanstack, we will cache it
   });
   const { data, isLoading } = result;
   const streetSegments = data?.data ?? [];

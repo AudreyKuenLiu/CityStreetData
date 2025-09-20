@@ -1,10 +1,10 @@
 import type { LineLayerSpecification } from "react-map-gl/maplibre";
 
 export const SanFranciscoBoundsLatLon = [
-  -122.62173, 37.649452, -122.271884, 37.87798,
+  -122.579989, 37.647624, -122.3074, 37.86348,
 ] satisfies [number, number, number, number];
 
-export const SanFranciscoCenterLatLon = [-122.446465, 37.754811] as const;
+export const SanFranciscoCenterLatLon = [37.756212, -122.443696] as const;
 
 export const streetLayerId = "streetSegmentLayer";
 export const streetLayerStyle: LineLayerSpecification = {

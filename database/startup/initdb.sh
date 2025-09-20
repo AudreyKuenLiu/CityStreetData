@@ -49,6 +49,8 @@ CREATE TABLE IF NOT EXISTS sf_streets_and_intersections (
   line                   geometry(LineString, 4326)
 );
 CREATE TRIGGER update_sf_streets_and_intersections_time BEFORE UPDATE ON sf_streets_and_intersections FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_streets_and_intersections_line_idx ON sf_streets_and_intersections USING GIST(line);
+CREATE INDEX sf_streets_and_intersections_cnn_idx ON sf_streets_and_intersections(cnn); 
 
 CREATE TYPE feature_type AS ENUM (
   'classcode',
@@ -71,6 +73,7 @@ CREATE TABLE IF NOT EXISTS sf_street_features (
   metadata     JSONB
 );
 CREATE TRIGGER update_sf_street_features_time BEFORE UPDATE ON sf_street_features FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_street_features_cnn_idx ON sf_street_features(cnn); 
 
 CREATE TYPE event_type AS ENUM (
   'traffic_crash_resulting_in_injury',
@@ -89,5 +92,7 @@ CREATE TABLE IF NOT EXISTS sf_events (
   metadata   JSONB
 );
 CREATE TRIGGER update_sf_events_time BEFORE UPDATE ON sf_events FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_events_point_idx ON sf_events USING GIST(point);
+CREATE INDEX sf_events_cnn_idx on sf_events(cnn);
 
 EOSQL

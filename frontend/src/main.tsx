@@ -18,16 +18,27 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 2 * 60 * 1000, //2 minutes
+      //gcTime: 2 * 60 * 1000,
     },
   },
 });
 
-// Register the router instance for type safety
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
+// This code is only for TypeScript
+declare global {
+  interface Window {
+    __TANSTACK_QUERY_CLIENT__: import("@tanstack/query-core").QueryClient;
   }
 }
+
+// Register the router instance for type safety
+// declare module "@tanstack/react-router" {
+//   interface Register {
+//     router: typeof router;
+//   }
+// }
+
+// This code is for all users
+//window.__TANSTACK_QUERY_CLIENT__ = queryClient;
 
 // Render the app
 const rootElement = document.getElementById("root")!;

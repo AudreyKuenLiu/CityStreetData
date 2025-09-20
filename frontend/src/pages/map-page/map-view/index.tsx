@@ -18,8 +18,8 @@ export const MapView: React.FC = () => {
   const mapRef = useRef<MapRef | null>(null);
   const [clickedStreet, setClickedStreet] = React.useState("");
   const [viewState, setViewState] = React.useState<ViewState>({
-    longitude: SanFranciscoCenterLatLon[0],
-    latitude: SanFranciscoCenterLatLon[1],
+    longitude: SanFranciscoCenterLatLon[1],
+    latitude: SanFranciscoCenterLatLon[0],
     zoom: 5,
     bearing: 0,
     pitch: 0,
