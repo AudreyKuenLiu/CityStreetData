@@ -12,6 +12,7 @@ import (
 
 type SfDataController struct {
 	sfDataRepository *repo.SfDataRepository
+	logger *slog.Logger
 }
 
 func NewSFDataController(logger *slog.Logger) (*SfDataController, error) {
@@ -24,6 +25,7 @@ func NewSFDataController(logger *slog.Logger) (*SfDataController, error) {
 
 	return &SfDataController{
 		sfDataRepository: sfDataRepository,
+		logger: logger,
 	}, nil
 }
 
@@ -38,9 +40,12 @@ func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params 
 	if params == nil {
 		return nil, fmt.Errorf("no params passed to GetSegmentsForViewport")
 	}
-	NWPoint := []float64{params.NEPoint[0], params.SWPoint[1]}
-	SEPoint := []float64{params.SWPoint[0], params.NEPoint[1]}
-	polygon := geometry.NewGeometry(geos.NewPolygon([][][]float64{{params.NEPoint, NWPoint, params.SWPoint, SEPoint, params.NEPoint}})).SetSRID(4326)
+	WNPoint := []float64{params.SWPoint[1], params.NEPoint[0]}
+	ESPoint := []float64{params.NEPoint[1], params.SWPoint[0]}
+	ENPoint := []float64{params.NEPoint[1], params.NEPoint[0]}
+	WSPoint := []float64{params.SWPoint[1], params.SWPoint[0]}
+
+	polygon := geometry.NewGeometry(geos.NewPolygon([][][]float64{{ENPoint, ESPoint, WSPoint, WNPoint, ENPoint}})).SetSRID(4326)
 
 	ret, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &repo.GetSegmentsWithinPolygonParams{
 		Polygon: polygon,

@@ -1,10 +1,13 @@
 import type { LineLayerSpecification } from "react-map-gl/maplibre";
 
-export const SanFranciscoBoundsLatLon = [
-  -122.579989, 37.647624, -122.3074, 37.86348,
-] satisfies [number, number, number, number];
+export const SanFranciscoNWPoint = [
+  37.86241254364695, -122.57899808205441,
+] as const;
+export const SanFranciscoSEPoint = [
+  37.64657565635305, -122.30600871794562,
+] as const;
 
-export const SanFranciscoCenterLatLon = [37.756212, -122.443696] as const;
+export const SanFranciscoCenterLatLon = [37.7544941, -122.4425034] as const;
 export const MAX_ZOOM = 18;
 export const DEFAULT_ZOOM = 5;
 

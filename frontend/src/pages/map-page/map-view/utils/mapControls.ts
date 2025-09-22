@@ -1,6 +1,13 @@
-import { SanFranciscoBoundsLatLon } from "../constants";
+import { SanFranciscoNWPoint, SanFranciscoSEPoint } from "../constants";
 import type { Feature, Geometry } from "geojson";
 import { CityGrid } from "../../../../models/mapGrid";
+
+export const SanFranciscoBoundsLatLon = [
+  SanFranciscoSEPoint[0],
+  SanFranciscoNWPoint[1],
+  SanFranciscoNWPoint[0],
+  SanFranciscoSEPoint[1],
+] satisfies [number, number, number, number];
 
 const SanFranciscoGridMaxZoom = new CityGrid({
   cityBBox: SanFranciscoBoundsLatLon,
@@ -28,6 +35,7 @@ export const getCellsInSanFranciscoBoundingBox = ({
   bbox,
   zoomLevel,
 }: {
+  //in the order of WS, EN OR (minX, minY, maxX, maxY)
   bbox: [number, number, number, number];
   zoomLevel: number;
 }): Feature<Geometry>[] => {

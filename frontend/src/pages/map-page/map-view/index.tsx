@@ -2,12 +2,6 @@ import React, { useRef } from "react";
 import Map, { Layer, Source, ViewState, MapRef } from "react-map-gl/maplibre";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {
-  SanFranciscoBoundsLatLon,
-  //SanFranciscoBoundingBox,
-  //SanFranciscoGridMaxZoom,
-  //SanFranciscoGridMedZoom,
-  // SanFranciscoGridMinZoom,
-  SanFranciscoCenterLatLon,
   streetLayerId,
   streetLayerStyle,
   MAX_ZOOM,
@@ -15,33 +9,40 @@ import {
   highlightedStreetLayerStyle,
   highlightedStreetLayerId,
 } from "./constants";
-import { squareGrid } from "@turf/turf";
 import { ControlPanel } from "../control-panel";
 import { useStreetSegmentsForViewport } from "./queries";
 import type { FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-export const MapView: React.FC = () => {
+export const MapView = ({
+  initalNESWBounds,
+  centerLatLon,
+}: {
+  initalNESWBounds: [number, number, number, number];
+  centerLatLon: [number, number];
+}): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
   const [clickedStreet, setClickedStreet] = React.useState("");
   const [viewState, setViewState] = React.useState<ViewState>({
-    longitude: SanFranciscoCenterLatLon[1],
-    latitude: SanFranciscoCenterLatLon[0],
+    longitude: centerLatLon[1],
+    latitude: centerLatLon[0],
     zoom: DEFAULT_ZOOM,
     bearing: 0,
     pitch: 0,
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
+  const currentENPoint =
+    mapRef.current?.getBounds().getNorthEast().toArray() != null
+      ? mapRef.current?.getBounds().getNorthEast().toArray()
+      : [initalNESWBounds[1], initalNESWBounds[0]];
+  const currentWSPoint =
+    mapRef.current?.getBounds().getSouthWest().toArray() != null
+      ? mapRef.current?.getBounds().getSouthWest().toArray()
+      : [initalNESWBounds[3], initalNESWBounds[2]];
 
   const { streetSegments, isLoading } = useStreetSegmentsForViewport({
-    nePoint: mapRef.current?.getBounds().getNorthEast().toArray() ?? [
-      SanFranciscoBoundsLatLon[2],
-      SanFranciscoBoundsLatLon[3],
-    ],
-    swPoint: mapRef.current?.getBounds().getSouthWest().toArray() ?? [
-      SanFranciscoBoundsLatLon[0],
-      SanFranciscoBoundsLatLon[1],
-    ],
+    nePoint: [currentENPoint[1], currentENPoint[0]],
+    swPoint: [currentWSPoint[1], currentWSPoint[0]],
     zoomLevel: mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
   });
 
@@ -68,14 +69,8 @@ export const MapView: React.FC = () => {
 
   console.log(
     "this is the map bounds",
-    mapRef.current?.getBounds().getNorthEast() ?? [
-      SanFranciscoBoundsLatLon[2],
-      SanFranciscoBoundsLatLon[3],
-    ],
-    mapRef.current?.getBounds().getSouthWest() ?? [
-      SanFranciscoBoundsLatLon[0],
-      SanFranciscoBoundsLatLon[1],
-    ],
+    currentENPoint,
+    currentWSPoint,
     mapRef.current?.getZoom() ?? DEFAULT_ZOOM
     //streetSegments,
     //isLoading
@@ -88,7 +83,13 @@ export const MapView: React.FC = () => {
         ref={mapRef}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
-        maxBounds={SanFranciscoBoundsLatLon}
+        // [sw, ne]
+        maxBounds={[
+          initalNESWBounds[3],
+          initalNESWBounds[2],
+          initalNESWBounds[1],
+          initalNESWBounds[0],
+        ]}
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
         onClick={(event: MapLayerMouseEvent) => {
@@ -104,7 +105,16 @@ export const MapView: React.FC = () => {
         {/* <Source
           id="grid1"
           type="geojson"
-          data={squareGrid(SanFranciscoBoundsLatLon, 4)}
+          data={pointGrid(
+            [
+              SanFranciscoNWPoint[1],
+              SanFranciscoSEPoint[0],
+              SanFranciscoSEPoint[1],
+              SanFranciscoNWPoint[0],
+            ],
+            24,
+            { units: "kilometers" }
+          )}
         >
           <Layer {...streetLayerStyle} />
         </Source> */}
