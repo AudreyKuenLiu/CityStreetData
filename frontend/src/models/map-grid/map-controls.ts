@@ -1,6 +1,15 @@
-import { SanFranciscoNWPoint, SanFranciscoSEPoint } from "../constants";
-import type { Feature, Geometry } from "geojson";
-import { CityGrid } from "../../../../models/mapGrid";
+import {
+  SanFranciscoNWPoint,
+  SanFranciscoSEPoint,
+} from "../../constants/map-dimensions";
+import { CityGrid } from "./map-grid";
+import type { BoundingBox } from "./map-grid";
+
+enum ZoomLevelInView {
+  ONE,
+  TWO,
+  THREE,
+}
 
 export const SanFranciscoBoundsLatLon = [
   SanFranciscoSEPoint[0],
@@ -23,22 +32,32 @@ const SanFranciscoGridMinZoom = new CityGrid({
 });
 
 const getSanFranciscoGrid = (zoomLevel: number): CityGrid => {
-  if (zoomLevel >= 16) {
+  const zoomLevelInView = getZoomLevelInView(zoomLevel);
+  if (zoomLevelInView === ZoomLevelInView.THREE) {
     return SanFranciscoGridMaxZoom;
-  } else if (zoomLevel < 16 && zoomLevel >= 14) {
+  } else if (zoomLevelInView === ZoomLevelInView.TWO) {
     return SanFranciscoGridMedZoom;
   }
   return SanFranciscoGridMinZoom;
 };
 
-export const getCellsInSanFranciscoBoundingBox = ({
+export const getZoomLevelInView = (zoomLevel: number): ZoomLevelInView => {
+  if (zoomLevel >= 16) {
+    return ZoomLevelInView.THREE;
+  } else if (zoomLevel < 16 && zoomLevel >= 14) {
+    return ZoomLevelInView.TWO;
+  }
+  return ZoomLevelInView.ONE;
+};
+
+export const getBoundingBoxInView = ({
   bbox,
   zoomLevel,
 }: {
   //in the order of WS, EN OR (minX, minY, maxX, maxY)
   bbox: [number, number, number, number];
   zoomLevel: number;
-}): Feature<Geometry>[] => {
+}): BoundingBox => {
   const sfGrid = getSanFranciscoGrid(zoomLevel);
-  return sfGrid.getCellsInView({ bbox });
+  return sfGrid.getBoundingBoxInView({ bbox });
 };

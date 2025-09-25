@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { getCellsInSanFranciscoBoundingBox } from "./utils/mapControls";
+import {
+  getBoundingBoxInView,
+  getZoomLevelInView,
+} from "../../../models/map-grid";
 import axios from "axios";
 
 type ApiSegmentsReturnObj = {
@@ -27,23 +30,34 @@ export const useStreetSegmentsForViewport = ({
   swPoint,
   zoomLevel,
 }: useStreetSegmentsForViewportParams): useStreetSegmentsForViewportReturn => {
-  const viewedCells = getCellsInSanFranciscoBoundingBox({
+  const viewedCells = getBoundingBoxInView({
     bbox: [...nePoint, ...swPoint],
     zoomLevel,
   });
-  console.log("viewedCells", viewedCells);
   const result = useQuery({
-    queryKey: ["ping", nePoint, swPoint, zoomLevel],
+    queryKey: [
+      "ping",
+      viewedCells[0],
+      viewedCells[1],
+      viewedCells[2],
+      viewedCells[3],
+      zoomLevel,
+    ] as const,
     queryFn: async () => {
       return await axios.get<ApiSegmentsReturnObj[]>(`/api/segments`, {
         params: {
-          nePoint: nePoint.toString(),
-          swPoint: swPoint.toString(),
+          nePoint: [viewedCells[0], viewedCells[1]].toString(),
+          swPoint: [viewedCells[2], viewedCells[3]].toString(),
           zoomLevel: zoomLevel.toString(),
         },
       });
     },
-    gcTime: 0, // don't cache data in react tanstack, we will cache it
+    queryKeyHashFn: (queryKey) => {
+      const zoomLevelQueryKey = queryKey[5];
+      const zoomLevelInView = getZoomLevelInView(zoomLevelQueryKey);
+      return `${queryKey[1]}-${queryKey[2]}-${queryKey[3]}-${queryKey[4]}-${zoomLevelInView}`;
+    },
+    gcTime: 1000 * 60 * 10, //10 minutes
   });
   const { data, isLoading } = result;
   const streetSegments = data?.data ?? [];

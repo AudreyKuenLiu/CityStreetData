@@ -7,7 +7,7 @@ import {
   SanFranciscoCenterLatLon,
   SanFranciscoNWPoint,
   SanFranciscoSEPoint,
-} from "./map-view/constants";
+} from "../../constants/map-dimensions";
 
 import "allotment/dist/style.css";
 

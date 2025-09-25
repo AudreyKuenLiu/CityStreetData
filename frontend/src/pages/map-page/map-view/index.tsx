@@ -9,10 +9,15 @@ import {
   highlightedStreetLayerStyle,
   highlightedStreetLayerId,
 } from "./constants";
+import {
+  SanFranciscoNWPoint,
+  SanFranciscoSEPoint,
+} from "../../../constants/map-dimensions";
 import { ControlPanel } from "../control-panel";
 import { useStreetSegmentsForViewport } from "./queries";
 import type { FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { squareGrid } from "@turf/turf";
 
 export const MapView = ({
   initalNESWBounds,
@@ -105,14 +110,14 @@ export const MapView = ({
         {/* <Source
           id="grid1"
           type="geojson"
-          data={pointGrid(
+          data={squareGrid(
             [
               SanFranciscoNWPoint[1],
               SanFranciscoSEPoint[0],
               SanFranciscoSEPoint[1],
               SanFranciscoNWPoint[0],
             ],
-            24,
+            4,
             { units: "kilometers" }
           )}
         >
