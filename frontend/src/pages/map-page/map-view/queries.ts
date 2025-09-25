@@ -4,6 +4,7 @@ import {
   getZoomLevelInView,
 } from "../../../models/map-grid";
 import axios from "axios";
+import { useRef } from "react";
 
 type ApiSegmentsReturnObj = {
   cnn: number;
@@ -34,6 +35,7 @@ export const useStreetSegmentsForViewport = ({
     bbox: [...nePoint, ...swPoint],
     zoomLevel,
   });
+  const streetSegments = useRef<ApiSegmentsReturnObj[] | null>(null);
   const result = useQuery({
     queryKey: [
       "ping",
@@ -60,10 +62,10 @@ export const useStreetSegmentsForViewport = ({
     gcTime: 1000 * 60 * 10, //10 minutes
   });
   const { data, isLoading } = result;
-  const streetSegments = data?.data ?? [];
+  streetSegments.current = data?.data ?? streetSegments.current;
 
   return {
-    streetSegments,
+    streetSegments: streetSegments.current ?? [],
     isLoading,
   };
 };

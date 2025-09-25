@@ -89,22 +89,23 @@ export class CityGrid {
     if (latOrLon == null || (lat != null && long != null)) {
       return -1;
     }
-    console.log(
-      "these are the parameters",
-      latOrLon,
-      minLatOrLon,
-      maxLatOrLon,
-      cellLength
-    );
-    if (latOrLon < minLatOrLon) {
+    if (latOrLon <= minLatOrLon) {
       return lat != null ? this.cityGrid.length - 1 : 0;
     }
-    if (latOrLon > maxLatOrLon) {
+    if (latOrLon >= maxLatOrLon) {
       return lat != null ? 0 : this.cityGrid[0].length - 1;
     }
     const baseLatOrLon = latOrLon - minLatOrLon;
     const index = Math.abs(Math.floor(baseLatOrLon / cellLength));
-    console.log("this is the calculation", baseLatOrLon, index);
+    console.log(
+      "this is the calculation",
+      latOrLon,
+      minLatOrLon,
+      maxLatOrLon,
+      baseLatOrLon,
+      cellLength,
+      index
+    );
     return lat != null ? this.cityGrid.length - 1 - index : index;
   }
 
@@ -155,6 +156,12 @@ export class CityGrid {
 
     const NEBBoxCell = this.cityGrid[NEBBoxCellIndex[0]][NEBBoxCellIndex[1]];
     const SWBBoxCell = this.cityGrid[SWBBoxCellIndex[0]][SWBBoxCellIndex[1]];
+    console.log(
+      "returning values",
+      NEBBoxCellIndex[0],
+      NEBBoxCellIndex[1],
+      NEBBoxCell
+    );
 
     return [
       NEBBoxCell.NE[0],
