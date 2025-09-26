@@ -1,1 +1,5 @@
-export { getBoundingBoxInView, getZoomLevelInView } from "./map-controls";
+export {
+  getBoundingBoxInView,
+  getZoomLevelInView,
+  ZoomLevelInView,
+} from "./map-controls";

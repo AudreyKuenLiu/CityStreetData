@@ -18,7 +18,7 @@ WORKDIR /app
 RUN npm run build
 
 # Build the application from source
-FROM golang:1.24 AS build-stage
+FROM golang:1.25 AS build-stage
 WORKDIR /app
 COPY ./backend/. .
 RUN apt-get update
@@ -33,7 +33,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o /citystreetdata
 
 # Deploy the application binary into a lean image
 #FROM ubuntu:22.04 AS build-release-stage
-FROM golang:1.24 AS build-release-stage
+FROM golang:1.25 AS build-release-stage
 WORKDIR /
 RUN apt-get update
 RUN apt-get install -y libgeos-dev

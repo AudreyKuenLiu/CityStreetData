@@ -52,6 +52,11 @@ CREATE TRIGGER update_sf_streets_and_intersections_time BEFORE UPDATE ON sf_stre
 CREATE INDEX sf_streets_and_intersections_line_idx ON sf_streets_and_intersections USING GIST(line);
 CREATE INDEX sf_streets_and_intersections_cnn_idx ON sf_streets_and_intersections(cnn); 
 
+CREATE TYPE speed_limit_unit AS ENUM (
+  'mph'
+);
+
+/*
 CREATE TYPE feature_type AS ENUM (
   'classcode',
   'school_zone',
@@ -59,7 +64,6 @@ CREATE TYPE feature_type AS ENUM (
   'speed_limit',
   'calming_measure'
 );
-
 CREATE TABLE IF NOT EXISTS sf_street_features (
   id           BIGINT GENERATED ALWAYS AS IDENTITY primary key,
   updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -74,6 +78,119 @@ CREATE TABLE IF NOT EXISTS sf_street_features (
 );
 CREATE TRIGGER update_sf_street_features_time BEFORE UPDATE ON sf_street_features FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE INDEX sf_street_features_cnn_idx ON sf_street_features(cnn); 
+*/
+
+CREATE TYPE class_code as ENUM (
+	'other',
+	'freeway',
+	'highway_or_major_street',
+	'arterial',
+	'collector',
+	'residential',
+	'freeway_ramp'
+);
+
+CREATE TABLE IF NOT EXISTS sf_street_feature_classcode (
+  id           BIGINT GENERATED ALWAYS AS IDENTITY primary key,
+  updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMP NOT NULL,
+  removed_at   TIMESTAMP,
+  cnn          INTEGER NOT NULL,
+  value        class_code NOT NULL, 
+  is_active    BOOLEAN
+);
+CREATE TRIGGER update_sf_street_feature_classcode BEFORE UPDATE ON sf_street_feature_classcode FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_street_feature_classcode_cnn_idx ON sf_street_feature_classcode(cnn); 
+CREATE INDEX sf_street_feature_classcode_value_idx ON sf_street_feature_classcode(value); 
+
+CREATE TABLE IF NOT EXISTS sf_street_feature_school_zone (
+  id           BIGINT GENERATED ALWAYS AS IDENTITY primary key,
+  updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMP NOT NULL,
+  removed_at   TIMESTAMP,
+  cnn          INTEGER NOT NULL,
+  value        INTEGER NOT NULL, --Speed Limit in MPH
+  unit         speed_limit_unit NOT NULL, 
+  is_active    BOOLEAN NOT NULL,
+  metadata     JSONB
+);
+CREATE TRIGGER update_sf_street_feature_school_zone_time BEFORE UPDATE ON sf_street_feature_school_zone FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_street_feature_school_zone_cnn_idx ON sf_street_feature_school_zone(cnn); 
+
+CREATE TABLE IF NOT EXISTS sf_street_feature_slow_street (
+  id           BIGINT GENERATED ALWAYS AS IDENTITY primary key,
+  updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMP NOT NULL,
+  removed_at   TIMESTAMP,
+  cnn          INTEGER NOT NULL,
+  value        TEXT NOT NULL,
+  metadata     JSONB
+);
+CREATE TRIGGER update_sf_street_feature_slow_street_time BEFORE UPDATE ON sf_street_feature_slow_street FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_street_feature_slow_street_cnn_idx ON sf_street_feature_slow_street(cnn); 
+
+CREATE TABLE IF NOT EXISTS sf_street_feature_speed_limit (
+  id           BIGINT GENERATED ALWAYS AS IDENTITY primary key,
+  updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMP NOT NULL,
+  removed_at   TIMESTAMP,
+  cnn          INTEGER NOT NULL,
+  value        INTEGER NOT NULL, --Speed Limit in MPH
+  unit         speed_limit_unit NOT NULL, 
+  use_defacto_limit BOOLEAN NOT NULL,
+  metadata     JSONB
+);
+CREATE TRIGGER update_sf_street_feature_speed_limit_time BEFORE UPDATE ON sf_street_feature_speed_limit FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_street_feature_speed_limit_cnn_idx ON sf_street_feature_speed_limit(cnn); 
+
+CREATE TYPE calming_measure AS ENUM (
+    'median_extension',
+    'channelization',
+    'speed_hump',
+    'ped_refuge_island',
+    'chicane',
+    'median_island',
+    'traffic_circle',
+    'left_turn_traffic_calming',
+    'painted_traffic_circle',
+    'traffic_island',
+    'speed_table',
+    'painted_island',
+    'raised_crosswalk',
+    'centerline_hardening_w_rubber_humps',
+    'speed_radar_sign',
+    'choker',
+    'striping',
+    '5_lump_speed_cushion',
+    '7_lump_speed_cushion',
+    '3_lump_speed_cushion',
+    '4_lump_speed_cushion',
+    'speed_cushion',
+    'speed_bump',
+    'road_diet',
+    'edgeline',
+    '6_lump_speed_cushion',
+    'one_way_conversion',
+    '2_lump_speed_cushion'
+);
+
+CREATE TABLE IF NOT EXISTS sf_street_feature_calming_measure (
+  id           BIGINT GENERATED ALWAYS AS IDENTITY primary key,
+  updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMP NOT NULL,
+  removed_at   TIMESTAMP,
+  cnn          INTEGER NOT NULL,
+  value        calming_measure NOT NULL,
+  is_on_intersection BOOLEAN NOT NULL, 
+  metadata     JSONB
+);
+CREATE TRIGGER update_sf_street_feature_calming_measure_time BEFORE UPDATE ON sf_street_feature_calming_measure FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_street_feature_calming_measure_cnn_idx ON sf_street_feature_calming_measure(cnn); 
 
 CREATE TYPE event_type AS ENUM (
   'traffic_crash_resulting_in_injury',
@@ -94,5 +211,75 @@ CREATE TABLE IF NOT EXISTS sf_events (
 CREATE TRIGGER update_sf_events_time BEFORE UPDATE ON sf_events FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE INDEX sf_events_point_idx ON sf_events USING GIST(point);
 CREATE INDEX sf_events_cnn_idx on sf_events(cnn);
+
+CREATE OR REPLACE FUNCTION integer_to_class_code(int_class_code INTEGER)
+RETURNS class_code AS $$
+BEGIN
+    RETURN CASE int_class_code
+        WHEN 0 THEN 'other'
+        WHEN 1 THEN 'freeway'
+        WHEN 2 THEN 'highway_or_major_street'
+        WHEN 3 THEN 'arterial'
+        WHEN 4 THEN 'collector'
+        WHEN 5 THEN 'residential'
+        WHEN 6 THEN 'freeway_ramp'
+        ELSE 'other'
+    END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION intersection_tc_measure_to_calming_measure(tc_measure text)
+RETURNS calming_measure AS $$
+BEGIN
+    RETURN CASE TRIM(LOWER(tc_measure))
+        WHEN 'median extension' THEN 'median_extension'
+        WHEN 'channelization' THEN 'channelization'
+        WHEN 'speed hump' THEN 'speed_hump'
+        WHEN 'ped refuge island' THEN 'ped_refuge_island'
+        WHEN 'chicane' THEN 'chicane'
+        WHEN 'median island' THEN 'median_island'
+        WHEN 'traffic circle' THEN 'traffic_circle'
+        WHEN 'left turn traffic calming' THEN 'left_turn_traffic_calming'
+        WHEN 'painted traffic circle' THEN 'painted_traffic_circle'
+        WHEN 'traffic island' THEN 'traffic_island'
+        WHEN 'speed table' THEN 'speed_table'
+        WHEN 'painted island' THEN 'painted_island'
+        WHEN 'raised crosswalk' THEN 'raised_crosswalk'
+        WHEN 'centerline hardening w/rubber humps' THEN 'centerline_hardening_w_rubber_humps'
+        WHEN 'speed radar sign' THEN 'speed_radar_sign'
+        WHEN 'choker' THEN 'choker'
+        ELSE NULL
+    END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION midblock_tc_measure_to_calming_measure(tc_measure text)
+RETURNS calming_measure AS $$
+BEGIN
+	RETURN CASE TRIM(LOWER(tc_measure))
+		WHEN 'striping' THEN 'striping'
+		WHEN 'speed radar sign' THEN 'speed_radar_sign'
+		WHEN 'choker' THEN 'choker'
+		WHEN '5-lump speed cushion' THEN '5_lump_speed_cushion'
+		WHEN 'channelization' THEN 'channelization'
+		WHEN '7-lump speed cushion' THEN '7_lump_speed_cushion'
+		WHEN 'speed hump' THEN 'speed_hump'
+		WHEN '3-lump speed cushion' THEN '3_lump_speed_cushion'
+		WHEN '4-lump speed cushion' THEN '4_lump_speed_cushion'
+		WHEN 'chicane' THEN 'chicane'
+		WHEN 'speed cushion' THEN 'speed_cushion'
+		WHEN 'speed bump' THEN 'speed_bump'
+		WHEN 'road diet' THEN 'road_diet'
+		WHEN 'edgeline' THEN 'edgeline'
+		WHEN '6-lump speed cushion' THEN '6_lump_speed_cushion'
+		WHEN 'one-way conversion' THEN 'one_way_conversion'
+		WHEN 'traffic island' THEN 'traffic_island'
+		WHEN '2-lump speed cushion' THEN '2_lump_speed_cushion'
+		WHEN 'speed table' THEN 'speed_table'
+		WHEN 'raised crosswalk' THEN 'raised_crosswalk'
+		ELSE NULL
+	END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
 
 EOSQL

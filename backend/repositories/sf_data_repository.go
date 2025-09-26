@@ -1,10 +1,12 @@
 package repositories
 
 import (
+	"citystreetdata/types"
 	"context"
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/twpayne/go-geos/geometry"
@@ -38,13 +40,14 @@ func NewSFDataRepository(logger *slog.Logger) (*SfDataRepository, error) {
 }
 
 type StreetSegment struct {
-	CNN int `json:"cnn"`
-	StreetName string `json:"street"`
-	Line *geometry.Geometry `json:"line"`
+	CNN        int                `json:"cnn"`
+	StreetName string             `json:"street"`
+	Line       *geometry.Geometry `json:"line"`
 }
 
 type GetSegmentsWithinPolygonParams struct {
 	Polygon *geometry.Geometry
+	Filters *types.StreetFeatureFilters
 }
 
 func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, params *GetSegmentsWithinPolygonParams) ([]StreetSegment, error) {
@@ -52,26 +55,36 @@ func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, param
 		return nil, fmt.Errorf("invalid polygon: %v", params.Polygon)
 	}
 
-	dbpool, err := pgxpool.NewWithConfig(ctx, sfr.config)
-	if err != nil {
-		return nil, err
+	classcodeFilter := ""
+	if params.Filters != nil && params.Filters.ClassCodes != nil && len(params.Filters.ClassCodes) > 0 {
+		strArr := []string{}
+		for _, v := range params.Filters.ClassCodes {
+			strArr = append(strArr, fmt.Sprintf("'%v'", v.ToString()))
+		}
+		setStr := fmt.Sprintf("(%s)", strings.Join(strArr, ","))
+		classcodeFilter = fmt.Sprintf("JOIN (SELECT * FROM sf_street_feature_classcode WHERE value in %s) as cc ON si.cnn = cc.cnn", setStr)
 	}
-	defer dbpool.Close()
-	row, err := dbpool.Query(ctx, `
+
+	queryStr := fmt.Sprintf(`
 	SELECT DISTINCT
 		si.cnn,
 		TRIM(si.street || ' ' || COALESCE(si.st_type, '')) as street, 
 		si.line
 	FROM 
 		sf_streets_and_intersections as si 
-		JOIN
-		sf_street_features as sf
-		on si.cnn = sf.cnn
+		%s
 	WHERE
 		si.active = 'true'
 		AND
 		(ST_WITHIN(si.line, $1) OR ST_INTERSECTS(si.line, $2))
-	`, params.Polygon, params.Polygon)
+	`, classcodeFilter)
+
+	dbpool, err := pgxpool.NewWithConfig(ctx, sfr.config)
+	if err != nil {
+		return nil, err
+	}
+	defer dbpool.Close()
+	row, err := dbpool.Query(ctx, queryStr, params.Polygon, params.Polygon)
 	if err != nil {
 		return nil, err
 	}

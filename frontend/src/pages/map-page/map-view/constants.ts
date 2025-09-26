@@ -9,6 +9,7 @@ export const streetLayerStyle: LineLayerSpecification = {
   type: "line",
   source: "streets",
   paint: {
+    "line-opacity": 0.65,
     "line-width": 5,
     "line-color": "#8686AC",
   },

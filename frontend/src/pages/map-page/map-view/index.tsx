@@ -117,7 +117,7 @@ export const MapView = ({
               SanFranciscoSEPoint[1],
               SanFranciscoNWPoint[0],
             ],
-            4,
+            0.5,
             { units: "kilometers" }
           )}
         >

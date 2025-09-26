@@ -2,9 +2,20 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getBoundingBoxInView,
   getZoomLevelInView,
+  ZoomLevelInView,
 } from "../../../models/map-grid";
 import axios from "axios";
 import { useRef } from "react";
+
+export enum classcode {
+  Other,
+  Freeways,
+  HighwayOrMajorStreet,
+  Arterial,
+  Collector,
+  Residential,
+  FreewayRamp,
+}
 
 type ApiSegmentsReturnObj = {
   cnn: number;
@@ -24,6 +35,32 @@ type useStreetSegmentsForViewportParams = {
 type useStreetSegmentsForViewportReturn = {
   streetSegments: ApiSegmentsReturnObj[];
   isLoading: boolean;
+};
+
+const zoomLevelToClassCodes = (zoomLevel: number): classcode[] => {
+  const zoomInView = getZoomLevelInView(zoomLevel);
+  const classcodeViewOne = [
+    classcode.Freeways,
+    classcode.HighwayOrMajorStreet,
+    classcode.FreewayRamp,
+  ];
+  const classcodeViewTwo = [
+    ...classcodeViewOne,
+    classcode.Arterial,
+    classcode.Collector,
+  ];
+  const classcodeViewThree = [
+    ...classcodeViewOne,
+    ...classcodeViewTwo,
+    classcode.Residential,
+  ];
+  if (zoomInView === ZoomLevelInView.ONE) {
+    return classcodeViewOne;
+  }
+  if (zoomInView === ZoomLevelInView.TWO) {
+    return classcodeViewTwo;
+  }
+  return classcodeViewThree;
 };
 
 export const useStreetSegmentsForViewport = ({
@@ -46,13 +83,18 @@ export const useStreetSegmentsForViewport = ({
       zoomLevel,
     ] as const,
     queryFn: async () => {
-      return await axios.get<ApiSegmentsReturnObj[]>(`/api/segments`, {
-        params: {
-          nePoint: [viewedCells[0], viewedCells[1]].toString(),
-          swPoint: [viewedCells[2], viewedCells[3]].toString(),
-          zoomLevel: zoomLevel.toString(),
-        },
-      });
+      return await axios.get<ApiSegmentsReturnObj[]>(
+        `/api/segmentsForViewport`,
+        {
+          params: {
+            nePoint: [viewedCells[0], viewedCells[1]].toString(),
+            swPoint: [viewedCells[2], viewedCells[3]].toString(),
+            filters: JSON.stringify({
+              classCodes: zoomLevelToClassCodes(zoomLevel),
+            }),
+          },
+        }
+      );
     },
     queryKeyHashFn: (queryKey) => {
       const zoomLevelQueryKey = queryKey[5];

@@ -3,7 +3,7 @@
     "id": "sf_streets_and_intersections",
     "api_endpoint": "https://data.sfgov.org/resource/3psu-pn9h.csv",
     "params": {
-      "$limit": 0
+      "$limit": 1000
     },
     "staging_fields": [
       "cnn",
@@ -45,7 +45,7 @@
     "id": "sf_traffic_crashes",
     "api_endpoint": "https://data.sfgov.org/resource/ubvf-ztfx.csv",
     "params": {
-      "$limit": 0 
+      "$limit": 1000
     },
     "staging_fields": [
       "unique_id",
@@ -112,7 +112,7 @@
     "id": "sf_speed_limits_per_street_segment",
     "api_endpoint": "https://data.sfgov.org/resource/3t7b-gebn.csv",
     "params": {
-      "$limit": 0
+      "$limit": 1000
     },
     "staging_fields": [
       "objectid",
@@ -141,7 +141,7 @@
     "id": "sf_intersection_level_traffic_calming_devices",
     "api_endpoint": "https://data.sfgov.org/resource/bp3t-bd4t.csv",
     "params": {
-      "$limit": 0
+      "$limit": 1000
     },
     "staging_fields": [
       "row_id",
@@ -169,7 +169,7 @@
     "id": "sf_mid_block_traffic_calming_areas",
     "api_endpoint": "https://data.sfgov.org/resource/abhw-ffzx.csv",
     "params": {
-      "$limit": 0
+      "$limit": 1000
     },
     "staging_fields": [
       "row_id",
@@ -201,7 +201,7 @@
     "id": "sf_slow_streets",
     "api_endpoint": "https://data.sfgov.org/resource/hkz3-itiu.csv",
     "params": {
-      "$limit":  0
+      "$limit": 1000
     },
     "staging_fields": [
       "objectid",
@@ -233,7 +233,7 @@
     "id": "sf_pd_incident_reports_2018_to_present",
     "api_endpoint": "https://data.sfgov.org/resource/wg3w-h783.csv",
     "params": {
-      "$limit": 0,
+      "$limit": 1000,
       "$where": "incident_category IN ('Traffic Violation Arrest', 'Traffic Collision') AND resolution LIKE 'Cite or Arrest%'"
     },
     "staging_fields": [
@@ -272,7 +272,7 @@
     "id": "sf_vision_zero_high_injury_network",
     "api_endpoint": "https://data.sfgov.org/resource/8vtn-qytr.csv",
     "params": {
-      "$limit": 0
+      "$limit": 1000
     },
     "staging_fields": [
       "objectid",

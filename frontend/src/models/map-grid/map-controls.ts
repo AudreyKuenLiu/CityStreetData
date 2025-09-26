@@ -5,10 +5,10 @@ import {
 import { CityGrid } from "./map-grid";
 import type { BoundingBox } from "./map-grid";
 
-enum ZoomLevelInView {
-  ONE,
+export enum ZoomLevelInView {
+  ONE, //least zoomed in
   TWO,
-  THREE,
+  THREE, //most zoomed in
 }
 
 export const SanFranciscoBoundsLatLon = [
@@ -42,9 +42,9 @@ const getSanFranciscoGrid = (zoomLevel: number): CityGrid => {
 };
 
 export const getZoomLevelInView = (zoomLevel: number): ZoomLevelInView => {
-  if (zoomLevel >= 16) {
+  if (zoomLevel >= 15) {
     return ZoomLevelInView.THREE;
-  } else if (zoomLevel < 16 && zoomLevel >= 14) {
+  } else if (zoomLevel < 15 && zoomLevel >= 13) {
     return ZoomLevelInView.TWO;
   }
   return ZoomLevelInView.ONE;

@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 
 	dc "citystreetdata/controllers"
+	cTypes "citystreetdata/controllers/types"
+	"citystreetdata/types"
 	"citystreetdata/utils"
+
+	"github.com/go-playground/validator/v10"
 
 	echo "github.com/labstack/echo/v4"
 )
@@ -18,6 +21,7 @@ type handlers struct {
 	logger           *slog.Logger
 	dummyController  *dc.DummyController
 	sfDataController *dc.SfDataController
+	validate         *validator.Validate
 }
 
 type Params struct {
@@ -28,15 +32,17 @@ func NewHandlers(p Params) (*handlers, error) {
 	logger := slog.Default()
 	dummyController := dc.NewDummyController()
 	sfDataController, err := dc.NewSFDataController(logger)
+	validate := validator.New()
 	if err != nil {
 		return nil, err
 	}
 
 	h := handlers{
-		echoInstance:    p.EchoInstance,
-		dummyController: dummyController,
+		echoInstance:     p.EchoInstance,
+		dummyController:  dummyController,
 		sfDataController: sfDataController,
-		logger: logger,
+		validate:         validate,
+		logger:           logger,
 	}
 
 	return &h, nil
@@ -44,16 +50,16 @@ func NewHandlers(p Params) (*handlers, error) {
 
 func (h *handlers) InitHandlers() error {
 	h.echoInstance.GET("/api/ping", h.pingDB)
-	h.echoInstance.GET("/api/segments", h.getSegmentsForViewport)
+	h.echoInstance.GET("/api/segmentsForViewport", h.getSegmentsForViewport)
 	return nil
 }
 
 func (h *handlers) getSegmentsForViewport(c echo.Context) error {
 	nePointStr := c.QueryParam("nePoint")
 	swPointStr := c.QueryParam("swPoint")
-	zoomLevelStr := c.QueryParam("zoomLevel")
-	if nePointStr == "" || swPointStr == "" || zoomLevelStr == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("missing required query parameters - nePoint: %v - swPoint: %v - zoomLevel: %v", nePointStr, swPointStr, zoomLevelStr))
+	filterStr := c.QueryParam("filters")
+	if nePointStr == "" || swPointStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("missing required query parameters - nePoint: %v - swPoint: %v", nePointStr, swPointStr))
 	}
 	nePoints, err := utils.PointArrayToNumberArray(nePointStr)
 	if err != nil {
@@ -63,15 +69,19 @@ func (h *handlers) getSegmentsForViewport(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing swPoint: %v, format must be [float, float]", err))
 	}
-	zoomLevel, err := strconv.ParseFloat(zoomLevelStr, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing zoomLevel: %v, format must be float", err))
+	var filters types.StreetFeatureFilters
+	if len(filterStr) > 0 {
+		err = json.Unmarshal([]byte(filterStr), &filters)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing filters: %v", err))
+		}
 	}
+	h.logger.Info("these are the fitlers", "filters", filters, "filterstr", filterStr)
 
-	result, err := h.sfDataController.GetSegmentsForViewport(c.Request().Context(), &dc.GetSegmentsForViewportParams{
-		NEPoint:   []float64{nePoints[0], nePoints[1]},
-		SWPoint:   []float64{swPoints[0], swPoints[1]},
-		ZoomLevel: zoomLevel,
+	result, err := h.sfDataController.GetSegmentsForViewport(c.Request().Context(), &cTypes.GetSegmentsForViewportParams{
+		NEPoint: []float64{nePoints[0], nePoints[1]},
+		SWPoint: []float64{swPoints[0], swPoints[1]},
+		Filters: &filters,
 	})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting segments for viewport: %v", err))

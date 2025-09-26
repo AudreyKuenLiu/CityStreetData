@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"citystreetdata/controllers/types"
 	repo "citystreetdata/repositories"
 	"context"
 	"fmt"
@@ -12,7 +13,7 @@ import (
 
 type SfDataController struct {
 	sfDataRepository *repo.SfDataRepository
-	logger *slog.Logger
+	logger           *slog.Logger
 }
 
 func NewSFDataController(logger *slog.Logger) (*SfDataController, error) {
@@ -25,18 +26,11 @@ func NewSFDataController(logger *slog.Logger) (*SfDataController, error) {
 
 	return &SfDataController{
 		sfDataRepository: sfDataRepository,
-		logger: logger,
+		logger:           logger,
 	}, nil
 }
 
-
-type GetSegmentsForViewportParams struct {
-	NEPoint []float64
-	SWPoint []float64
-	ZoomLevel float64
-}
-
-func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params *GetSegmentsForViewportParams) ([]repo.StreetSegment, error) {
+func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params *types.GetSegmentsForViewportParams) ([]repo.StreetSegment, error) {
 	if params == nil {
 		return nil, fmt.Errorf("no params passed to GetSegmentsForViewport")
 	}
@@ -49,6 +43,7 @@ func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params 
 
 	ret, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &repo.GetSegmentsWithinPolygonParams{
 		Polygon: polygon,
+		Filters: params.Filters,
 	})
 	if err != nil {
 		return nil, err
