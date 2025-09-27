@@ -29,23 +29,15 @@ const zoomLevelToClassCodes = (zoomLevel: number): classcode[] => {
     classcode.HighwayOrMajorStreet,
     classcode.FreewayRamp,
   ];
-  const classcodeViewTwo = [
-    ...classcodeViewOne,
-    classcode.Arterial,
-    classcode.Collector,
-  ];
-  const classcodeViewThree = [
-    ...classcodeViewOne,
-    ...classcodeViewTwo,
-    classcode.Residential,
-  ];
+  const classcodeViewTwo = [classcode.Arterial, classcode.Collector];
+  const classcodeViewThree = [classcode.Residential];
   if (zoomInView === ZoomLevelInView.ONE) {
     return classcodeViewOne;
   }
   if (zoomInView === ZoomLevelInView.TWO) {
-    return classcodeViewTwo;
+    return [...classcodeViewOne, ...classcodeViewTwo];
   }
-  return classcodeViewThree;
+  return [...classcodeViewOne, ...classcodeViewTwo, ...classcodeViewThree];
 };
 
 export const useStreetSegmentsForViewport = ({

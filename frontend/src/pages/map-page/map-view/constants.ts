@@ -8,6 +8,9 @@ export const streetLayerStyle: LineLayerSpecification = {
   id: streetLayerId,
   type: "line",
   source: "streets",
+  layout: {
+    "line-cap": "round",
+  },
   paint: {
     "line-opacity": 0.65,
     "line-width": 10,
@@ -20,6 +23,9 @@ export const highlightedStreetLayerStyle: LineLayerSpecification = {
   id: highlightedStreetLayerId,
   type: "line",
   source: "streets",
+  layout: {
+    "line-cap": "round",
+  },
   paint: {
     "line-width": 10,
     "line-color": "#272757",

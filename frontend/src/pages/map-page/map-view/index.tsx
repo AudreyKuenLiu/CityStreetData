@@ -12,7 +12,8 @@ import {
 } from "./constants";
 import { ControlPanel } from "../control-panel";
 import { useSelectedSegments } from "./hooks/use-selected-segments";
-import type { FeatureCollection } from "geojson";
+import type { ViewPortSegment } from "./api-models/segments-for-viewport";
+import type { FeatureCollection, LineString } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 export const MapView = ({
@@ -54,40 +55,39 @@ export const MapView = ({
     zoomLevel: mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
   });
 
-  const geoJson: FeatureCollection = useMemo(
+  const geoJson: FeatureCollection<LineString, ViewPortSegment> = useMemo(
     () => ({
       type: "FeatureCollection",
       features: streetSegments.map((streetSegment) => {
         return {
           type: "Feature" as const,
-          geometry: {
-            type: "LineString" as const,
-            coordinates: streetSegment.line.coordinates,
-          },
+          geometry: streetSegment.line,
           properties: {
-            streetName: streetSegment.street,
-            cnn: streetSegment.cnn.toString(),
+            street: streetSegment.street,
+            cnn: streetSegment.cnn,
+            line: streetSegment.line,
           },
         };
       }),
     }),
     [streetSegments]
   );
-  const geoJsonSelected: FeatureCollection = {
+  const geoJsonSelected: FeatureCollection<LineString, ViewPortSegment> = {
     type: "FeatureCollection",
     features: Object.entries(selectedSegments).map(([cnn, value]) => {
       return {
         type: "Feature" as const,
         geometry: value.line,
         properties: {
-          streetName: value.street,
-          cnn,
+          street: value.street,
+          line: value.line,
+          cnn: parseInt(cnn),
         },
       };
     }),
   };
 
-  console.log("rerendering", geoJsonSelected);
+  // console.log("rerendering", geoJsonSelected);
 
   return (
     <>
@@ -111,11 +111,16 @@ export const MapView = ({
             features?.[0]?.properties?.cnn != null &&
             features?.[0].geometry.type === "LineString"
           ) {
+            console.log(
+              "selecting coorindates",
+              features?.[0].geometry,
+              features?.[0].properties.line
+            );
             dispatch({
               type: "toggle",
               payload: {
                 cnn: features?.[0].properties.cnn,
-                line: features?.[0].geometry,
+                line: JSON.parse(features?.[0].properties.line),
                 street: features?.[0].properties.streetName,
               },
             });
