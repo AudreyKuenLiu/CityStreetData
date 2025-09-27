@@ -101,7 +101,6 @@ export const useStreetSegmentsForViewport = ({
       const zoomLevelInView = getZoomLevelInView(zoomLevelQueryKey);
       return `${queryKey[1]}-${queryKey[2]}-${queryKey[3]}-${queryKey[4]}-${zoomLevelInView}`;
     },
-    gcTime: 1000 * 60 * 10, //10 minutes
   });
   const { data, isLoading } = result;
   streetSegments.current = data?.data ?? streetSegments.current;

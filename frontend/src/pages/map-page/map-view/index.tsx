@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import Map, { Layer, Source, ViewState, MapRef } from "react-map-gl/maplibre";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {
@@ -9,15 +9,10 @@ import {
   highlightedStreetLayerStyle,
   highlightedStreetLayerId,
 } from "./constants";
-import {
-  SanFranciscoNWPoint,
-  SanFranciscoSEPoint,
-} from "../../../constants/map-dimensions";
 import { ControlPanel } from "../control-panel";
 import { useStreetSegmentsForViewport } from "./queries";
 import type { FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { squareGrid } from "@turf/turf";
 
 export const MapView = ({
   initalNESWBounds,
@@ -27,8 +22,9 @@ export const MapView = ({
   centerLatLon: [number, number];
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
-  const [clickedStreet, setClickedStreet] = React.useState("");
-  const [viewState, setViewState] = React.useState<ViewState>({
+  const [cursor, setCursor] = useState<string>("grab");
+  const [clickedStreet, setClickedStreet] = useState("");
+  const [viewState, setViewState] = useState<ViewState>({
     longitude: centerLatLon[1],
     latitude: centerLatLon[0],
     zoom: DEFAULT_ZOOM,
@@ -36,6 +32,9 @@ export const MapView = ({
     pitch: 0,
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
+  const onMouseEnter = useCallback(() => setCursor("pointer"), []);
+  const onMouseLeave = useCallback(() => setCursor("grab"), []);
+
   const currentENPoint =
     mapRef.current?.getBounds().getNorthEast().toArray() != null
       ? mapRef.current?.getBounds().getNorthEast().toArray()
@@ -45,7 +44,7 @@ export const MapView = ({
       ? mapRef.current?.getBounds().getSouthWest().toArray()
       : [initalNESWBounds[3], initalNESWBounds[2]];
 
-  const { streetSegments, isLoading } = useStreetSegmentsForViewport({
+  const { streetSegments } = useStreetSegmentsForViewport({
     nePoint: [currentENPoint[1], currentENPoint[0]],
     swPoint: [currentWSPoint[1], currentWSPoint[0]],
     zoomLevel: mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
@@ -72,15 +71,6 @@ export const MapView = ({
     [clickedStreet]
   );
 
-  console.log(
-    "this is the map bounds",
-    currentENPoint,
-    currentWSPoint,
-    mapRef.current?.getZoom() ?? DEFAULT_ZOOM
-    //streetSegments,
-    //isLoading
-  );
-
   return (
     <>
       <ControlPanel />
@@ -95,6 +85,9 @@ export const MapView = ({
           initalNESWBounds[1],
           initalNESWBounds[0],
         ]}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        cursor={cursor}
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
         onClick={(event: MapLayerMouseEvent) => {
@@ -107,22 +100,6 @@ export const MapView = ({
         interactiveLayerIds={[highlightedStreetLayerId, streetLayerId]}
         mapStyle="https://tiles.openfreemap.org/styles/positron"
       >
-        {/* <Source
-          id="grid1"
-          type="geojson"
-          data={squareGrid(
-            [
-              SanFranciscoNWPoint[1],
-              SanFranciscoSEPoint[0],
-              SanFranciscoSEPoint[1],
-              SanFranciscoNWPoint[0],
-            ],
-            0.5,
-            { units: "kilometers" }
-          )}
-        >
-          <Layer {...streetLayerStyle} />
-        </Source> */}
         <Source id="streets" type="geojson" data={geoJson}>
           <Layer {...streetLayerStyle} />
           <Layer {...highlightedStreetLayerStyle} filter={filter} />
