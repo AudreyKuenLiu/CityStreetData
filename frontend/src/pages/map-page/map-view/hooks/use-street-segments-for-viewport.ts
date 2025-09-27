@@ -3,28 +3,13 @@ import {
   getBoundingBoxInView,
   getZoomLevelInView,
   ZoomLevelInView,
-} from "../../../models/map-grid";
+} from "../../../../models/map-grid";
 import axios from "axios";
 import { useRef } from "react";
-
-export enum classcode {
-  Other,
-  Freeways,
-  HighwayOrMajorStreet,
-  Arterial,
-  Collector,
-  Residential,
-  FreewayRamp,
-}
-
-type ApiSegmentsReturnObj = {
-  cnn: number;
-  street: string;
-  line: {
-    type: string;
-    coordinates: number[][];
-  };
-};
+import {
+  classcode,
+  ViewPortSegment,
+} from "../api-models/segments-for-viewport";
 
 type useStreetSegmentsForViewportParams = {
   nePoint: [number, number];
@@ -33,7 +18,7 @@ type useStreetSegmentsForViewportParams = {
 };
 
 type useStreetSegmentsForViewportReturn = {
-  streetSegments: ApiSegmentsReturnObj[];
+  streetSegments: ViewPortSegment[];
   isLoading: boolean;
 };
 
@@ -72,7 +57,7 @@ export const useStreetSegmentsForViewport = ({
     bbox: [...nePoint, ...swPoint],
     zoomLevel,
   });
-  const streetSegments = useRef<ApiSegmentsReturnObj[] | null>(null);
+  const streetSegments = useRef<ViewPortSegment[] | null>(null);
   const result = useQuery({
     queryKey: [
       "ping",
@@ -83,18 +68,15 @@ export const useStreetSegmentsForViewport = ({
       zoomLevel,
     ] as const,
     queryFn: async () => {
-      return await axios.get<ApiSegmentsReturnObj[]>(
-        `/api/segmentsForViewport`,
-        {
-          params: {
-            nePoint: [viewedCells[0], viewedCells[1]].toString(),
-            swPoint: [viewedCells[2], viewedCells[3]].toString(),
-            filters: JSON.stringify({
-              classCodes: zoomLevelToClassCodes(zoomLevel),
-            }),
-          },
-        }
-      );
+      return await axios.get<ViewPortSegment[]>(`/api/segmentsForViewport`, {
+        params: {
+          nePoint: [viewedCells[0], viewedCells[1]].toString(),
+          swPoint: [viewedCells[2], viewedCells[3]].toString(),
+          filters: JSON.stringify({
+            classCodes: zoomLevelToClassCodes(zoomLevel),
+          }),
+        },
+      });
     },
     queryKeyHashFn: (queryKey) => {
       const zoomLevelQueryKey = queryKey[5];

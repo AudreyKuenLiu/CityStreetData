@@ -1,6 +1,6 @@
 import type { LineLayerSpecification } from "react-map-gl/maplibre";
 
-export const MAX_ZOOM = 18;
+export const MAX_ZOOM = 20;
 export const DEFAULT_ZOOM = 5;
 
 export const streetLayerId = "streetSegmentLayer";
@@ -10,7 +10,7 @@ export const streetLayerStyle: LineLayerSpecification = {
   source: "streets",
   paint: {
     "line-opacity": 0.65,
-    "line-width": 5,
+    "line-width": 10,
     "line-color": "#8686AC",
   },
 } as const;
@@ -21,7 +21,7 @@ export const highlightedStreetLayerStyle: LineLayerSpecification = {
   type: "line",
   source: "streets",
   paint: {
-    "line-width": 5,
+    "line-width": 10,
     "line-color": "#272757",
   },
 } as const;

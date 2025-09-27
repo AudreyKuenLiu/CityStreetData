@@ -1,5 +1,6 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import Map, { Layer, Source, ViewState, MapRef } from "react-map-gl/maplibre";
+import { useStreetSegmentsForViewport } from "./hooks/use-street-segments-for-viewport";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {
   streetLayerId,
@@ -10,7 +11,7 @@ import {
   highlightedStreetLayerId,
 } from "./constants";
 import { ControlPanel } from "../control-panel";
-import { useStreetSegmentsForViewport } from "./queries";
+import { useSelectedSegments } from "./hooks/use-selected-segments";
 import type { FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -23,7 +24,10 @@ export const MapView = ({
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
   const [cursor, setCursor] = useState<string>("grab");
-  const [clickedStreet, setClickedStreet] = useState("");
+
+  const [selectedSegments, dispatch] = useSelectedSegments();
+  const [key, setKey] = useState(0);
+
   const [viewState, setViewState] = useState<ViewState>({
     longitude: centerLatLon[1],
     latitude: centerLatLon[0],
@@ -50,26 +54,40 @@ export const MapView = ({
     zoomLevel: mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
   });
 
-  const geoJson: FeatureCollection = {
+  const geoJson: FeatureCollection = useMemo(
+    () => ({
+      type: "FeatureCollection",
+      features: streetSegments.map((streetSegment) => {
+        return {
+          type: "Feature" as const,
+          geometry: {
+            type: "LineString" as const,
+            coordinates: streetSegment.line.coordinates,
+          },
+          properties: {
+            streetName: streetSegment.street,
+            cnn: streetSegment.cnn.toString(),
+          },
+        };
+      }),
+    }),
+    [streetSegments]
+  );
+  const geoJsonSelected: FeatureCollection = {
     type: "FeatureCollection",
-    features: streetSegments.map((streetSegment) => {
+    features: Object.entries(selectedSegments).map(([cnn, value]) => {
       return {
-        type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: streetSegment.line.coordinates,
-        },
+        type: "Feature" as const,
+        geometry: value.line,
         properties: {
-          streetName: streetSegment.street,
-          cnn: streetSegment.cnn,
+          streetName: value.street,
+          cnn,
         },
       };
     }),
   };
-  const filter: ["in", string, string] = React.useMemo(
-    () => ["in", "cnn", clickedStreet],
-    [clickedStreet]
-  );
+
+  console.log("rerendering", geoJsonSelected);
 
   return (
     <>
@@ -87,22 +105,36 @@ export const MapView = ({
         ]}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
+        onClick={(event: MapLayerMouseEvent) => {
+          const features = event.features;
+          if (
+            features?.[0]?.properties?.cnn != null &&
+            features?.[0].geometry.type === "LineString"
+          ) {
+            dispatch({
+              type: "toggle",
+              payload: {
+                cnn: features?.[0].properties.cnn,
+                line: features?.[0].geometry,
+                street: features?.[0].properties.streetName,
+              },
+            });
+            setKey(key + 1); //super-hack this line is responsibe for "rerendering" the map when clicked
+            console.log("clicked street", features?.[0].properties.cnn);
+          }
+        }}
         cursor={cursor}
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
-        onClick={(event: MapLayerMouseEvent) => {
-          const features = event.features;
-          if (features?.[0]?.properties?.cnn != null) {
-            console.log("clickedStreet", features[0].properties.cnn);
-            setClickedStreet(features[0].properties.cnn);
-          }
-        }}
         interactiveLayerIds={[highlightedStreetLayerId, streetLayerId]}
         mapStyle="https://tiles.openfreemap.org/styles/positron"
+        doubleClickZoom={false}
       >
         <Source id="streets" type="geojson" data={geoJson}>
           <Layer {...streetLayerStyle} />
-          <Layer {...highlightedStreetLayerStyle} filter={filter} />
+        </Source>
+        <Source id="selected-streets" type="geojson" data={geoJsonSelected}>
+          <Layer {...highlightedStreetLayerStyle} />
         </Source>
       </Map>
     </>
