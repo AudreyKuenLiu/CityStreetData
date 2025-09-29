@@ -5,25 +5,27 @@ import { Allotment } from "allotment";
 import { Layout } from "antd";
 import {
   SanFranciscoCenterLatLon,
-  SanFranciscoNWPoint,
-  SanFranciscoSEPoint,
+  SanFranciscoNEPoint,
+  SanFranciscoSWPoint,
 } from "../../constants/map-dimensions";
-
+import { useStreetSegmentsForMap } from "./hooks/use-street-segments-for-map";
 import "allotment/dist/style.css";
 
 export const MapPage: React.FC = () => {
+  const { mapConfig } = useStreetSegmentsForMap();
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
       <Allotment>
         <Allotment.Pane>
           <MapView
             initalNESWBounds={[
-              SanFranciscoNWPoint[0],
-              SanFranciscoSEPoint[1],
-              SanFranciscoSEPoint[0],
-              SanFranciscoNWPoint[1],
+              SanFranciscoNEPoint[0],
+              SanFranciscoNEPoint[1],
+              SanFranciscoSWPoint[0],
+              SanFranciscoSWPoint[1],
             ]}
             centerLatLon={[...SanFranciscoCenterLatLon]}
+            mapConfig={mapConfig}
           />
         </Allotment.Pane>
         <Allotment.Pane snap>

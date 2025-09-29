@@ -8,7 +8,7 @@ import axios from "axios";
 import { useRef } from "react";
 import {
   classcode,
-  ViewPortSegment,
+  ViewportSegment,
 } from "../api-models/segments-for-viewport";
 
 type useStreetSegmentsForViewportParams = {
@@ -18,7 +18,7 @@ type useStreetSegmentsForViewportParams = {
 };
 
 type useStreetSegmentsForViewportReturn = {
-  streetSegments: ViewPortSegment[];
+  streetSegments: ViewportSegment[];
   isLoading: boolean;
 };
 
@@ -49,10 +49,10 @@ export const useStreetSegmentsForViewport = ({
     bbox: [...nePoint, ...swPoint],
     zoomLevel,
   });
-  const streetSegments = useRef<ViewPortSegment[] | null>(null);
+  const streetSegments = useRef<ViewportSegment[] | null>(null);
   const result = useQuery({
     queryKey: [
-      "ping",
+      "segmentsForViewport",
       viewedCells[0],
       viewedCells[1],
       viewedCells[2],
@@ -60,7 +60,7 @@ export const useStreetSegmentsForViewport = ({
       zoomLevel,
     ] as const,
     queryFn: async () => {
-      return await axios.get<ViewPortSegment[]>(`/api/segmentsForViewport`, {
+      return await axios.get<ViewportSegment[]>(`/api/segmentsForViewport`, {
         params: {
           nePoint: [viewedCells[0], viewedCells[1]].toString(),
           swPoint: [viewedCells[2], viewedCells[3]].toString(),

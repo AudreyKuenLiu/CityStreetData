@@ -10,7 +10,7 @@ export enum classcode {
   FreewayRamp,
 }
 
-export type ViewPortSegment = {
+export type ViewportSegment = {
   cnn: number;
   street: string;
   line: LineString;

@@ -1,9 +1,9 @@
 import { useReducer, Dispatch } from "react";
-import { ViewPortSegment } from "../api-models/segments-for-viewport";
+import { ViewportSegment } from "../api-models/segments-for-viewport";
 
 //type State = Record<string, ViewPortSegment>;
-type State = Record<string, Omit<ViewPortSegment, "cnn">>;
-type Action = { type: "toggle"; payload: ViewPortSegment };
+type State = Record<string, Omit<ViewportSegment, "cnn">>;
+type Action = { type: "toggle"; payload: ViewportSegment };
 
 const initialState: State = {};
 const reducer = (state: State, action: Action): State => {

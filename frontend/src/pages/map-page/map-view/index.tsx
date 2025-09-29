@@ -12,23 +12,29 @@ import {
 } from "./constants";
 import { ControlPanel } from "../control-panel";
 import { useSelectedSegments } from "./hooks/use-selected-segments";
-import type { ViewPortSegment } from "./api-models/segments-for-viewport";
 import type { FeatureCollection, LineString } from "geojson";
+import type {
+  CityGrid,
+  StreetSegment,
+  ZoomLevelInView,
+} from "../../../models/map-grid";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useStreetSegmentsFromViewport } from "./hooks/use-streets-segments-from-viewport";
 
 export const MapView = ({
   initalNESWBounds,
   centerLatLon,
+  mapConfig,
 }: {
   initalNESWBounds: [number, number, number, number];
   centerLatLon: [number, number];
+  mapConfig: {
+    zoomLevelInView: ZoomLevelInView;
+    cityGrid: CityGrid;
+  }[];
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
   const [cursor, setCursor] = useState<string>("grab");
-
-  const [selectedSegments, dispatch] = useSelectedSegments();
-  const [key, setKey] = useState(0);
-
   const [viewState, setViewState] = useState<ViewState>({
     longitude: centerLatLon[1],
     latitude: centerLatLon[0],
@@ -40,6 +46,9 @@ export const MapView = ({
   const onMouseEnter = useCallback(() => setCursor("pointer"), []);
   const onMouseLeave = useCallback(() => setCursor("grab"), []);
 
+  const [selectedSegments, dispatch] = useSelectedSegments();
+  const [key, setKey] = useState(0);
+
   const currentENPoint =
     mapRef.current?.getBounds().getNorthEast().toArray() != null
       ? mapRef.current?.getBounds().getNorthEast().toArray()
@@ -49,45 +58,49 @@ export const MapView = ({
       ? mapRef.current?.getBounds().getSouthWest().toArray()
       : [initalNESWBounds[3], initalNESWBounds[2]];
 
-  const { streetSegments } = useStreetSegmentsForViewport({
+  // const { streetSegments } = useStreetSegmentsForViewport({
+  //   nePoint: [currentENPoint[1], currentENPoint[0]],
+  //   swPoint: [currentWSPoint[1], currentWSPoint[0]],
+  //   zoomLevel: mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
+  // });
+  const { streetSegments } = useStreetSegmentsFromViewport({
+    zoomLevel: mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
     nePoint: [currentENPoint[1], currentENPoint[0]],
     swPoint: [currentWSPoint[1], currentWSPoint[0]],
-    zoomLevel: mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
+    mapConfig,
   });
 
-  const geoJson: FeatureCollection<LineString, ViewPortSegment> = useMemo(
-    () => ({
+  const geoJson: FeatureCollection<LineString, StreetSegment> = useMemo(() => {
+    return {
       type: "FeatureCollection",
       features: streetSegments.map((streetSegment) => {
         return {
           type: "Feature" as const,
           geometry: streetSegment.line,
           properties: {
-            street: streetSegment.street,
+            //street: streetSegment.street,
             cnn: streetSegment.cnn,
             line: streetSegment.line,
           },
         };
       }),
-    }),
-    [streetSegments]
-  );
-  const geoJsonSelected: FeatureCollection<LineString, ViewPortSegment> = {
+    };
+  }, [streetSegments]);
+  //console.log("this is the geoJson", geoJson);
+  const geoJsonSelected: FeatureCollection<LineString, StreetSegment> = {
     type: "FeatureCollection",
     features: Object.entries(selectedSegments).map(([cnn, value]) => {
       return {
         type: "Feature" as const,
         geometry: value.line,
         properties: {
-          street: value.street,
+          //street: value.street,
           line: value.line,
           cnn: parseInt(cnn),
         },
       };
     }),
   };
-
-  // console.log("rerendering", geoJsonSelected);
 
   return (
     <>
@@ -111,11 +124,6 @@ export const MapView = ({
             features?.[0]?.properties?.cnn != null &&
             features?.[0].geometry.type === "LineString"
           ) {
-            console.log(
-              "selecting coorindates",
-              features?.[0].geometry,
-              features?.[0].properties.line
-            );
             dispatch({
               type: "toggle",
               payload: {
@@ -125,7 +133,6 @@ export const MapView = ({
               },
             });
             setKey(key + 1); //super-hack this line is responsibe for "rerendering" the map when clicked
-            console.log("clicked street", features?.[0].properties.cnn);
           }
         }}
         cursor={cursor}

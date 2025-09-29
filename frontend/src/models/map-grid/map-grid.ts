@@ -1,23 +1,62 @@
-import type { Feature, GeoJsonProperties, Polygon, Position } from "geojson";
-import { squareGrid } from "@turf/turf";
+import type {
+  Feature,
+  GeoJsonProperties,
+  LineString,
+  Polygon,
+  Position,
+} from "geojson";
+import { booleanCrosses, booleanWithin, polygon, squareGrid } from "@turf/turf";
+
+export interface StreetSegment {
+  cnn: number;
+  line: LineString;
+}
 
 class CityCell {
   NE: Position;
   NW: Position;
   SW: Position;
   SE: Position;
+  streetSegments: StreetSegment[];
   constructor({ cellPositions }: { cellPositions: Position[] }) {
     this.SW = [...cellPositions[0]];
     this.SE = [...cellPositions[1]];
     this.NE = [...cellPositions[2]];
     this.NW = [...cellPositions[3]];
+    this.streetSegments = [];
+  }
+  private isWithinOrCrossesCell(line: LineString): boolean {
+    const cellPolygon = polygon([
+      [
+        [this.NE[1], this.NE[0]],
+        [this.NW[1], this.NE[0]],
+        [this.SW[1], this.SW[0]],
+        [this.SE[1], this.SE[0]],
+        [this.NE[1], this.NE[0]],
+      ],
+    ]);
+    return (
+      booleanWithin(line, cellPolygon) || booleanCrosses(line, cellPolygon)
+    );
+  }
+  addStreetSegment(streetSegment: StreetSegment): boolean {
+    if (this.isWithinOrCrossesCell(streetSegment.line)) {
+      this.streetSegments.push(streetSegment);
+      return true;
+    }
+    return false;
   }
 }
 
 //type CityGridArray = Feature<Polygon, GeoJsonProperties>[];
 type CityGridArray = CityCell[][];
-//Bounding box must be in coordinates in the form of North, East, South, West
+//Bounding box must be in coordinates in the form of South, West, North, East,
 export type BoundingBox = [number, number, number, number];
+interface CityGridInput {
+  cellSizeKilometers: number;
+  cityBBox: BoundingBox;
+  streetSegments?: StreetSegment[];
+}
 
 export class CityGrid {
   private cityGrid: CityGridArray;
@@ -67,7 +106,6 @@ export class CityGrid {
       i += 1;
     } while (i < cityGrid.length);
     cityRows.push([...currentRow]);
-    console.log("these are the city rows", cityRows);
 
     return cityRows;
   }
@@ -100,23 +138,33 @@ export class CityGrid {
     return lat != null ? this.cityGrid.length - 1 - index : index;
   }
 
-  constructor({
-    cellSizeKilometers,
-    cityBBox,
-  }: {
-    cellSizeKilometers: number;
-    cityBBox: BoundingBox;
-  }) {
-    this.cityGrid = this.buildCityGrid({ cityBBox, cellSizeKilometers });
+  private mapStreetSegmentsToGrid(streetSegments: StreetSegment[]): void {
+    for (let i = 0; i < this.cityGrid.length; i++) {
+      for (let j = 0; j < this.cityGrid[i].length; j++) {
+        for (const streetSegment of streetSegments) {
+          this.cityGrid[i][j].addStreetSegment(streetSegment);
+        }
+      }
+    }
   }
 
-  getBoundingBoxInView({ bbox }: { bbox: BoundingBox }): BoundingBox {
+  private getBoundBoxCells({
+    bbox,
+  }: {
+    bbox: BoundingBox;
+  }): //Returns NE, SW Cells
+  {
+    NEBBoxCell: CityCell;
+    SWBBoxCell: CityCell;
+    NEBBoxCellIndex: [number, number];
+    SWBBoxCellIndex: [number, number];
+  } {
     const NECityCell = this.cityGrid[0][this.cityGrid[0].length - 1];
     const SWCityCell = this.cityGrid[this.cityGrid.length - 1][0];
     const cellHeight = Math.abs(NECityCell.NE[0] - NECityCell.SE[0]);
     const cellWidth = Math.abs(NECityCell.NE[1] - NECityCell.NW[1]);
 
-    const NEBBoxCellIndex = [
+    const NEBBoxCellIndex: [number, number] = [
       this.getCellIndexOnGrid({
         lat: bbox[0],
         minLatOrLon: SWCityCell.SW[0],
@@ -129,8 +177,8 @@ export class CityGrid {
         maxLatOrLon: NECityCell.NE[1],
         cellLength: cellWidth,
       }),
-    ];
-    const SWBBoxCellIndex = [
+    ] as const;
+    const SWBBoxCellIndex: [number, number] = [
       this.getCellIndexOnGrid({
         lat: bbox[2],
         minLatOrLon: SWCityCell.SW[0],
@@ -143,11 +191,47 @@ export class CityGrid {
         maxLatOrLon: NECityCell.NE[1],
         cellLength: cellWidth,
       }),
-    ];
+    ] as const;
 
     const NEBBoxCell = this.cityGrid[NEBBoxCellIndex[0]][NEBBoxCellIndex[1]];
     const SWBBoxCell = this.cityGrid[SWBBoxCellIndex[0]][SWBBoxCellIndex[1]];
+    return { NEBBoxCell, SWBBoxCell, NEBBoxCellIndex, SWBBoxCellIndex };
+  }
 
+  constructor({ cellSizeKilometers, cityBBox, streetSegments }: CityGridInput) {
+    this.cityGrid = this.buildCityGrid({ cityBBox, cellSizeKilometers });
+    const startTime = Date.now(); // Or new Date().getTime()
+    this.mapStreetSegmentsToGrid(streetSegments ?? []);
+    const endTime = Date.now();
+    console.log(`Method execution time: ${endTime - startTime} milliseconds`);
+  }
+
+  getStreetSegmentsInView({ bbox }: { bbox: BoundingBox }): StreetSegment[] {
+    const { NEBBoxCellIndex, SWBBoxCellIndex } = this.getBoundBoxCells({
+      bbox,
+    });
+    const streetSegmentMap: { [cnn: string]: StreetSegment } = {};
+
+    let i = NEBBoxCellIndex[0];
+    while (i <= SWBBoxCellIndex[0]) {
+      let j = SWBBoxCellIndex[1];
+      while (j <= NEBBoxCellIndex[1]) {
+        const streetSegments = this.cityGrid[i][j].streetSegments;
+        for (const streetSegment of streetSegments) {
+          streetSegmentMap[streetSegment.cnn] = streetSegment;
+        }
+        j += 1;
+      }
+      i += 1;
+    }
+
+    return Object.entries(streetSegmentMap).map(([, streetSegment]) => {
+      return streetSegment;
+    });
+  }
+
+  getBoundingBoxInView({ bbox }: { bbox: BoundingBox }): BoundingBox {
+    const { NEBBoxCell, SWBBoxCell } = this.getBoundBoxCells({ bbox });
     return [
       NEBBoxCell.NE[0],
       NEBBoxCell.NE[1],
@@ -156,3 +240,11 @@ export class CityGrid {
     ];
   }
 }
+
+export const InitializeCityGrid = ({
+  cellSizeKilometers,
+  cityBBox,
+  streetSegments,
+}: CityGridInput): CityGrid => {
+  return new CityGrid({ cellSizeKilometers, cityBBox, streetSegments });
+};

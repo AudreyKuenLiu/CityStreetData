@@ -1,6 +1,6 @@
 import {
-  SanFranciscoNWPoint,
-  SanFranciscoSEPoint,
+  SanFranciscoNEPoint,
+  SanFranciscoSWPoint,
 } from "../../constants/map-dimensions";
 import { CityGrid } from "./map-grid";
 import type { BoundingBox } from "./map-grid";
@@ -11,11 +11,12 @@ export enum ZoomLevelInView {
   THREE, //most zoomed in
 }
 
-export const SanFranciscoBoundsLatLon = [
-  SanFranciscoSEPoint[0],
-  SanFranciscoNWPoint[1],
-  SanFranciscoNWPoint[0],
-  SanFranciscoSEPoint[1],
+//in the form of S, W, N, E
+const SanFranciscoBoundsLatLon = [
+  SanFranciscoSWPoint[0],
+  SanFranciscoSWPoint[1],
+  SanFranciscoNEPoint[0],
+  SanFranciscoNEPoint[1],
 ] satisfies [number, number, number, number];
 
 const SanFranciscoGridMaxZoom = new CityGrid({
