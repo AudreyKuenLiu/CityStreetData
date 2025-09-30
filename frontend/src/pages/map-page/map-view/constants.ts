@@ -12,22 +12,44 @@ export const streetLayerStyle: LineLayerSpecification = {
     "line-cap": "round",
   },
   paint: {
-    "line-opacity": 0.65,
+    "line-opacity": 0.4,
     "line-width": 10,
-    "line-color": "#8686AC",
+    //"line-color": "#8686AC",
+    //"line-color": "#98A869",
+    "line-color": "#6D8196",
+    //"line-color": "#FFC067",
   },
 } as const;
-
-export const highlightedStreetLayerId = "highlightedStreetSegmentLayer";
-export const highlightedStreetLayerStyle: LineLayerSpecification = {
-  id: highlightedStreetLayerId,
+export const hoveredLayerId = "hoveredSegmentLayer";
+export const hoveredLayerStyle: LineLayerSpecification = {
+  id: hoveredLayerId,
   type: "line",
   source: "streets",
   layout: {
     "line-cap": "round",
   },
   paint: {
+    "line-opacity": 0.7,
     "line-width": 10,
+    //"line-color": "#8686AC",
+    //"line-color": "#98A869",
+    //"line-color": "#6D8196",
+    "line-color": "#ED7B58",
+  },
+} as const;
+
+export const selectedStreetLayerId = "selectedStreetSegmentLayer";
+export const selectedStreetLayerStyle: LineLayerSpecification = {
+  id: selectedStreetLayerId,
+  type: "line",
+  source: "streets",
+  layout: {
+    "line-cap": "round",
+  },
+  paint: {
+    "line-opacity": 0.75,
+    "line-width": 10,
+    //"line-color": "#FFC067",
     "line-color": "#272757",
   },
 } as const;

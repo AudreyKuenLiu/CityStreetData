@@ -1,6 +1,5 @@
 import React from "react";
-import { DatePicker } from "antd";
-import { Select } from "antd";
+import { Select, Button, DatePicker } from "antd";
 
 export const ControlPanel: React.FC = () => {
   return (
@@ -17,16 +16,23 @@ export const ControlPanel: React.FC = () => {
       }}
     >
       <Select
-        placeholder="Segment by"
-        options={[{ value: "Streets", label: <span>Streets</span> }]}
-      />
-      <Select
         placeholder="Select an event"
         options={[
           { value: "Traffic Crashes", label: <span>Traffic Crashes</span> },
         ]}
       />
+      {/* <Select
+        placeholder="Segment by"
+        options={[{ value: "Streets", label: <span>Streets</span> }]}
+      /> */}
       <DatePicker.RangePicker />
+      <Button
+        type="primary"
+        disabled
+        style={{ backgroundColor: "#d9d9d9", borderColor: "#d9d9d9" }}
+      >
+        Query
+      </Button>
     </div>
   );
 };

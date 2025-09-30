@@ -26,7 +26,6 @@ export const MapPage: React.FC = () => {
             ]}
             centerLatLon={[...SanFranciscoCenterLatLon]}
             getStreetSegmentsForZoomLevel={getStreetSegmentsForZoomLevel}
-            //mapConfig={mapConfig}
           />
         </Allotment.Pane>
         <Allotment.Pane snap>

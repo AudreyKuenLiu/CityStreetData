@@ -1,14 +1,16 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import Map, { Layer, Source, ViewState, MapRef } from "react-map-gl/maplibre";
-import { useStreetSegmentsForViewport } from "./hooks/use-street-segments-for-viewport";
+//import { useStreetSegmentsForViewport } from "./hooks/use-street-segments-for-viewport";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {
   streetLayerId,
   streetLayerStyle,
   MAX_ZOOM,
   DEFAULT_ZOOM,
-  highlightedStreetLayerStyle,
-  highlightedStreetLayerId,
+  selectedStreetLayerStyle,
+  selectedStreetLayerId,
+  hoveredLayerStyle,
+  hoveredLayerId,
 } from "./constants";
 import { ControlPanel } from "../control-panel";
 import { useSelectedSegments } from "./hooks/use-selected-segments";
@@ -27,6 +29,13 @@ export const MapView = ({
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
   const [cursor, setCursor] = useState<string>("grab");
+  const [hoverInfo, setHoverInfo] = useState<{ cnn: string } | null>(null);
+  const onHover = useCallback((event: MapLayerMouseEvent) => {
+    const street = event.features && event.features[0];
+    setHoverInfo({
+      cnn: street && street.properties.cnn,
+    });
+  }, []);
   const [viewState, setViewState] = useState<ViewState>({
     longitude: centerLatLon[1],
     latitude: centerLatLon[0],
@@ -41,15 +50,15 @@ export const MapView = ({
   const [selectedSegments, dispatch] = useSelectedSegments();
   const [key, setKey] = useState(0);
 
-  const currentENPoint =
-    mapRef.current?.getBounds().getNorthEast().toArray() != null
-      ? mapRef.current?.getBounds().getNorthEast().toArray()
-      : [initalNESWBounds[1], initalNESWBounds[0]];
-  const currentWSPoint =
-    mapRef.current?.getBounds().getSouthWest().toArray() != null
-      ? mapRef.current?.getBounds().getSouthWest().toArray()
-      : [initalNESWBounds[3], initalNESWBounds[2]];
-  console.log("this is the viewport", currentENPoint, currentWSPoint);
+  // const currentENPoint =
+  //   mapRef.current?.getBounds().getNorthEast().toArray() != null
+  //     ? mapRef.current?.getBounds().getNorthEast().toArray()
+  //     : [initalNESWBounds[1], initalNESWBounds[0]];
+  // const currentWSPoint =
+  //   mapRef.current?.getBounds().getSouthWest().toArray() != null
+  //     ? mapRef.current?.getBounds().getSouthWest().toArray()
+  //     : [initalNESWBounds[3], initalNESWBounds[2]];
+  // console.log("this is the viewport", currentENPoint, currentWSPoint);
 
   const streetSegments = getStreetSegmentsForZoomLevel(
     mapRef.current?.getZoom() ?? DEFAULT_ZOOM
@@ -85,54 +94,68 @@ export const MapView = ({
       };
     }),
   };
+  const hoveredStreetSegment = (hoverInfo && hoverInfo.cnn) || "";
+  console.log("this is the hovered segment", hoveredStreetSegment);
+  const filter: ["in", string, string] = useMemo(
+    () => ["in", "cnn", hoveredStreetSegment],
+    [hoveredStreetSegment]
+  );
 
   return (
     <>
       <ControlPanel />
-      <Map
-        ref={mapRef}
-        {...viewState}
-        onMove={(evt) => setViewState(evt.viewState)}
-        // [sw, ne]
-        maxBounds={[
-          initalNESWBounds[3],
-          initalNESWBounds[2],
-          initalNESWBounds[1],
-          initalNESWBounds[0],
-        ]}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        onClick={(event: MapLayerMouseEvent) => {
-          const features = event.features;
-          if (
-            features?.[0]?.properties?.cnn != null &&
-            features?.[0].geometry.type === "LineString"
-          ) {
-            dispatch({
-              type: "toggle",
-              payload: {
-                cnn: features?.[0].properties.cnn,
-                line: JSON.parse(features?.[0].properties.line),
-                street: features?.[0].properties.streetName,
-              },
-            });
-            setKey(key + 1); //super-hack this line is responsibe for "rerendering" the map when clicked
-          }
-        }}
-        cursor={cursor}
-        maxZoom={MAX_ZOOM}
-        style={{ width: "100%", height: "100%" }}
-        interactiveLayerIds={[highlightedStreetLayerId, streetLayerId]}
-        mapStyle="https://tiles.openfreemap.org/styles/positron"
-        doubleClickZoom={false}
-      >
-        <Source id="streets" type="geojson" data={geoJson}>
-          <Layer {...streetLayerStyle} />
-        </Source>
-        <Source id="selected-streets" type="geojson" data={geoJsonSelected}>
-          <Layer {...highlightedStreetLayerStyle} />
-        </Source>
-      </Map>
+      <>
+        <Map
+          ref={mapRef}
+          {...viewState}
+          onMove={(evt) => setViewState(evt.viewState)}
+          onMouseMove={onHover}
+          // [sw, ne]
+          maxBounds={[
+            initalNESWBounds[3],
+            initalNESWBounds[2],
+            initalNESWBounds[1],
+            initalNESWBounds[0],
+          ]}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          onClick={(event: MapLayerMouseEvent) => {
+            const features = event.features;
+            if (
+              features?.[0]?.properties?.cnn != null &&
+              features?.[0].geometry.type === "LineString"
+            ) {
+              dispatch({
+                type: "toggle",
+                payload: {
+                  cnn: features?.[0].properties.cnn,
+                  line: JSON.parse(features?.[0].properties.line),
+                  street: features?.[0].properties.streetName,
+                },
+              });
+              setKey(key + 1); //super-hack this line is responsibe for "rerendering" the map when clicked
+            }
+          }}
+          cursor={cursor}
+          maxZoom={MAX_ZOOM}
+          style={{ width: "100%", height: "100%" }}
+          interactiveLayerIds={[
+            selectedStreetLayerId,
+            streetLayerId,
+            hoveredLayerId,
+          ]}
+          mapStyle="https://tiles.openfreemap.org/styles/positron"
+          doubleClickZoom={false}
+        >
+          <Source id="streets" type="geojson" data={geoJson}>
+            <Layer {...streetLayerStyle} />
+            <Layer {...hoveredLayerStyle} filter={filter} />
+          </Source>
+          <Source id="selected-streets" type="geojson" data={geoJsonSelected}>
+            <Layer {...selectedStreetLayerStyle} />
+          </Source>
+        </Map>
+      </>
     </>
   );
 };
