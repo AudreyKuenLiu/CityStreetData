@@ -13,11 +13,12 @@ export interface StreetSegment {
 }
 
 class CityCell {
+  //Position here is [Lat, Long]
   NE: Position;
   NW: Position;
   SW: Position;
   SE: Position;
-  streetSegments: StreetSegment[];
+  private streetSegments: StreetSegment[];
   constructor({ cellPositions }: { cellPositions: Position[] }) {
     this.SW = [...cellPositions[0]];
     this.SE = [...cellPositions[1]];
@@ -39,6 +40,9 @@ class CityCell {
       booleanWithin(line, cellPolygon) || booleanCrosses(line, cellPolygon)
     );
   }
+  getStreetSegments(): StreetSegment[] {
+    return this.streetSegments;
+  }
   addStreetSegment(streetSegment: StreetSegment): boolean {
     if (this.isWithinOrCrossesCell(streetSegment.line)) {
       this.streetSegments.push(streetSegment);
@@ -48,7 +52,6 @@ class CityCell {
   }
 }
 
-//type CityGridArray = Feature<Polygon, GeoJsonProperties>[];
 type CityGridArray = CityCell[][];
 //Bounding box must be in coordinates in the form of South, West, North, East,
 export type BoundingBox = [number, number, number, number];
@@ -216,7 +219,7 @@ export class CityGrid {
     while (i <= SWBBoxCellIndex[0]) {
       let j = SWBBoxCellIndex[1];
       while (j <= NEBBoxCellIndex[1]) {
-        const streetSegments = this.cityGrid[i][j].streetSegments;
+        const streetSegments = this.cityGrid[i][j].getStreetSegments();
         for (const streetSegment of streetSegments) {
           streetSegmentMap[streetSegment.cnn] = streetSegment;
         }
@@ -238,6 +241,45 @@ export class CityGrid {
       SWBBoxCell.SW[0],
       SWBBoxCell.SW[1],
     ];
+  }
+
+  setStreetSegments({
+    streetSegmentGrid,
+  }: {
+    streetSegmentGrid: StreetSegment[][][];
+  }): boolean {
+    if (this.cityGrid.length !== streetSegmentGrid.length) {
+      return false;
+    }
+    if (
+      this.cityGrid.length > 0 &&
+      this.cityGrid[0].length !== streetSegmentGrid[0].length
+    ) {
+      return false;
+    }
+
+    for (let i = 0; i < this.cityGrid.length; i += 1) {
+      for (let j = 0; j < this.cityGrid[i].length; j += 1) {
+        const streetSegments = streetSegmentGrid[i][j];
+        for (const streetSegment of streetSegments) {
+          this.cityGrid[i][j].addStreetSegment(streetSegment);
+        }
+      }
+    }
+    return true;
+  }
+
+  toJsonString(): string {
+    return JSON.stringify(
+      this.cityGrid.map((row) => {
+        return row.map((cell) => {
+          return {
+            nePoint: cell.NE,
+            swPoint: cell.SW,
+          };
+        });
+      })
+    );
   }
 }
 

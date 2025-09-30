@@ -62,11 +62,11 @@ func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, param
 			strArr = append(strArr, fmt.Sprintf("'%v'", v.ToString()))
 		}
 		setStr := fmt.Sprintf("(%s)", strings.Join(strArr, ","))
-		classcodeFilter = fmt.Sprintf("JOIN (SELECT * FROM sf_street_feature_classcode WHERE value in %s) as cc ON si.cnn = cc.cnn", setStr)
+		classcodeFilter = fmt.Sprintf("JOIN (SELECT cnn FROM sf_street_feature_classcode WHERE value in %s) as cc ON si.cnn = cc.cnn", setStr)
 	}
 
 	queryStr := fmt.Sprintf(`
-	SELECT DISTINCT
+	SELECT 
 		si.cnn,
 		TRIM(si.street || ' ' || COALESCE(si.st_type, '')) as street, 
 		si.line
@@ -91,7 +91,6 @@ func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, param
 	defer row.Close()
 
 	segmentArr := []StreetSegment{}
-
 	for row.Next() {
 		var segment = StreetSegment{}
 

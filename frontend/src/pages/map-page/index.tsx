@@ -8,11 +8,13 @@ import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
 } from "../../constants/map-dimensions";
-import { useStreetSegmentsForMap } from "./hooks/use-street-segments-for-map";
+import { useStreetMapConfig } from "./hooks/use-street-map-config";
 import "allotment/dist/style.css";
+import { useStreetMapControl } from "./hooks/use-street-map-control";
 
 export const MapPage: React.FC = () => {
-  const { mapConfig } = useStreetSegmentsForMap();
+  //const { mapConfig } = useStreetMapConfig();
+  const { getStreetSegmentsForZoomLevel } = useStreetMapControl();
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
       <Allotment>
@@ -25,7 +27,8 @@ export const MapPage: React.FC = () => {
               SanFranciscoSWPoint[1],
             ]}
             centerLatLon={[...SanFranciscoCenterLatLon]}
-            mapConfig={mapConfig}
+            getStreetSegmentsForZoomLevel={getStreetSegmentsForZoomLevel}
+            //mapConfig={mapConfig}
           />
         </Allotment.Pane>
         <Allotment.Pane snap>

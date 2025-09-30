@@ -7,7 +7,7 @@ import {
 } from "../../../../models/map-grid";
 import type { LineString } from "geojson";
 
-export const useStreetSegmentsFromViewport = ({
+export const useStreetSegmentsForCity = ({
   zoomLevel,
   nePoint,
   swPoint,
@@ -21,7 +21,6 @@ export const useStreetSegmentsFromViewport = ({
     cityGrid: CityGrid;
   }[];
 }): {
-  //streetSegments: ViewportSegment[];
   streetSegments: StreetSegment[];
 } => {
   const zoomLevelInView = getZoomLevelInView(zoomLevel);
@@ -61,13 +60,13 @@ export const useStreetSegmentsFromViewport = ({
   ) {
     bounds.current.zoomLevelInView = zoomLevelInView;
     bounds.current.boundsInView = boundingBoxInView;
-    const startTime = new Date().getTime();
+    //const startTime = new Date().getTime();
     const streetSegmentsInView = selectedMap.cityGrid.getStreetSegmentsInView({
       bbox: boundingBoxInView,
     });
-    const endTime = new Date().getTime();
+    //const endTime = new Date().getTime();
 
-    console.log(`Method execution time: ${endTime - startTime} milliseconds`);
+    //console.log(`Method execution time: ${endTime - startTime} milliseconds`);
     setStreetSegments(streetSegmentsInView);
   }
 

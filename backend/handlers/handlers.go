@@ -51,6 +51,7 @@ func NewHandlers(p Params) (*handlers, error) {
 func (h *handlers) InitHandlers() error {
 	h.echoInstance.GET("/api/ping", h.pingDB)
 	h.echoInstance.GET("/api/segmentsForViewport", h.getSegmentsForViewport)
+	h.echoInstance.GET("/api/segmentsForGrid", h.getSegmentsForGrid)
 	return nil
 }
 
@@ -76,16 +77,45 @@ func (h *handlers) getSegmentsForViewport(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing filters: %v", err))
 		}
 	}
-	h.logger.Info("these are the fitlers", "filters", filters, "filterstr", filterStr)
 
 	result, err := h.sfDataController.GetSegmentsForViewport(c.Request().Context(), &cTypes.GetSegmentsForViewportParams{
-		NEPoint: []float64{nePoints[0], nePoints[1]},
-		SWPoint: []float64{swPoints[0], swPoints[1]},
+		Rectangle: cTypes.RectangleCell{
+			NEPoint: [2]float64{nePoints[0], nePoints[1]},
+			SWPoint: [2]float64{swPoints[0], swPoints[1]},
+		},
 		Filters: &filters,
 	})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting segments for viewport: %v", err))
 	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (h *handlers) getSegmentsForGrid(c echo.Context) error {
+	cityGrid := c.QueryParam("cityGrid")
+	filterStr := c.QueryParam("filters")
+
+	cityGridObj := [][]cTypes.RectangleCell{}
+	err := json.Unmarshal([]byte(cityGrid), &cityGridObj)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cityGrid: %v", err))
+	}
+	var filters types.StreetFeatureFilters
+	if len(filterStr) > 0 {
+		err = json.Unmarshal([]byte(filterStr), &filters)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing filters: %v", err))
+		}
+	}
+
+	result, err := h.sfDataController.GetSegmentsForGrid(c.Request().Context(), &cTypes.GetSegmentsForGridParams{
+		Grid:    &cityGridObj,
+		Filters: &filters,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting segments for CityGrid: %v", err))
+	}
+
 	return c.JSON(http.StatusOK, result)
 }
 

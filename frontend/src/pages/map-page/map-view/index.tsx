@@ -13,25 +13,17 @@ import {
 import { ControlPanel } from "../control-panel";
 import { useSelectedSegments } from "./hooks/use-selected-segments";
 import type { FeatureCollection, LineString } from "geojson";
-import type {
-  CityGrid,
-  StreetSegment,
-  ZoomLevelInView,
-} from "../../../models/map-grid";
+import { StreetSegment } from "../../../models/map-grid";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useStreetSegmentsFromViewport } from "./hooks/use-streets-segments-from-viewport";
 
 export const MapView = ({
   initalNESWBounds,
   centerLatLon,
-  mapConfig,
+  getStreetSegmentsForZoomLevel,
 }: {
   initalNESWBounds: [number, number, number, number];
   centerLatLon: [number, number];
-  mapConfig: {
-    zoomLevelInView: ZoomLevelInView;
-    cityGrid: CityGrid;
-  }[];
+  getStreetSegmentsForZoomLevel: (zoomLevel: number) => StreetSegment[];
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
   const [cursor, setCursor] = useState<string>("grab");
@@ -57,18 +49,11 @@ export const MapView = ({
     mapRef.current?.getBounds().getSouthWest().toArray() != null
       ? mapRef.current?.getBounds().getSouthWest().toArray()
       : [initalNESWBounds[3], initalNESWBounds[2]];
+  console.log("this is the viewport", currentENPoint, currentWSPoint);
 
-  // const { streetSegments } = useStreetSegmentsForViewport({
-  //   nePoint: [currentENPoint[1], currentENPoint[0]],
-  //   swPoint: [currentWSPoint[1], currentWSPoint[0]],
-  //   zoomLevel: mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
-  // });
-  const { streetSegments } = useStreetSegmentsFromViewport({
-    zoomLevel: mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
-    nePoint: [currentENPoint[1], currentENPoint[0]],
-    swPoint: [currentWSPoint[1], currentWSPoint[0]],
-    mapConfig,
-  });
+  const streetSegments = getStreetSegmentsForZoomLevel(
+    mapRef.current?.getZoom() ?? DEFAULT_ZOOM
+  );
 
   const geoJson: FeatureCollection<LineString, StreetSegment> = useMemo(() => {
     return {
@@ -86,7 +71,6 @@ export const MapView = ({
       }),
     };
   }, [streetSegments]);
-  //console.log("this is the geoJson", geoJson);
   const geoJsonSelected: FeatureCollection<LineString, StreetSegment> = {
     type: "FeatureCollection",
     features: Object.entries(selectedSegments).map(([cnn, value]) => {

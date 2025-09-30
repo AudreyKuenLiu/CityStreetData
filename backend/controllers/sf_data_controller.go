@@ -6,9 +6,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-
-	"github.com/twpayne/go-geos"
-	"github.com/twpayne/go-geos/geometry"
 )
 
 type SfDataController struct {
@@ -34,12 +31,7 @@ func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params 
 	if params == nil {
 		return nil, fmt.Errorf("no params passed to GetSegmentsForViewport")
 	}
-	WNPoint := []float64{params.SWPoint[1], params.NEPoint[0]}
-	ESPoint := []float64{params.NEPoint[1], params.SWPoint[0]}
-	ENPoint := []float64{params.NEPoint[1], params.NEPoint[0]}
-	WSPoint := []float64{params.SWPoint[1], params.SWPoint[0]}
-
-	polygon := geometry.NewGeometry(geos.NewPolygon([][][]float64{{ENPoint, ESPoint, WSPoint, WNPoint, ENPoint}})).SetSRID(4326)
+	polygon := params.Rectangle.ToPolygon()
 
 	ret, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &repo.GetSegmentsWithinPolygonParams{
 		Polygon: polygon,
@@ -49,4 +41,32 @@ func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params 
 		return nil, err
 	}
 	return ret, nil
+}
+
+func (sfc *SfDataController) GetSegmentsForGrid(ctx context.Context, params *types.GetSegmentsForGridParams) (*types.GetSegmentsForGridReturn, error) {
+	if params == nil || params.Grid == nil {
+		return nil, fmt.Errorf("no params passed to GetSegmentsForGrid")
+	}
+
+	streetSegmentGrid := [][][]repo.StreetSegment{}
+	grid := params.Grid
+	for _, row := range *grid {
+		streetSegmentGridRow := [][]repo.StreetSegment{}
+		for _, cell := range row {
+			streetSegments, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &repo.GetSegmentsWithinPolygonParams{
+				Polygon: cell.ToPolygon(),
+				Filters: params.Filters,
+			})
+			streetSegmentGridRow = append(streetSegmentGridRow, streetSegments)
+			if err != nil {
+				return nil, err
+			}
+
+		}
+		streetSegmentGrid = append(streetSegmentGrid, streetSegmentGridRow)
+	}
+
+	return &types.GetSegmentsForGridReturn{
+		StreetSegmentGrid: &streetSegmentGrid,
+	}, nil
 }
