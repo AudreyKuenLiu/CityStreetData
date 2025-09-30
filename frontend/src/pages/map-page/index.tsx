@@ -8,12 +8,10 @@ import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
 } from "../../constants/map-dimensions";
-import { useStreetMapConfig } from "./hooks/use-street-map-config";
 import "allotment/dist/style.css";
 import { useStreetMapControl } from "./hooks/use-street-map-control";
 
 export const MapPage: React.FC = () => {
-  //const { mapConfig } = useStreetMapConfig();
   const { getStreetSegmentsForZoomLevel } = useStreetMapControl();
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
