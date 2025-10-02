@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback, useMemo } from "react";
-import Map, { Layer, Source, ViewState, MapRef } from "react-map-gl/maplibre";
+import React, { useRef, useMemo } from "react";
+import Map, { Layer, Source, MapRef } from "react-map-gl/maplibre";
 //import { useStreetSegmentsForViewport } from "./hooks/use-street-segments-for-viewport";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {
@@ -13,9 +13,10 @@ import {
   hoveredLayerId,
 } from "./constants";
 import { ControlPanel } from "../control-panel";
-import { useSelectedSegments } from "./hooks/use-selected-segments";
+import { useCnns, useActions } from "./store/street-map-data-form";
 import type { FeatureCollection, LineString } from "geojson";
 import { StreetSegment } from "../../../models/map-grid";
+import { useMapControls } from "./hooks/use-map-controls";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 export const MapView = ({
@@ -28,38 +29,19 @@ export const MapView = ({
   getStreetSegmentsForZoomLevel: (zoomLevel: number) => StreetSegment[];
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
-  const [cursor, setCursor] = useState<string>("grab");
-  const [hoverInfo, setHoverInfo] = useState<{ cnn: string } | null>(null);
-  const throttledHover = useCallback(
-    (event: MapLayerMouseEvent): void => {
-      const street = event.features?.[0];
-      if (hoverInfo?.cnn !== street?.properties.cnn) {
-        console.log(
-          "setting hover info",
-          hoverInfo?.cnn,
-          street?.properties.cnn
-        );
-        setHoverInfo({
-          cnn: street?.properties.cnn,
-        });
-      }
-    },
-    [hoverInfo?.cnn]
-  );
-
-  const [viewState, setViewState] = useState<ViewState>({
-    longitude: centerLatLon[1],
-    latitude: centerLatLon[0],
-    zoom: DEFAULT_ZOOM,
-    bearing: 0,
-    pitch: 0,
-    padding: { top: 0, bottom: 0, left: 0, right: 0 },
-  });
-  const onMouseEnter = useCallback(() => setCursor("pointer"), []);
-  const onMouseLeave = useCallback(() => setCursor("grab"), []);
-
-  const [selectedSegments, dispatch] = useSelectedSegments();
-  const [key, setKey] = useState(0);
+  const {
+    onMouseEnter,
+    onMouseLeave,
+    hoverInfo,
+    onHover,
+    cursor,
+    key,
+    setKey,
+    viewState,
+    setViewState,
+  } = useMapControls({ centerLatLon });
+  const { toggleStreet } = useActions();
+  const selectedSegments = useCnns();
 
   // const currentENPoint =
   //   mapRef.current?.getBounds().getNorthEast().toArray() != null
@@ -93,14 +75,14 @@ export const MapView = ({
   }, [streetSegments]);
   const geoJsonSelected: FeatureCollection<LineString, StreetSegment> = {
     type: "FeatureCollection",
-    features: Object.entries(selectedSegments).map(([cnn, value]) => {
+    features: selectedSegments.map(({ cnn, line }) => {
       return {
         type: "Feature" as const,
-        geometry: value.line,
+        geometry: line,
         properties: {
           //street: value.street,
-          line: value.line,
-          cnn: parseInt(cnn),
+          line: line,
+          cnn: cnn,
         },
       };
     }),
@@ -119,7 +101,7 @@ export const MapView = ({
           ref={mapRef}
           {...viewState}
           onMove={(evt) => setViewState(evt.viewState)}
-          onMouseMove={throttledHover}
+          onMouseMove={onHover}
           // [sw, ne]
           maxBounds={[
             initalNESWBounds[3],
@@ -135,13 +117,9 @@ export const MapView = ({
               features?.[0]?.properties?.cnn != null &&
               features?.[0].geometry.type === "LineString"
             ) {
-              dispatch({
-                type: "toggle",
-                payload: {
-                  cnn: features?.[0].properties.cnn,
-                  line: JSON.parse(features?.[0].properties.line),
-                  street: features?.[0].properties.streetName,
-                },
+              toggleStreet({
+                cnn: features[0].properties.cnn,
+                line: JSON.parse(features[0].properties.line),
               });
               setKey(key + 1); //super-hack this line is responsibe for "rerendering" the map when clicked
             }
