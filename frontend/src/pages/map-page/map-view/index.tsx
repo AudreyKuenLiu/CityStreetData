@@ -30,12 +30,23 @@ export const MapView = ({
   const mapRef = useRef<MapRef | null>(null);
   const [cursor, setCursor] = useState<string>("grab");
   const [hoverInfo, setHoverInfo] = useState<{ cnn: string } | null>(null);
-  const onHover = useCallback((event: MapLayerMouseEvent) => {
-    const street = event.features && event.features[0];
-    setHoverInfo({
-      cnn: street && street.properties.cnn,
-    });
-  }, []);
+  const throttledHover = useCallback(
+    (event: MapLayerMouseEvent): void => {
+      const street = event.features?.[0];
+      if (hoverInfo?.cnn !== street?.properties.cnn) {
+        console.log(
+          "setting hover info",
+          hoverInfo?.cnn,
+          street?.properties.cnn
+        );
+        setHoverInfo({
+          cnn: street?.properties.cnn,
+        });
+      }
+    },
+    [hoverInfo?.cnn]
+  );
+
   const [viewState, setViewState] = useState<ViewState>({
     longitude: centerLatLon[1],
     latitude: centerLatLon[0],
@@ -95,7 +106,6 @@ export const MapView = ({
     }),
   };
   const hoveredStreetSegment = (hoverInfo && hoverInfo.cnn) || "";
-  console.log("this is the hovered segment", hoveredStreetSegment);
   const filter: ["in", string, string] = useMemo(
     () => ["in", "cnn", hoveredStreetSegment],
     [hoveredStreetSegment]
@@ -109,7 +119,7 @@ export const MapView = ({
           ref={mapRef}
           {...viewState}
           onMove={(evt) => setViewState(evt.viewState)}
-          onMouseMove={onHover}
+          onMouseMove={throttledHover}
           // [sw, ne]
           maxBounds={[
             initalNESWBounds[3],

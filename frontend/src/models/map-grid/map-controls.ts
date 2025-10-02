@@ -43,9 +43,9 @@ const getSanFranciscoGrid = (zoomLevel: number): CityGrid => {
 };
 
 export const getZoomLevelInView = (zoomLevel: number): ZoomLevelInView => {
-  if (zoomLevel >= 15) {
+  if (zoomLevel >= 15.5) {
     return ZoomLevelInView.THREE;
-  } else if (zoomLevel < 15 && zoomLevel >= 13) {
+  } else if (zoomLevel < 15.5 && zoomLevel >= 13.5) {
     return ZoomLevelInView.TWO;
   }
   return ZoomLevelInView.ONE;

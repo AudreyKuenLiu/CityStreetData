@@ -47,9 +47,24 @@ export const selectedStreetLayerStyle: LineLayerSpecification = {
     "line-cap": "round",
   },
   paint: {
-    "line-opacity": 0.75,
+    "line-opacity": 0.9,
     "line-width": 10,
     //"line-color": "#FFC067",
     "line-color": "#272757",
+  },
+} as const;
+export const highlightedSelectedStreetLayerId =
+  "highlightedSelectedStreetSegmentLayer";
+export const highlightedSelectedStreetLayerStyle: LineLayerSpecification = {
+  id: highlightedSelectedStreetLayerId,
+  type: "line",
+  source: "streets",
+  layout: {
+    "line-cap": "round",
+  },
+  paint: {
+    "line-opacity": 0.7,
+    "line-width": 10,
+    "line-color": "#ED7B58",
   },
 } as const;
