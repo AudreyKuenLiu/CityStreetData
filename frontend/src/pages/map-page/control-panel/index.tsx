@@ -6,12 +6,12 @@ export const ControlPanel: React.FC = () => {
     <div
       style={{
         display: "flex",
-        float: "right",
         position: "absolute",
         zIndex: 2,
         marginTop: "16px",
         marginLeft: "16px",
         marginRight: "16px",
+        right: "0px",
         gap: "8px",
       }}
     >

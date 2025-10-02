@@ -8,6 +8,7 @@ import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
 } from "../../constants/map-dimensions";
+import { ControlPanel } from "./control-panel";
 import "allotment/dist/style.css";
 import { useStreetMapControl } from "./hooks/use-street-map-control";
 
@@ -17,6 +18,7 @@ export const MapPage: React.FC = () => {
     <Layout style={{ height: "100vh", width: "100vw" }}>
       <Allotment>
         <Allotment.Pane>
+          <ControlPanel />
           <MapView
             initalNESWBounds={[
               SanFranciscoNEPoint[0],
@@ -28,7 +30,7 @@ export const MapPage: React.FC = () => {
             getStreetSegmentsForZoomLevel={getStreetSegmentsForZoomLevel}
           />
         </Allotment.Pane>
-        <Allotment.Pane snap>
+        <Allotment.Pane visible={false} snap>
           <div>Additional Content</div>
         </Allotment.Pane>
       </Allotment>

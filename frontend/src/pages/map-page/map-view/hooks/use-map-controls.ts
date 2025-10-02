@@ -44,11 +44,6 @@ export const useMapControls = ({
         });
       }
       if (hoverInfo?.cnn !== street?.properties.cnn) {
-        console.log(
-          "setting hover info",
-          hoverInfo?.cnn,
-          street?.properties.cnn
-        );
         setHoverInfo({
           cnn: street?.properties.cnn,
         });
