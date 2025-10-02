@@ -7,6 +7,8 @@ enum StreetEvent {
 }
 type StreetMapFormActions = {
   toggleStreet: (streetSegment: StreetSegment) => void;
+  addStreet: (StreetSegment: StreetSegment) => void;
+  removeStreet: (cnn: number) => void;
   setStreetEvent: (streetEvent: StreetEvent | null) => void;
   setStartDate: (startDate: Date | null) => void;
   setEndDate: (endDate: Date | null) => void;
@@ -61,6 +63,26 @@ const useStreetMapDataForm = create<StreetMapForm>((set) => ({
           updatedMap.set(streetSegment.cnn, streetSegment);
         }
 
+        return {
+          cnns: updatedMap,
+          isReady: isStretMapFormReady(state, { cnns: updatedMap }),
+        };
+      });
+    },
+    addStreet: (streetSegment: StreetSegment): void => {
+      set((state) => {
+        const updatedMap = new Map(state.cnns);
+        updatedMap.set(streetSegment.cnn, streetSegment);
+        return {
+          cnns: updatedMap,
+          isReady: isStretMapFormReady(state, { cnns: updatedMap }),
+        };
+      });
+    },
+    removeStreet: (cnn: number): void => {
+      set((state) => {
+        const updatedMap = new Map(state.cnns);
+        updatedMap.delete(cnn);
         return {
           cnns: updatedMap,
           isReady: isStretMapFormReady(state, { cnns: updatedMap }),

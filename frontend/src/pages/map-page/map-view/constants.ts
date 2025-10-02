@@ -13,7 +13,7 @@ export const streetLayerStyle: LineLayerSpecification = {
   },
   paint: {
     "line-opacity": 0.4,
-    "line-width": 10,
+    "line-width": 15,
     //"line-color": "#8686AC",
     //"line-color": "#98A869",
     "line-color": "#6D8196",
@@ -30,7 +30,7 @@ export const hoveredLayerStyle: LineLayerSpecification = {
   },
   paint: {
     "line-opacity": 0.7,
-    "line-width": 10,
+    "line-width": 15,
     //"line-color": "#8686AC",
     //"line-color": "#98A869",
     //"line-color": "#6D8196",
@@ -48,7 +48,7 @@ export const selectedStreetLayerStyle: LineLayerSpecification = {
   },
   paint: {
     "line-opacity": 0.9,
-    "line-width": 10,
+    "line-width": 15,
     //"line-color": "#FFC067",
     "line-color": "#272757",
   },
@@ -64,7 +64,7 @@ export const highlightedSelectedStreetLayerStyle: LineLayerSpecification = {
   },
   paint: {
     "line-opacity": 0.7,
-    "line-width": 10,
+    "line-width": 15,
     "line-color": "#ED7B58",
   },
 } as const;

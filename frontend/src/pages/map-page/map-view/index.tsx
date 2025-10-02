@@ -1,7 +1,10 @@
 import React, { useRef, useMemo } from "react";
 import Map, { Layer, Source, MapRef } from "react-map-gl/maplibre";
 //import { useStreetSegmentsForViewport } from "./hooks/use-street-segments-for-viewport";
-import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
+import type {
+  MapLayerMouseEvent,
+  ViewStateChangeEvent,
+} from "react-map-gl/maplibre";
 import {
   streetLayerId,
   streetLayerStyle,
@@ -73,20 +76,23 @@ export const MapView = ({
       }),
     };
   }, [streetSegments]);
-  const geoJsonSelected: FeatureCollection<LineString, StreetSegment> = {
-    type: "FeatureCollection",
-    features: selectedSegments.map(({ cnn, line }) => {
-      return {
-        type: "Feature" as const,
-        geometry: line,
-        properties: {
-          //street: value.street,
-          line: line,
-          cnn: cnn,
-        },
-      };
+  const geoJsonSelected: FeatureCollection<LineString, StreetSegment> = useMemo(
+    () => ({
+      type: "FeatureCollection",
+      features: selectedSegments.map(({ cnn, line }) => {
+        return {
+          type: "Feature" as const,
+          geometry: line,
+          properties: {
+            //street: value.street,
+            line: line,
+            cnn: cnn,
+          },
+        };
+      }),
     }),
-  };
+    [selectedSegments]
+  );
   const hoveredStreetSegment = (hoverInfo && hoverInfo.cnn) || "";
   const filter: ["in", string, string] = useMemo(
     () => ["in", "cnn", hoveredStreetSegment],
