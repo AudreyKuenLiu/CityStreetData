@@ -19,6 +19,7 @@ import { useCnns, useActions } from "./store/street-map-data-form";
 import type { FeatureCollection, LineString } from "geojson";
 import { StreetSegment } from "../../../models/map-grid";
 import { useMapControls } from "./hooks/use-map-controls";
+import { useMapConfigs } from "./hooks/use-map-configs";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 export const MapView = ({
@@ -43,7 +44,11 @@ export const MapView = ({
     setViewState,
   } = useMapControls({ centerLatLon });
   const { toggleStreet } = useActions();
-  const selectedSegments = useCnns();
+  const { configs } = useMapConfigs();
+  const layerIds = configs.map((config) => {
+    return config.layerStyle.id;
+  });
+  // const selectedSegments = useCnns();
 
   // const currentENPoint =
   //   mapRef.current?.getBounds().getNorthEast().toArray() != null
@@ -75,23 +80,23 @@ export const MapView = ({
       }),
     };
   }, [streetSegments]);
-  const geoJsonSelected: FeatureCollection<LineString, StreetSegment> = useMemo(
-    () => ({
-      type: "FeatureCollection",
-      features: selectedSegments.map(({ cnn, line }) => {
-        return {
-          type: "Feature" as const,
-          geometry: line,
-          properties: {
-            //street: value.street,
-            line: line,
-            cnn: cnn,
-          },
-        };
-      }),
-    }),
-    [selectedSegments]
-  );
+  // const geoJsonSelected: FeatureCollection<LineString, StreetSegment> = useMemo(
+  //   () => ({
+  //     type: "FeatureCollection",
+  //     features: selectedSegments.map(({ cnn, line }) => {
+  //       return {
+  //         type: "Feature" as const,
+  //         geometry: line,
+  //         properties: {
+  //           //street: value.street,
+  //           line: line,
+  //           cnn: cnn,
+  //         },
+  //       };
+  //     }),
+  //   }),
+  //   [selectedSegments]
+  // );
   const hoveredStreetSegment = (hoverInfo && hoverInfo.cnn) || "";
   const filter: ["in", string, string] = useMemo(
     () => ["in", "cnn", hoveredStreetSegment],
@@ -131,9 +136,10 @@ export const MapView = ({
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
         interactiveLayerIds={[
-          selectedStreetLayerId,
           streetLayerId,
           hoveredLayerId,
+          ...layerIds,
+          //selectedStreetLayerId,
         ]}
         mapStyle="https://tiles.openfreemap.org/styles/positron"
         doubleClickZoom={false}
@@ -142,9 +148,16 @@ export const MapView = ({
           <Layer {...streetLayerStyle} />
           <Layer {...hoveredLayerStyle} filter={filter} />
         </Source>
-        <Source id="selected-streets" type="geojson" data={geoJsonSelected}>
+        {configs.map((config) => {
+          return (
+            <Source id={config.sourceId} type="geojson" data={config.data}>
+              <Layer {...config.layerStyle} />
+            </Source>
+          );
+        })}
+        {/* <Source id="selected-streets" type="geojson" data={geoJsonSelected}>
           <Layer {...selectedStreetLayerStyle} />
-        </Source>
+        </Source> */}
       </Map>
     </>
   );

@@ -1,7 +1,8 @@
 import React from "react";
 
 import { MapView } from "./map-view";
-import { Allotment } from "allotment";
+//import { Allotment } from "allotment";
+import { Splitter } from "antd";
 import { Layout } from "antd";
 import {
   SanFranciscoCenterLatLon,
@@ -9,15 +10,15 @@ import {
   SanFranciscoSWPoint,
 } from "../../constants/map-dimensions";
 import { ControlPanel } from "./control-panel";
-import "allotment/dist/style.css";
+//import "allotment/dist/style.css";
 import { useStreetMapControl } from "./hooks/use-street-map-control";
 
 export const MapPage: React.FC = () => {
   const { getStreetSegmentsForZoomLevel } = useStreetMapControl();
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
-      <Allotment>
-        <Allotment.Pane>
+      <Splitter>
+        <Splitter.Panel style={{ position: "relative" }}>
           <ControlPanel />
           <MapView
             initalNESWBounds={[
@@ -29,11 +30,11 @@ export const MapPage: React.FC = () => {
             centerLatLon={[...SanFranciscoCenterLatLon]}
             getStreetSegmentsForZoomLevel={getStreetSegmentsForZoomLevel}
           />
-        </Allotment.Pane>
-        <Allotment.Pane visible={false} snap>
+        </Splitter.Panel>
+        <Splitter.Panel defaultSize={0}>
           <div>Additional Content</div>
-        </Allotment.Pane>
-      </Allotment>
+        </Splitter.Panel>
+      </Splitter>
     </Layout>
   );
 };

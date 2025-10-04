@@ -54,12 +54,12 @@ export const useMapControls = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
-      if (e.key === "X") {
+      if (e.key === "x") {
         setIsXPressed(true);
       }
     };
     const handleKeyUp = (e: KeyboardEvent): void => {
-      if (e.key === "X" || e.shiftKey === false) {
+      if (e.key === "x") {
         setIsXPressed(false);
       }
     };
