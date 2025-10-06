@@ -150,7 +150,12 @@ export const MapView = ({
         </Source>
         {configs.map((config) => {
           return (
-            <Source id={config.sourceId} type="geojson" data={config.data}>
+            <Source
+              id={config.sourceId}
+              type="geojson"
+              data={config.data}
+              key={config.sourceId}
+            >
               <Layer {...config.layerStyle} />
             </Source>
           );

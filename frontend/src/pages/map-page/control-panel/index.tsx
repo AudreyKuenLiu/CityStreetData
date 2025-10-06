@@ -5,7 +5,7 @@ import { GroupSelector } from "./group-selector/group-selector";
 import { useActions } from "../map-view/store/street-map-data-form";
 
 export const ControlPanel: React.FC = () => {
-  const { addGroup, setCurrentGroup } = useActions();
+  const { addGroup, setCurrentGroup, removeGroup } = useActions();
   return (
     <Flex
       style={{
@@ -30,10 +30,18 @@ export const ControlPanel: React.FC = () => {
       >
         <GroupSelector
           onAddItem={(name) => {
-            return addGroup({ name }).id;
+            const group = addGroup({ name });
+            return {
+              id: group.id,
+              name,
+              color: group.color,
+            };
           }}
           onSelectItem={(id) => {
             return setCurrentGroup({ id });
+          }}
+          onDeleteItem={(option) => {
+            return removeGroup({ id: option.id });
           }}
         />
         <Select
