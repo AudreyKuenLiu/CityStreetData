@@ -1,4 +1,10 @@
-import React, { useState, useRef, forwardRef, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  forwardRef,
+  useEffect,
+  useLayoutEffect,
+} from "react";
 import { Divider, Button, Input, Select, Space, Tooltip, Flex } from "antd";
 import { DeleteOutlined, PlusOutlined, XFilled } from "@ant-design/icons";
 import type { InputRef, RefSelectProps } from "antd";
@@ -31,13 +37,13 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
   const selectRef = useRef<RefSelectProps>(null);
 
   useEffect(() => {
-    if (groups.length === 0) {
+    if (groups.length === 0 && index === 1) {
       const group = onAddItem(`Group ${index++}`);
       onSelectItem(group.id);
       setOption(group);
       setGroups([group]);
     }
-  }, [groups, onAddItem, setOption, setGroups, onSelectItem]);
+  }, [groups, onAddItem, onSelectItem]);
 
   const onNameChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setName(event.target.value);
@@ -64,6 +70,8 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
     if (newGroups.length > 0) {
       onSelectItem(newGroups[0].id);
       setOption(newGroups[0]);
+    } else {
+      index = 1;
     }
     setGroups([...newGroups]);
   };
@@ -165,19 +173,20 @@ const OptionRender = ({
 };
 
 const PopupRender = forwardRef(
-  ({
-    menu,
-    name,
-    ref,
-    onNameChange,
-    addItem,
-  }: {
-    menu: React.ReactElement;
-    name: string;
-    ref?: React.Ref<InputRef>;
-    onNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    addItem: () => void;
-  }): React.ReactNode => {
+  (
+    {
+      menu,
+      name,
+      onNameChange,
+      addItem,
+    }: {
+      menu: React.ReactElement;
+      name: string;
+      onNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+      addItem: () => void;
+    },
+    ref: React.Ref<InputRef>
+  ): React.ReactNode => {
     return (
       <>
         {menu}
