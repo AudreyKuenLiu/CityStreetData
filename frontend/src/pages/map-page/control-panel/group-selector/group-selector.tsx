@@ -98,7 +98,7 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
       optionRender={(option) => {
         return (
           <OptionRender
-            label={option.label}
+            label={option.data.label}
             color={option.data.color}
             deleteItem={() =>
               deleteItem({
@@ -139,13 +139,14 @@ const OptionRender = ({
   deleteItem,
   editItem,
 }: {
-  label: string | React.ReactNode;
+  label: string;
   color: string;
   deleteItem: () => void;
   editItem: (newName: string) => void;
 }): React.ReactNode => {
   const [openNameEditor, setOpenNameEditor] = useState<boolean>(false);
-  const [newName, setNewName] = useState<string>("");
+  const [newName, setNewName] = useState<string>(label);
+  const [currentName, setCurrentName] = useState<string>(label);
   const inputRef = useRef<InputRef>(null);
 
   return (
@@ -165,6 +166,7 @@ const OptionRender = ({
               if (e.key === "Enter") {
                 editItem(newName);
                 setOpenNameEditor(false);
+                setCurrentName(newName);
               }
             }}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,7 +186,7 @@ const OptionRender = ({
               whiteSpace: "nowrap",
             }}
           >
-            {label}
+            {currentName}
           </div>
         )}
       </Flex>
