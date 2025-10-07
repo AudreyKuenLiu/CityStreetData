@@ -1,12 +1,11 @@
-import React, {
-  useState,
-  useRef,
-  forwardRef,
-  useEffect,
-  useLayoutEffect,
-} from "react";
+import React, { useState, useRef, forwardRef, useEffect } from "react";
 import { Divider, Button, Input, Select, Space, Tooltip, Flex } from "antd";
-import { DeleteOutlined, PlusOutlined, XFilled } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  XFilled,
+} from "@ant-design/icons";
 import type { InputRef, RefSelectProps } from "antd";
 
 let index = 1;
@@ -17,22 +16,24 @@ type GroupOption = {
 };
 
 interface GroupSelectorParams {
+  currentOption: GroupOption | null;
+  groups: GroupOption[];
   onAddItem: (name: string) => GroupOption;
   onSelectItem: (id: string) => void;
   onDeleteItem: (deletedOption: GroupOption) => void;
-  onEditItem?: (editedOption: GroupOption) => void;
+  onEditItem: (editedOption: GroupOption, newName: string) => void;
 }
 
 export const GroupSelector: React.FC<GroupSelectorParams> = ({
+  currentOption,
+  groups,
   onAddItem,
   onSelectItem,
   onDeleteItem,
   onEditItem,
 }) => {
-  const [groups, setGroups] = useState<GroupOption[]>([]);
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
-  const [option, setOption] = useState<GroupOption | null>(null);
   const inputRef = useRef<InputRef>(null);
   const selectRef = useRef<RefSelectProps>(null);
 
@@ -40,8 +41,6 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
     if (groups.length === 0 && index === 1) {
       const group = onAddItem(`Group ${index++}`);
       onSelectItem(group.id);
-      setOption(group);
-      setGroups([group]);
     }
   }, [groups, onAddItem, onSelectItem]);
 
@@ -50,16 +49,9 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
   };
 
   const addItem = (): void => {
-    const { id, color } = onAddItem(name);
-    const newGroup = {
-      id,
-      name: name || `Group ${index++}`,
-      color,
-    };
-    setGroups([...groups, newGroup]);
+    const { id } = onAddItem(name || `Group ${index++}`);
     setName("");
     onSelectItem(id);
-    setOption(newGroup);
     setOpen(false);
     selectRef.current?.blur();
   };
@@ -69,11 +61,9 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
     const newGroups = groups.filter((group) => group.id !== deletedOption.id);
     if (newGroups.length > 0) {
       onSelectItem(newGroups[0].id);
-      setOption(newGroups[0]);
     } else {
       index = 1;
     }
-    setGroups([...newGroups]);
   };
 
   return (
@@ -83,7 +73,7 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
         <XFilled
           style={{
             marginRight: "6px",
-            color: option?.color,
+            color: currentOption?.color,
           }}
         />
       }
@@ -95,14 +85,9 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
       defaultActiveFirstOption={true}
       onSelect={(_, option) => {
         onSelectItem(option.value);
-        setOption({
-          id: option.value,
-          name: option.label,
-          color: option.color,
-        });
         selectRef.current?.blur();
       }}
-      value={option?.id}
+      value={currentOption?.id}
       options={groups.map((group) => {
         return {
           label: group.name,
@@ -122,6 +107,16 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
                 color: option.data.color,
               })
             }
+            editItem={(newName: string) => {
+              onEditItem(
+                {
+                  id: option.data.value,
+                  name: option.data.label,
+                  color: option.data.color,
+                },
+                newName
+              );
+            }}
           />
         );
       }}
@@ -142,32 +137,81 @@ const OptionRender = ({
   label,
   color,
   deleteItem,
+  editItem,
 }: {
   label: string | React.ReactNode;
   color: string;
   deleteItem: () => void;
+  editItem: (newName: string) => void;
 }): React.ReactNode => {
+  const [openNameEditor, setOpenNameEditor] = useState<boolean>(false);
+  const [newName, setNewName] = useState<string>("");
+  const inputRef = useRef<InputRef>(null);
+
   return (
-    <Flex>
+    <Flex style={{ gap: "4px", alignItems: "center" }}>
       <XFilled
         style={{
           marginRight: "6px",
           color,
         }}
       />
-      {label}
-      <Tooltip title="Delete group">
-        <Button
-          style={{ marginLeft: "auto" }}
-          onClick={(e) => {
-            e.stopPropagation();
-            deleteItem();
-          }}
-          size="small"
-          shape="circle"
-          icon={<DeleteOutlined />}
-        />
-      </Tooltip>
+      <Flex>
+        {openNameEditor ? (
+          <Input
+            value={newName}
+            ref={inputRef}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                editItem(newName);
+                setOpenNameEditor(false);
+              }
+            }}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setNewName(e.target.value);
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              inputRef.current?.focus();
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              maxWidth: 185,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {label}
+          </div>
+        )}
+      </Flex>
+      <Flex style={{ marginLeft: "auto", gap: "2px" }}>
+        <Tooltip title="Edit name">
+          <Button
+            size="small"
+            shape="circle"
+            icon={<EditOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenNameEditor(true);
+            }}
+          />
+        </Tooltip>
+        <Tooltip title="Delete group">
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteItem();
+            }}
+            size="small"
+            shape="circle"
+            icon={<DeleteOutlined />}
+          />
+        </Tooltip>
+      </Flex>
     </Flex>
   );
 };

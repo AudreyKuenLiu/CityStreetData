@@ -2,10 +2,24 @@ import React from "react";
 import { Select, Button, DatePicker, Flex } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { GroupSelector } from "./group-selector/group-selector";
-import { useActions } from "../map-view/store/street-map-data-form";
+import {
+  useActions,
+  useCurrentStreetGroup,
+  useStreetGroups,
+} from "../map-view/store/street-map-data-form";
 
 export const ControlPanel: React.FC = () => {
-  const { addGroup, setCurrentGroup, removeGroup } = useActions();
+  const { addGroup, setCurrentGroup, removeGroup, editGroup } = useActions();
+  const currentStreetGroup = useCurrentStreetGroup();
+  const streetGroups = useStreetGroups();
+  const groups = Array.from(streetGroups.values()).map((streetGroup) => {
+    return {
+      id: streetGroup.id,
+      name: streetGroup.name,
+      color: streetGroup.color,
+    };
+  });
+
   return (
     <Flex
       style={{
@@ -19,16 +33,22 @@ export const ControlPanel: React.FC = () => {
         gap: "4px",
       }}
     >
-      {/* <Divider
-        type="vertical"
-        style={{ height: "38px", borderColor: "#666666" }}
-      /> */}
       <Flex
         style={{
           gap: "8px",
         }}
       >
         <GroupSelector
+          currentOption={
+            currentStreetGroup != null
+              ? {
+                  id: currentStreetGroup.id,
+                  name: currentStreetGroup.name,
+                  color: currentStreetGroup.color,
+                }
+              : null
+          }
+          groups={groups}
           onAddItem={(name) => {
             const group = addGroup({ name });
             return {
@@ -42,6 +62,9 @@ export const ControlPanel: React.FC = () => {
           }}
           onDeleteItem={(option) => {
             return removeGroup({ id: option.id });
+          }}
+          onEditItem={(option, name) => {
+            return editGroup({ id: option.id, name });
           }}
         />
         <Select

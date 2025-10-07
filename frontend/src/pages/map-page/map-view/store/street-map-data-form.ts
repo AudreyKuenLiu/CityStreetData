@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { StreetSegment } from "../../../../models/map-grid";
 import { useShallow } from "zustand/shallow";
 import { devtools } from "zustand/middleware";
+import { getRandomColor } from "../../../../utils";
 
 enum StreetEvent {
   TrafficCrashes = "TRAFFIC_CRASHES",
@@ -30,7 +31,6 @@ type StreetMapForm = {
   streetGroups: Map<string, StreetGroup>;
   _cnnToGroupId: Map<number, string>;
   currentGroupId: string | null;
-  //cnns: Map<number, StreetSegment>;
   streetEvent: StreetEvent | null;
   startDate: Date | null;
   endDate: Date | null;
@@ -39,11 +39,6 @@ type StreetMapForm = {
 };
 
 type StreetMapFormState = Omit<StreetMapForm, "actions">;
-
-const selectColor = (number: number): string => {
-  const hue = number * 137.508; // use golden angle approximation
-  return `hsl(${hue},70%,40%)`;
-};
 
 const isStreetMapFormReady = (
   oldState: StreetMapFormState,
@@ -120,7 +115,7 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           let color = "";
           set((state) => {
             const newStreetGroups = new Map(state.streetGroups);
-            color = selectColor(newStreetGroups.size + 1);
+            color = getRandomColor();
             newStreetGroups.set(id, {
               id,
               name,
@@ -142,12 +137,6 @@ const useStreetMapDataForm = create<StreetMapForm>()(
             }
             const updatedMap = new Map(state.streetGroups);
             const streetGroup = updatedMap.get(id);
-            console.log(
-              "this is the updatedMap and streetGroup",
-              updatedMap,
-              streetGroup,
-              state._cnnToGroupId
-            );
             for (const cnn of streetGroup?.cnns.keys() ?? []) {
               state._cnnToGroupId.delete(cnn);
             }
@@ -168,7 +157,9 @@ const useStreetMapDataForm = create<StreetMapForm>()(
               ret = false;
               return {};
             }
-            streetGroup.name = name;
+            const newStreetGroup = { ...streetGroup };
+            newStreetGroup.name = name;
+            updatedMap.set(id, newStreetGroup);
             return {
               streetGroups: updatedMap,
             };
@@ -309,6 +300,13 @@ export const useStreetGroups = (): Map<string, StreetGroup> => {
   return useStreetMapDataForm(
     useShallow((state) => {
       return state.streetGroups;
+    })
+  );
+};
+export const useCurrentStreetGroup = (): StreetGroup | null => {
+  return useStreetMapDataForm(
+    useShallow((state) => {
+      return state.streetGroups.get(state.currentGroupId ?? "") ?? null;
     })
   );
 };
