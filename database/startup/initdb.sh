@@ -222,7 +222,7 @@ CREATE TYPE collision_severity AS ENUM (
   'complaint_of_pain'
 );
 
-CREATE TYPE type_of_collision AS ENUM (
+CREATE TYPE collision_type AS ENUM (
   'vehicle_pedestrian',
   'broadside',
   'rear_end',
@@ -243,7 +243,7 @@ CREATE TABLE IF NOT EXISTS sf_events_traffic_crashes (
   point              geometry(Point, 4326),
   is_on_intersection BOOLEAN NOT NULL, 
   collision_severity collision_severity NOT NULL,
-  type_of_collision  type_of_collision NOT NULL,
+  collision_type  collision_type NOT NULL,
   number_killed      INTEGER NOT NULL, --fatal
   number_injured     INTEGER NOT NULL, --severe, complaint_of_pain, other_visible
   metadata           JSONB
@@ -341,8 +341,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION text_to_type_of_collision(tc_measure text)
-RETURNS type_of_collision AS $$
+CREATE OR REPLACE FUNCTION text_to_collision_type(tc_measure text)
+RETURNS collision_type AS $$
 BEGIN
 	RETURN CASE TRIM(LOWER(tc_measure))
     WHEN 'vehicle/pedestrian' THEN 'vehicle_pedestrian'

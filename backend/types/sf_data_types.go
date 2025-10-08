@@ -37,9 +37,26 @@ type StreetFeatureFilters struct {
 	ClassCodes []ClassCode `json:"classCodes"`
 }
 
-type EventType string
+type CollisionSeverity string
 
 const (
-	TrafficCrash  EventType = "traffic_crash_resulting_in_injury"
-	TrafficArrest EventType = "police_traffic_arrest"
+	Fatal           CollisionSeverity = "fatal"
+	Visible         CollisionSeverity = "other_visible"
+	ComplaintOfPain CollisionSeverity = "complaint_of_pain"
+	Medical         CollisionSeverity = "medical"
+	Severe          CollisionSeverity = "severe"
+)
+
+type CollisionType string
+
+const (
+	OtherCollisionType CollisionType = "other"
+	Overturned         CollisionType = "overturned"
+	VehiclePedestiran  CollisionType = "vehicle_pedestrian"
+	HitObject          CollisionType = "hit_object"
+	RearEnd            CollisionType = "rear_end"
+	Broadside          CollisionType = "broadside"
+	Sideswipe          CollisionType = "sideswipe"
+	NotStated          CollisionType = "not_stated"
+	HeadOn             CollisionType = "head_on"
 )

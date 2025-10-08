@@ -71,7 +71,7 @@ INSERT INTO sf_events_traffic_crashes(
     point,
     is_on_intersection,
     collision_severity,
-    type_of_collision,
+    collision_type,
     number_killed,
     number_injured,
     metadata
@@ -82,7 +82,7 @@ SELECT
     dta.point as point,
     CASE WHEN cnn_sgmt_fkey IS NULL THEN true ELSE false END as is_on_intersection,
     text_to_collision_severity(dta.collision_severity) as collision_severity,
-    text_to_type_of_collision(dta.type_of_collision) as type_of_collision,
+    text_to_collision_type(dta.type_of_collision) as collision_type,
     COALESCE(dta.number_killed, 0) as number_killed,
     COALESCE(dta.number_injured, 0) as number_injured,
     json_build_object(
@@ -151,7 +151,7 @@ SET
     cnn = CASE WHEN cnn_sgmt_fkey IS NULL THEN cnn_intrsctn_fkey ELSE cnn_sgmt_fkey END,
     is_on_intersection = CASE WHEN cnn_sgmt_fkey IS NULL THEN true ELSE false END,
     collision_severity = text_to_collision_severity(dtu.collision_severity),
-    type_of_collision = text_to_type_of_collision(dtu.type_of_collision),
+    collision_type = text_to_collision_type(dtu.type_of_collision),
     number_injured = COALESCE(dtu.number_injured, 0),
     number_killed = COALESCE(dtu.number_killed, 0),
     point = dtu.point,
@@ -216,7 +216,7 @@ WHERE
     (cnn != CASE WHEN dtu.cnn_sgmt_fkey IS NULL THEN COALESCE(dtu.cnn_intrsctn_fkey, 0) ELSE COALESCE(dtu.cnn_sgmt_fkey, 0) END) OR
     (sfe.is_on_intersection != CASE WHEN cnn_sgmt_fkey IS NULL THEN true ELSE false END) OR
     sfe.collision_severity != text_to_collision_severity(dtu.collision_severity) OR
-    sfe.type_of_collision != text_to_type_of_collision(dtu.type_of_collision) OR
+    sfe.collision_type != text_to_collision_type(dtu.type_of_collision) OR
     sfe.number_injured != COALESCE(dtu.number_injured, 0) OR
     sfe.number_killed != COALESCE(dtu.number_killed, 0) OR
     NOT ST_OrderingEquals(sfe.point, dtu.point) OR

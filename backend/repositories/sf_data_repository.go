@@ -39,7 +39,11 @@ func NewSFDataRepository(logger *slog.Logger) (*SfDataRepository, error) {
 	}, nil
 }
 
-func (sfr *SfDataRepository) GetEventsForCnn(ctx context.Context, params *types.GetEventsForCnnParams) error {
+func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, params *types.GetTrafficForStreetsParams) error {
+	if params == nil || len(params.CNNs) == 0 {
+		return fmt.Errorf("invalid params, must provide cnns")
+	}
+
 	return nil
 }
 

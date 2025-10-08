@@ -19,9 +19,10 @@ type GetSegmentsWithinPolygonParams struct {
 	Filters *types.StreetFeatureFilters
 }
 
-type GetEventsForCnnParams struct {
-	CNNs      []int
-	Event     string
-	StartDate time.Time
-	EndDate   time.Time
+type GetTrafficForStreetsParams struct {
+	CNNs                []int
+	CollisionSeverities *[]types.CollisionSeverity
+	CollisionTypes      *[]types.CollisionType
+	StartDate           time.Time
+	EndDate             time.Time
 }
