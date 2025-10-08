@@ -36,3 +36,10 @@ func (c ClassCode) ToString() string {
 type StreetFeatureFilters struct {
 	ClassCodes []ClassCode `json:"classCodes"`
 }
+
+type EventType string
+
+const (
+	TrafficCrash  EventType = "traffic_crash_resulting_in_injury"
+	TrafficArrest EventType = "police_traffic_arrest"
+)

@@ -72,6 +72,7 @@ export const ControlPanel: React.FC = () => {
           placeholder="Select an event"
           options={[
             { value: "Traffic Crashes", label: <span>Traffic Crashes</span> },
+            { value: "Traffic Arrests", label: <span>Traffic Arrests</span> },
           ]}
         />
         {/* <Select

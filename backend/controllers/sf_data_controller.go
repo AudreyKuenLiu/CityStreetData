@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"citystreetdata/controllers/types"
+	rTypes "citystreetdata/repositories/types"
+
 	repo "citystreetdata/repositories"
 	"context"
 	"fmt"
@@ -27,13 +29,13 @@ func NewSFDataController(logger *slog.Logger) (*SfDataController, error) {
 	}, nil
 }
 
-func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params *types.GetSegmentsForViewportParams) ([]repo.StreetSegment, error) {
+func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params *types.GetSegmentsForViewportParams) ([]rTypes.StreetSegment, error) {
 	if params == nil {
 		return nil, fmt.Errorf("no params passed to GetSegmentsForViewport")
 	}
 	polygon := params.Rectangle.ToPolygon()
 
-	ret, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &repo.GetSegmentsWithinPolygonParams{
+	ret, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &rTypes.GetSegmentsWithinPolygonParams{
 		Polygon: polygon,
 		Filters: params.Filters,
 	})
@@ -48,12 +50,12 @@ func (sfc *SfDataController) GetSegmentsForGrid(ctx context.Context, params *typ
 		return nil, fmt.Errorf("no params passed to GetSegmentsForGrid")
 	}
 
-	streetSegmentGrid := [][][]repo.StreetSegment{}
+	streetSegmentGrid := [][][]rTypes.StreetSegment{}
 	grid := params.Grid
 	for _, row := range *grid {
-		streetSegmentGridRow := [][]repo.StreetSegment{}
+		streetSegmentGridRow := [][]rTypes.StreetSegment{}
 		for _, cell := range row {
-			streetSegments, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &repo.GetSegmentsWithinPolygonParams{
+			streetSegments, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &rTypes.GetSegmentsWithinPolygonParams{
 				Polygon: cell.ToPolygon(),
 				Filters: params.Filters,
 			})

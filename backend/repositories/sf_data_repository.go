@@ -1,15 +1,15 @@
 package repositories
 
 import (
-	"citystreetdata/types"
 	"context"
 	"fmt"
 	"log/slog"
 	"os"
 	"strings"
 
+	"citystreetdata/repositories/types"
+
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/twpayne/go-geos/geometry"
 )
 
 type SfDataRepository struct {
@@ -39,18 +39,11 @@ func NewSFDataRepository(logger *slog.Logger) (*SfDataRepository, error) {
 	}, nil
 }
 
-type StreetSegment struct {
-	CNN        int                `json:"cnn"`
-	StreetName string             `json:"street"`
-	Line       *geometry.Geometry `json:"line"`
+func (sfr *SfDataRepository) GetEventsForCnn(ctx context.Context, params *types.GetEventsForCnnParams) error {
+	return nil
 }
 
-type GetSegmentsWithinPolygonParams struct {
-	Polygon *geometry.Geometry
-	Filters *types.StreetFeatureFilters
-}
-
-func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, params *GetSegmentsWithinPolygonParams) ([]StreetSegment, error) {
+func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, params *types.GetSegmentsWithinPolygonParams) ([]types.StreetSegment, error) {
 	if params.Polygon == nil || params.Polygon.Area() == 0 {
 		return nil, fmt.Errorf("invalid polygon: %v", params.Polygon)
 	}
@@ -90,9 +83,9 @@ func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, param
 	}
 	defer row.Close()
 
-	segmentArr := []StreetSegment{}
+	segmentArr := []types.StreetSegment{}
 	for row.Next() {
-		var segment = StreetSegment{}
+		var segment = types.StreetSegment{}
 
 		err := row.Scan(&segment.CNN, &segment.StreetName, &segment.Line)
 		if err != nil {

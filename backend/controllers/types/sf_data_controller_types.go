@@ -1,9 +1,8 @@
 package types
 
 import (
+	rTypes "citystreetdata/repositories/types"
 	"citystreetdata/types"
-
-	repo "citystreetdata/repositories"
 
 	"github.com/twpayne/go-geos"
 	"github.com/twpayne/go-geos/geometry"
@@ -38,5 +37,5 @@ type GetSegmentsForGridParams struct {
 }
 
 type GetSegmentsForGridReturn struct {
-	StreetSegmentGrid *[][][]repo.StreetSegment
+	StreetSegmentGrid *[][][]rTypes.StreetSegment
 }

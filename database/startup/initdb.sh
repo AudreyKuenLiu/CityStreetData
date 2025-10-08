@@ -192,6 +192,7 @@ CREATE TABLE IF NOT EXISTS sf_street_feature_calming_measure (
 CREATE TRIGGER update_sf_street_feature_calming_measure_time BEFORE UPDATE ON sf_street_feature_calming_measure FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE INDEX sf_street_feature_calming_measure_cnn_idx ON sf_street_feature_calming_measure(cnn); 
 
+/*
 CREATE TYPE event_type AS ENUM (
   'traffic_crash_resulting_in_injury',
   'police_traffic_arrest',
@@ -211,6 +212,64 @@ CREATE TABLE IF NOT EXISTS sf_events (
 CREATE TRIGGER update_sf_events_time BEFORE UPDATE ON sf_events FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE INDEX sf_events_point_idx ON sf_events USING GIST(point);
 CREATE INDEX sf_events_cnn_idx on sf_events(cnn);
+*/
+
+CREATE TYPE collision_severity AS ENUM (
+  'medical',
+  'other_visible',
+  'fatal',
+  'severe',
+  'complaint_of_pain'
+);
+
+CREATE TYPE type_of_collision AS ENUM (
+  'vehicle_pedestrian',
+  'broadside',
+  'rear_end',
+  'hit_object',
+  'sideswipe',
+  'overturned',
+  'other',
+  'head_on',
+  'not_stated'
+);
+
+CREATE TABLE IF NOT EXISTS sf_events_traffic_crashes (
+  id                 BIGINT GENERATED ALWAYS AS IDENTITY primary key,
+  updated_at         TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at         TIMESTAMP NOT NULL DEFAULT NOW(),
+  occured_at         TIMESTAMP NOT NULL,
+  cnn                INTEGER NOT NULL,
+  point              geometry(Point, 4326),
+  is_on_intersection BOOLEAN NOT NULL, 
+  collision_severity collision_severity NOT NULL,
+  type_of_collision  type_of_collision NOT NULL,
+  number_killed      INTEGER NOT NULL, --fatal
+  number_injured     INTEGER NOT NULL, --severe, complaint_of_pain, other_visible
+  metadata           JSONB
+);
+CREATE TRIGGER update_sf_events_traffic_crashes_time BEFORE UPDATE ON sf_events_traffic_crashes FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_events_traffic_crashes_point_idx ON sf_events_traffic_crashes USING GIST(point);
+CREATE INDEX sf_events_traffic_crashes_cnn_idx on sf_events_traffic_crashes(cnn);
+
+CREATE TYPE arrest_category AS ENUM (
+  'traffic_collision',
+  'traffic_violation_arrest'
+);
+
+CREATE TABLE IF NOT EXISTS sf_events_traffic_arrests (
+  id              BIGINT GENERATED ALWAYS AS IDENTITY primary key,
+  updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+  occured_at      TIMESTAMP NOT NULL,
+  cnn             INTEGER NOT NULL,
+  point           geometry(Point, 4326),
+  arrest_category arrest_category,
+  metadata        JSONB
+);
+CREATE TRIGGER update_sf_events_traffic_arrests_time BEFORE UPDATE ON sf_events_traffic_arrests FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE INDEX sf_events_traffic_arrests_point_idx ON sf_events_traffic_arrests USING GIST(point);
+CREATE INDEX sf_events_traffic_arrests_cnn_idx on sf_events_traffic_arrests(cnn);
 
 CREATE OR REPLACE FUNCTION integer_to_class_code(int_class_code INTEGER)
 RETURNS class_code AS $$
@@ -277,6 +336,49 @@ BEGIN
 		WHEN '2-lump speed cushion' THEN '2_lump_speed_cushion'
 		WHEN 'speed table' THEN 'speed_table'
 		WHEN 'raised crosswalk' THEN 'raised_crosswalk'
+		ELSE NULL
+	END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION text_to_type_of_collision(tc_measure text)
+RETURNS type_of_collision AS $$
+BEGIN
+	RETURN CASE TRIM(LOWER(tc_measure))
+    WHEN 'vehicle/pedestrian' THEN 'vehicle_pedestrian'
+    WHEN 'broadside' THEN 'broadside'
+    WHEN 'rear end' THEN 'rear_end'
+    WHEN 'hit object' THEN 'hit_object'
+    WHEN 'sideswipe' THEN 'sideswipe'
+    WHEN 'overturned' THEN 'overturned'
+    WHEN 'other' THEN 'other'
+    WHEN 'head-on' THEN 'head_on'
+    WHEN 'not stated' THEN 'not_stated'
+		ELSE NULL
+	END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION text_to_collision_severity(tc_measure text)
+RETURNS collision_severity AS $$
+BEGIN
+	RETURN CASE TRIM(LOWER(tc_measure))
+    WHEN 'medical' THEN 'medical'
+    WHEN 'fatal' THEN 'fatal'
+    WHEN 'injury (other visible)' THEN 'other_visible'
+    WHEN 'injury (severe)' THEN 'severe'
+    WHEN 'injury (complaint of pain)' THEN 'complaint_of_pain'
+		ELSE NULL
+	END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION text_to_arrest_category(tc_measure text)
+RETURNS arrest_category AS $$
+BEGIN
+	RETURN CASE TRIM(LOWER(tc_measure))
+    WHEN 'traffic collision' THEN 'traffic_collision'
+    WHEN 'traffic violation arrest' THEN 'traffic_violation_arrest'
 		ELSE NULL
 	END;
 END;

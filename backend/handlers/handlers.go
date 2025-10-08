@@ -52,6 +52,12 @@ func (h *handlers) InitHandlers() error {
 	h.echoInstance.GET("/api/ping", h.pingDB)
 	h.echoInstance.GET("/api/segmentsForViewport", h.getSegmentsForViewport)
 	h.echoInstance.GET("/api/segmentsForGrid", h.getSegmentsForGrid)
+	h.echoInstance.GET("/api/eventsForCnns", h.getEventsForCnns)
+	return nil
+}
+
+func (h *handlers) getEventsForCnns(c echo.Context) error {
+
 	return nil
 }
 
