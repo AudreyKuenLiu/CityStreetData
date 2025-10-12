@@ -1,3 +1,4 @@
+SET TIME ZONE 'America/Los_Angeles';
 WITH data_to_add AS (
 SELECT
     unique_id,

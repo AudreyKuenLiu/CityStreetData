@@ -149,6 +149,12 @@ export const MapView = ({
           <Layer {...hoveredLayerStyle} filter={filter} />
         </Source>
         {configs.map((config) => {
+          console.log(
+            "this is the config",
+            config.data.features.map(({ properties }) => {
+              return properties.cnn;
+            })
+          );
           return (
             <Source
               id={config.sourceId}

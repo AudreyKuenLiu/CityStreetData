@@ -1,3 +1,4 @@
+SET TIME ZONE 'America/Los_Angeles';
 -- Function to convert tc_measure to calming_measure for mid-block traffic calming areas
 -- Seems like there is only one kind of tc_measure at a time for most of the cases.
 -- cnn = 574000 (has two different kinds of tc_measures but actually only has one)

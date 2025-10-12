@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	dc "citystreetdata/controllers"
 	cTypes "citystreetdata/controllers/types"
 	"citystreetdata/types"
-	"citystreetdata/utils"
 
 	"github.com/go-playground/validator/v10"
 
@@ -52,13 +52,42 @@ func (h *handlers) InitHandlers() error {
 	h.echoInstance.GET("/api/ping", h.pingDB)
 	h.echoInstance.GET("/api/segmentsForViewport", h.getSegmentsForViewport)
 	h.echoInstance.GET("/api/segmentsForGrid", h.getSegmentsForGrid)
-	h.echoInstance.GET("/api/eventsForCnns", h.getEventsForCnns)
+	h.echoInstance.GET("/api/crashesForCnns", h.getCrashesForCnns)
 	return nil
 }
 
-func (h *handlers) getEventsForCnns(c echo.Context) error {
+func (h *handlers) getCrashesForCnns(c echo.Context) error {
+	cnnsStr := c.QueryParam("cnns")
+	startTimeStr := c.QueryParam("startTime")
+	endTimeStr := c.QueryParam("endTime")
 
-	return nil
+	cnns := []int{}
+	if len(cnnsStr) > 0 {
+		err := json.Unmarshal([]byte(cnnsStr), &cnns)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
+		}
+	}
+	startTime, err := time.Parse(time.RFC3339, startTimeStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
+	}
+	endTime, err := time.Parse(time.RFC3339, endTimeStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
+	}
+
+	result, err := h.sfDataController.GetCrashesForStreets(c.Request().Context(), &cTypes.GetCrashesForStreetsParams{
+		CNNs:      cnns,
+		StartTime: startTime,
+		EndTime:   endTime,
+	})
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting traffic crashes for cnns: %v", err))
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
 
 func (h *handlers) getSegmentsForViewport(c echo.Context) error {
@@ -68,11 +97,13 @@ func (h *handlers) getSegmentsForViewport(c echo.Context) error {
 	if nePointStr == "" || swPointStr == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("missing required query parameters - nePoint: %v - swPoint: %v", nePointStr, swPointStr))
 	}
-	nePoints, err := utils.PointArrayToNumberArray(nePointStr)
+	nePoints := [2]float64{0, 0}
+	err := json.Unmarshal([]byte(nePointStr), &nePoints)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing nePoint: %v, format must be [float, float]", err))
 	}
-	swPoints, err := utils.PointArrayToNumberArray(swPointStr)
+	swPoints := [2]float64{0, 0}
+	err = json.Unmarshal([]byte(swPointStr), &swPoints)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing swPoint: %v, format must be [float, float]", err))
 	}
@@ -86,8 +117,8 @@ func (h *handlers) getSegmentsForViewport(c echo.Context) error {
 
 	result, err := h.sfDataController.GetSegmentsForViewport(c.Request().Context(), &cTypes.GetSegmentsForViewportParams{
 		Rectangle: cTypes.RectangleCell{
-			NEPoint: [2]float64{nePoints[0], nePoints[1]},
-			SWPoint: [2]float64{swPoints[0], swPoints[1]},
+			NEPoint: nePoints,
+			SWPoint: swPoints,
 		},
 		Filters: &filters,
 	})

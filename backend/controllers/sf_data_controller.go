@@ -29,6 +29,19 @@ func NewSFDataController(logger *slog.Logger) (*SfDataController, error) {
 	}, nil
 }
 
+func (sfc *SfDataController) GetCrashesForStreets(ctx context.Context, params *types.GetCrashesForStreetsParams) ([]rTypes.CrashEvents, error) {
+	if params == nil {
+		return nil, fmt.Errorf("no params passed to GetCrashesForStreets")
+	}
+
+	return sfc.sfDataRepository.GetTrafficCrashesForStreets(ctx, &rTypes.GetTrafficForStreetsParams{
+		CNNs:      params.CNNs,
+		StartTime: params.StartTime,
+		EndTime:   params.EndTime,
+	})
+
+}
+
 func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params *types.GetSegmentsForViewportParams) ([]rTypes.StreetSegment, error) {
 	if params == nil {
 		return nil, fmt.Errorf("no params passed to GetSegmentsForViewport")
@@ -39,10 +52,8 @@ func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params 
 		Polygon: polygon,
 		Filters: params.Filters,
 	})
-	if err != nil {
-		return nil, err
-	}
-	return ret, nil
+
+	return ret, err
 }
 
 func (sfc *SfDataController) GetSegmentsForGrid(ctx context.Context, params *types.GetSegmentsForGridParams) (*types.GetSegmentsForGridReturn, error) {

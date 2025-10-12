@@ -43,8 +43,8 @@ export const useStreetMapControl = (): useStreetMapControlReturn => {
             `/api/segmentsForViewport`,
             {
               params: {
-                nePoint: SanFranciscoNEPoint.toString(),
-                swPoint: SanFranciscoSWPoint.toString(),
+                nePoint: JSON.stringify(SanFranciscoNEPoint),
+                swPoint: JSON.stringify(SanFranciscoSWPoint),
                 filters: JSON.stringify({
                   classCodes,
                 }),

@@ -3,6 +3,7 @@ package types
 import (
 	rTypes "citystreetdata/repositories/types"
 	"citystreetdata/types"
+	"time"
 
 	"github.com/twpayne/go-geos"
 	"github.com/twpayne/go-geos/geometry"
@@ -38,4 +39,10 @@ type GetSegmentsForGridParams struct {
 
 type GetSegmentsForGridReturn struct {
 	StreetSegmentGrid *[][][]rTypes.StreetSegment
+}
+
+type GetCrashesForStreetsParams struct {
+	CNNs      []int
+	StartTime time.Time
+	EndTime   time.Time
 }

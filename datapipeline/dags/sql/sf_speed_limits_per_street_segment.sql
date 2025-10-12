@@ -1,3 +1,4 @@
+SET TIME ZONE 'America/Los_Angeles';
 -- if schoolezone = YES then schoolzone_limit > 0 - the opposite is also true
 -- you can also have a school zone + a different speed limit on the street
 -- okay i think what i should do is still collapse these by CNN and then make the decision later whether
