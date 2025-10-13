@@ -12,9 +12,11 @@ import {
 import { ControlPanel } from "./control-panel";
 //import "allotment/dist/style.css";
 import { useStreetMapControl } from "./hooks/use-street-map-control";
+import { useStreetMapData } from "./hooks/use-street-map-data";
 
 export const MapPage: React.FC = () => {
   const { getStreetSegmentsForZoomLevel } = useStreetMapControl();
+  useStreetMapData();
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
       <Splitter>

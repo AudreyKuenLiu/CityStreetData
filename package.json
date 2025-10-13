@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@duckdb/duckdb-wasm": "^1.30.0",
+    "dexie": "^4.2.1",
+    "dexie-react-hooks": "^4.2.0"
+  }
+}

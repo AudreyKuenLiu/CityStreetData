@@ -59,6 +59,7 @@ export const useStreetMapControl = (): useStreetMapControlReturn => {
   const minZoomData = combinedQueries[0].data.data;
   const medZoomData = combinedQueries[1].data.data;
   const maxZoomData = combinedQueries[2].data.data;
+  console.log("this is the maxZoomDatal", maxZoomData);
 
   const config = useMemo(
     () => ({
@@ -68,6 +69,14 @@ export const useStreetMapControl = (): useStreetMapControlReturn => {
     }),
     [minZoomData, medZoomData, maxZoomData]
   );
+  // const config = useMemo(
+  //   () => ({
+  //     [ZoomLevelInView.ONE]: [],
+  //     [ZoomLevelInView.TWO]: [],
+  //     [ZoomLevelInView.THREE]: [],
+  //   }),
+  //   []
+  // );
 
   const getStreetSegmentsForZoomLevel = useCallback(
     (zoomLevel: number) => {

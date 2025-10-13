@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "watch-build": "chokidar 'src/**/*' -c 'npm run build'"
+    "watch-build": "chokidar 'src/**/*' -c 'npm run build && cp ./initdata.zip ./dist && cp ./test.zip ./dist'"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
@@ -21,6 +21,7 @@
     "@turf/turf": "^7.2.0",
     "antd": "^5.27.1",
     "axios": "^1.11.0",
+    "jszip": "^3.10.1",
     "lodash": "^4.17.21",
     "maplibre-gl": "^5.7.0",
     "react": "^19.1.1",
