@@ -24,14 +24,14 @@ interface GroupSelectorParams {
   onEditItem: (editedOption: GroupOption, newName: string) => void;
 }
 
-export const GroupSelector: React.FC<GroupSelectorParams> = ({
+export const GroupSelector = ({
   currentOption,
   groups,
   onAddItem,
   onSelectItem,
   onDeleteItem,
   onEditItem,
-}) => {
+}: GroupSelectorParams): React.JSX.Element => {
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<InputRef>(null);
@@ -40,6 +40,7 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
   useEffect(() => {
     if (groups.length === 0 && index === 1) {
       const group = onAddItem(`Group ${index++}`);
+      console.log("setting onselect item");
       onSelectItem(group.id);
     }
   }, [groups, onAddItem, onSelectItem]);
@@ -82,7 +83,6 @@ export const GroupSelector: React.FC<GroupSelectorParams> = ({
       open={open}
       onOpenChange={(visible) => setOpen(visible)}
       placeholder="Select a group"
-      defaultActiveFirstOption={true}
       onSelect={(_, option) => {
         onSelectItem(option.value);
         selectRef.current?.blur();

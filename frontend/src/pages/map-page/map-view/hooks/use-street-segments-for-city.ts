@@ -60,13 +60,10 @@ export const useStreetSegmentsForCity = ({
   ) {
     bounds.current.zoomLevelInView = zoomLevelInView;
     bounds.current.boundsInView = boundingBoxInView;
-    //const startTime = new Date().getTime();
     const streetSegmentsInView = selectedMap.cityGrid.getStreetSegmentsInView({
       bbox: boundingBoxInView,
     });
-    //const endTime = new Date().getTime();
 
-    //console.log(`Method execution time: ${endTime - startTime} milliseconds`);
     setStreetSegments(streetSegmentsInView);
   }
 

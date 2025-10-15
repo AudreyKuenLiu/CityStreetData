@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { ViewState } from "react-map-gl/maplibre";
 import { DEFAULT_ZOOM } from "../constants";
-import { useActions } from "../store/street-map-data-form";
+import { useActions } from "../../store/street-map-data-form";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 
 interface useMapControlsReturn {

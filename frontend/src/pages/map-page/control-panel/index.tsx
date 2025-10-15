@@ -1,99 +1,148 @@
-import React from "react";
+import React, { memo } from "react";
 import { Select, Button, DatePicker, Flex } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { GroupSelector } from "./group-selector/group-selector";
+import { useRef } from "react";
+import type { RefSelectProps } from "antd";
+import { StreetEventLabels, StreetEventOptions } from "./constants";
 import {
   useActions,
   useCurrentStreetGroup,
   useStreetGroups,
-} from "../map-view/store/street-map-data-form";
+  useStreetEvent,
+} from "../store/street-map-data-form";
 
-export const ControlPanel: React.FC = () => {
-  const { addGroup, setCurrentGroup, removeGroup, editGroup } = useActions();
-  const currentStreetGroup = useCurrentStreetGroup();
-  const streetGroups = useStreetGroups();
-  const groups = Array.from(streetGroups.values()).map((streetGroup) => {
-    return {
-      id: streetGroup.id,
-      name: streetGroup.name,
-      color: streetGroup.color,
-    };
-  });
+export const ControlPanel = memo(
+  ({
+    runQuery,
+    canRunQuery,
+  }: {
+    runQuery: () => Promise<void>;
+    canRunQuery: boolean;
+  }): React.JSX.Element => {
+    console.log("can get crashes", canRunQuery);
+    const {
+      addGroup,
+      setCurrentGroup,
+      removeGroup,
+      editGroup,
+      setEndDate,
+      setStartDate,
+      setStreetEvent,
+    } = useActions();
+    const currentStreetGroup = useCurrentStreetGroup();
+    const streetGroups = useStreetGroups();
+    const streetEvent = useStreetEvent();
+    const groups = Array.from(streetGroups.values()).map((streetGroup) => {
+      return {
+        id: streetGroup.id,
+        name: streetGroup.name,
+        color: streetGroup.color,
+      };
+    });
+    const selectRef = useRef<RefSelectProps>(null);
 
-  return (
-    <Flex
-      style={{
-        position: "absolute",
-        zIndex: 2,
-        alignItems: "center",
-        marginTop: "16px",
-        marginLeft: "16px",
-        marginRight: "16px",
-        right: "0px",
-        gap: "4px",
-      }}
-    >
+    return (
       <Flex
         style={{
-          gap: "8px",
+          position: "absolute",
+          zIndex: 2,
+          alignItems: "center",
+          marginTop: "16px",
+          marginLeft: "16px",
+          marginRight: "16px",
+          right: "0px",
+          gap: "4px",
         }}
       >
-        <GroupSelector
-          currentOption={
-            currentStreetGroup != null
-              ? {
-                  id: currentStreetGroup.id,
-                  name: currentStreetGroup.name,
-                  color: currentStreetGroup.color,
-                }
-              : null
-          }
-          groups={groups}
-          onAddItem={(name) => {
-            const group = addGroup({ name });
-            return {
-              id: group.id,
-              name,
-              color: group.color,
-            };
-          }}
-          onSelectItem={(id) => {
-            return setCurrentGroup({ id });
-          }}
-          onDeleteItem={(option) => {
-            return removeGroup({ id: option.id });
-          }}
-          onEditItem={(option, name) => {
-            return editGroup({ id: option.id, name });
-          }}
-        />
-        <Select
-          size="large"
-          placeholder="Select an event"
-          options={[
-            { value: "Traffic Crashes", label: <span>Traffic Crashes</span> },
-            { value: "Traffic Arrests", label: <span>Traffic Arrests</span> },
-          ]}
-        />
-        {/* <Select
-        placeholder="Segment by"
-        options={[{ value: "Streets", label: <span>Streets</span> }]}
-      /> */}
-        <DatePicker.RangePicker size="large" />
-        <Button
-          size="large"
-          type="primary"
-          icon={<SearchOutlined />}
-          disabled
+        <Flex
           style={{
-            backgroundColor: "#d9d9d9",
-            borderColor: "#d9d9d9",
-            justifyContent: "center",
+            gap: "8px",
           }}
         >
-          Query
-        </Button>
+          <GroupSelector
+            currentOption={
+              currentStreetGroup != null
+                ? {
+                    id: currentStreetGroup.id,
+                    name: currentStreetGroup.name,
+                    color: currentStreetGroup.color,
+                  }
+                : null
+            }
+            groups={groups}
+            onAddItem={(name) => {
+              const group = addGroup({ name });
+              return {
+                id: group.id,
+                name,
+                color: group.color,
+              };
+            }}
+            onSelectItem={(id) => {
+              return setCurrentGroup({ id });
+            }}
+            onDeleteItem={(option) => {
+              return removeGroup({ id: option.id });
+            }}
+            onEditItem={(option, name) => {
+              return editGroup({ id: option.id, name });
+            }}
+          />
+          <Select
+            size="large"
+            ref={selectRef}
+            placeholder="Select an event"
+            onInputKeyDown={(e) => {
+              selectRef.current?.blur();
+              e.stopPropagation();
+            }}
+            value={[
+              {
+                value: streetEvent,
+                label: StreetEventLabels[streetEvent],
+              },
+            ]}
+            options={StreetEventOptions}
+            onSelect={(_, option) => {
+              setStreetEvent(option.value);
+              selectRef.current?.blur();
+            }}
+          />
+          <DatePicker.RangePicker
+            size="large"
+            onChange={(value) => {
+              if (
+                value == null ||
+                value[0]?.date == null ||
+                value[1]?.date == null
+              ) {
+                setStartDate(null);
+                setEndDate(null);
+                return;
+              }
+              setStartDate(value[0].toDate());
+              setEndDate(value[1].toDate());
+            }}
+          />
+          <Button
+            size="large"
+            type="primary"
+            icon={<SearchOutlined />}
+            disabled={!canRunQuery}
+            onClick={async () => {
+              await runQuery();
+            }}
+            style={{
+              justifyContent: "center",
+            }}
+          >
+            Query
+          </Button>
+        </Flex>
       </Flex>
-    </Flex>
-  );
-};
+    );
+  }
+);
+
+ControlPanel.displayName = "ControlPanel";

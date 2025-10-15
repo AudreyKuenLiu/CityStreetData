@@ -11,7 +11,9 @@ export default defineConfig({
       target: "react",
       autoCodeSplitting: true,
     }),
-    react(),
+    react({
+      jsxImportSource: "@welldone-software/why-did-you-render", // <-----
+    }),
     // ...,
   ],
 });

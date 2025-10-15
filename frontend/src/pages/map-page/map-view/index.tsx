@@ -1,25 +1,19 @@
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, memo } from "react";
 import Map, { Layer, Source, MapRef } from "react-map-gl/maplibre";
-//import { useStreetSegmentsForViewport } from "./hooks/use-street-segments-for-viewport";
-import type {
-  MapLayerMouseEvent,
-  ViewStateChangeEvent,
-} from "react-map-gl/maplibre";
+import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {
   streetLayerId,
   streetLayerStyle,
   MAX_ZOOM,
   DEFAULT_ZOOM,
-  selectedStreetLayerStyle,
-  selectedStreetLayerId,
   hoveredLayerStyle,
   hoveredLayerId,
 } from "./constants";
-import { useCnns, useActions } from "./store/street-map-data-form";
+import { useActions } from "../store/street-map-data-form";
 import type { FeatureCollection, LineString } from "geojson";
 import { StreetSegment } from "../../../models/map-grid";
 import { useMapControls } from "./hooks/use-map-controls";
-import { useMapConfigs } from "./hooks/use-map-configs";
+import { useSelectedSteets } from "./hooks/use-selected-streets";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 export const MapView = ({
@@ -31,6 +25,7 @@ export const MapView = ({
   centerLatLon: [number, number];
   getStreetSegmentsForZoomLevel: (zoomLevel: number) => StreetSegment[];
 }): React.JSX.Element => {
+  console.log("rerendering mapView");
   const mapRef = useRef<MapRef | null>(null);
   const {
     onMouseEnter,
@@ -44,21 +39,10 @@ export const MapView = ({
     setViewState,
   } = useMapControls({ centerLatLon });
   const { toggleStreet } = useActions();
-  const { configs } = useMapConfigs();
+  const { configs } = useSelectedSteets();
   const layerIds = configs.map((config) => {
     return config.layerStyle.id;
   });
-  // const selectedSegments = useCnns();
-
-  // const currentENPoint =
-  //   mapRef.current?.getBounds().getNorthEast().toArray() != null
-  //     ? mapRef.current?.getBounds().getNorthEast().toArray()
-  //     : [initalNESWBounds[1], initalNESWBounds[0]];
-  // const currentWSPoint =
-  //   mapRef.current?.getBounds().getSouthWest().toArray() != null
-  //     ? mapRef.current?.getBounds().getSouthWest().toArray()
-  //     : [initalNESWBounds[3], initalNESWBounds[2]];
-  // console.log("this is the viewport", currentENPoint, currentWSPoint);
 
   const streetSegments = getStreetSegmentsForZoomLevel(
     mapRef.current?.getZoom() ?? DEFAULT_ZOOM
@@ -72,7 +56,6 @@ export const MapView = ({
           type: "Feature" as const,
           geometry: streetSegment.line,
           properties: {
-            //street: streetSegment.street,
             cnn: streetSegment.cnn,
             line: streetSegment.line,
           },
@@ -80,23 +63,7 @@ export const MapView = ({
       }),
     };
   }, [streetSegments]);
-  // const geoJsonSelected: FeatureCollection<LineString, StreetSegment> = useMemo(
-  //   () => ({
-  //     type: "FeatureCollection",
-  //     features: selectedSegments.map(({ cnn, line }) => {
-  //       return {
-  //         type: "Feature" as const,
-  //         geometry: line,
-  //         properties: {
-  //           //street: value.street,
-  //           line: line,
-  //           cnn: cnn,
-  //         },
-  //       };
-  //     }),
-  //   }),
-  //   [selectedSegments]
-  // );
+
   const hoveredStreetSegment = (hoverInfo && hoverInfo.cnn) || "";
   const filter: ["in", string, string] = useMemo(
     () => ["in", "cnn", hoveredStreetSegment],
@@ -135,12 +102,7 @@ export const MapView = ({
         cursor={cursor}
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
-        interactiveLayerIds={[
-          streetLayerId,
-          hoveredLayerId,
-          ...layerIds,
-          //selectedStreetLayerId,
-        ]}
+        interactiveLayerIds={[streetLayerId, hoveredLayerId, ...layerIds]}
         mapStyle="https://tiles.openfreemap.org/styles/positron"
         doubleClickZoom={false}
       >
@@ -149,12 +111,6 @@ export const MapView = ({
           <Layer {...hoveredLayerStyle} filter={filter} />
         </Source>
         {configs.map((config) => {
-          console.log(
-            "this is the config",
-            config.data.features.map(({ properties }) => {
-              return properties.cnn;
-            })
-          );
           return (
             <Source
               id={config.sourceId}
@@ -166,9 +122,6 @@ export const MapView = ({
             </Source>
           );
         })}
-        {/* <Source id="selected-streets" type="geojson" data={geoJsonSelected}>
-          <Layer {...selectedStreetLayerStyle} />
-        </Source> */}
       </Map>
     </>
   );

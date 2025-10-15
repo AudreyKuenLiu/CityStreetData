@@ -1,7 +1,6 @@
 import React from "react";
 
 import { MapView } from "./map-view";
-//import { Allotment } from "allotment";
 import { Splitter } from "antd";
 import { Layout } from "antd";
 import {
@@ -10,16 +9,18 @@ import {
   SanFranciscoSWPoint,
 } from "../../constants/map-dimensions";
 import { ControlPanel } from "./control-panel";
-//import "allotment/dist/style.css";
-import { useStreetMapControl } from "./hooks/use-street-map-control";
+import { useStreetsForMapView } from "./hooks/use-streets-for-map-view";
+import { GraphView } from "./graph-view";
+import { useCrashDataForStreets } from "./hooks/use-crash-data-for-streets";
 
 export const MapPage: React.FC = () => {
-  const { getStreetSegmentsForZoomLevel } = useStreetMapControl();
+  const { getStreetSegmentsForZoomLevel } = useStreetsForMapView();
+  const { getCrashes, isLoading, canGetCrashes } = useCrashDataForStreets();
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
       <Splitter>
         <Splitter.Panel style={{ position: "relative" }}>
-          <ControlPanel />
+          <ControlPanel runQuery={getCrashes} canRunQuery={canGetCrashes} />
           <MapView
             initalNESWBounds={[
               SanFranciscoNEPoint[0],
@@ -32,7 +33,7 @@ export const MapPage: React.FC = () => {
           />
         </Splitter.Panel>
         <Splitter.Panel defaultSize={0}>
-          <div>Additional Content</div>
+          <GraphView />
         </Splitter.Panel>
       </Splitter>
     </Layout>

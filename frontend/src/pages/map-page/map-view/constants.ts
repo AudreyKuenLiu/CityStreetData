@@ -14,10 +14,7 @@ export const streetLayerStyle: LineLayerSpecification = {
   paint: {
     "line-opacity": 0.4,
     "line-width": 15,
-    //"line-color": "#8686AC",
-    //"line-color": "#98A869",
     "line-color": "#6D8196",
-    //"line-color": "#FFC067",
   },
 } as const;
 export const hoveredLayerId = "hoveredSegmentLayer";
@@ -31,9 +28,6 @@ export const hoveredLayerStyle: LineLayerSpecification = {
   paint: {
     "line-opacity": 0.7,
     "line-width": 15,
-    //"line-color": "#8686AC",
-    //"line-color": "#98A869",
-    //"line-color": "#6D8196",
     "line-color": "#ED7B58",
   },
 } as const;
@@ -49,7 +43,6 @@ export const selectedStreetLayerStyle: LineLayerSpecification = {
   paint: {
     "line-opacity": 0.9,
     "line-width": 15,
-    //"line-color": "#FFC067",
     "line-color": "#272757",
   },
 } as const;

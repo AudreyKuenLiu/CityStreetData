@@ -48,8 +48,8 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 	if err != nil {
 		return nil, err
 	}
-
 	defer dbpool.Close()
+
 	row, err := dbpool.Query(ctx, `
 	WITH selected_streets AS (
 		SELECT
@@ -57,7 +57,7 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 		FROM
 			sf_streets_and_intersections
 		WHERE 
-			cnn in ($1)
+			cnn = ANY($1)
 	),
 	unique_intersections AS (
 		SELECT
@@ -100,8 +100,8 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 		crashes.occured_at, 
 		crashes.collision_severity, 
 		crashes.collision_type, 
-		crashes.number_killed, 
-		crashes.number_injured
+		COALESCE(crashes.number_killed, 0), 
+		COALESCE(crashes.number_injured, 0)
 	FROM
 		(
 			SELECT
