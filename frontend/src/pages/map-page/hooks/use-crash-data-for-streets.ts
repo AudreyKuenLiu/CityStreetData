@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import axios, { AxiosResponse } from "axios";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -14,7 +15,7 @@ interface useCrashDataForStreetsReturn {
   canGetCrashes: boolean;
   getCrashes: () => Promise<void>;
   isLoading: boolean;
-  data: { id: GroupId; response: CrashEvents[] }[];
+  data: Map<GroupId, CrashEvents[]>;
 }
 
 export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
@@ -62,11 +63,19 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   const getCrashes = async (): Promise<void> => {
     await result.refetch();
   };
+  const groupCrashes = useMemo(() => {
+    const data = result.data ?? [];
+    const groupCrashesMap = new Map<GroupId, CrashEvents[]>();
+    for (const dataGroup of data) {
+      groupCrashesMap.set(dataGroup.id, dataGroup.response);
+    }
+    return groupCrashesMap;
+  }, [result.data]);
 
   return {
     getCrashes,
     canGetCrashes: isReady,
     isLoading: result.isLoading,
-    data: result.data ?? [],
+    data: groupCrashes,
   };
 };

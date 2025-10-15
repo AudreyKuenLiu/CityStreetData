@@ -25,7 +25,6 @@ export const MapView = ({
   centerLatLon: [number, number];
   getStreetSegmentsForZoomLevel: (zoomLevel: number) => StreetSegment[];
 }): React.JSX.Element => {
-  console.log("rerendering mapView");
   const mapRef = useRef<MapRef | null>(null);
   const {
     onMouseEnter,

@@ -34,7 +34,7 @@ export const MapPage: React.FC = () => {
           />
         </Splitter.Panel>
         <Splitter.Panel defaultSize={0}>
-          <GraphView />
+          <GraphView isLoading={isLoading} groupCrashes={data} />
         </Splitter.Panel>
       </Splitter>
     </Layout>
