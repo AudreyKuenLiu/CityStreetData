@@ -1,4 +1,4 @@
-import { StreetEvent } from "../store/street-map-data-form";
+import { StreetEvent } from "../store/constants";
 
 export const StreetEventLabels = {
   [StreetEvent.TrafficCrashes]: "Traffic Crashes",

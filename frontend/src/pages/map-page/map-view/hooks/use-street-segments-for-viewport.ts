@@ -6,10 +6,7 @@ import {
 } from "../../../../models/map-grid";
 import axios from "axios";
 import { useRef } from "react";
-import {
-  classcode,
-  ViewportSegment,
-} from "../api-models/segments-for-viewport";
+import { classcode, ViewportSegment } from "../../../../models/api-models";
 
 type useStreetSegmentsForViewportParams = {
   nePoint: [number, number];

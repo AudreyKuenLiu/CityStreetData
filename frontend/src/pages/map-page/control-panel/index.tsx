@@ -11,6 +11,7 @@ import {
   useStreetGroups,
   useStreetEvent,
 } from "../store/street-map-data-form";
+import { convertToGroupId } from "../store/constants";
 
 export const ControlPanel = memo(
   ({
@@ -80,13 +81,25 @@ export const ControlPanel = memo(
               };
             }}
             onSelectItem={(id) => {
-              return setCurrentGroup({ id });
+              const groupId = convertToGroupId(id);
+              if (groupId == null) {
+                return;
+              }
+              return setCurrentGroup({ id: groupId });
             }}
             onDeleteItem={(option) => {
-              return removeGroup({ id: option.id });
+              const groupId = convertToGroupId(option.id);
+              if (groupId == null) {
+                return;
+              }
+              return removeGroup({ id: groupId });
             }}
             onEditItem={(option, name) => {
-              return editGroup({ id: option.id, name });
+              const groupId = convertToGroupId(option.id);
+              if (groupId == null) {
+                return;
+              }
+              return editGroup({ id: groupId, name });
             }}
           />
           <Select
@@ -135,6 +148,8 @@ export const ControlPanel = memo(
             }}
             style={{
               justifyContent: "center",
+              // for some reason this button is always transparent when disabled
+              backgroundColor: !canRunQuery ? "#d9d9d9" : undefined,
             }}
           >
             Query

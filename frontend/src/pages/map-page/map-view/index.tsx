@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, memo } from "react";
+import React, { useRef, useMemo } from "react";
 import Map, { Layer, Source, MapRef } from "react-map-gl/maplibre";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {

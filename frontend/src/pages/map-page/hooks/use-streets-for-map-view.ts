@@ -1,11 +1,11 @@
 import { useSuspenseQueries } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
-import { ViewportSegment } from "../map-view/api-models/segments-for-viewport";
+import { ViewportSegment } from "../../../models/api-models";
 import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
 } from "../../../constants/map-dimensions";
-import { classcode } from "../map-view/api-models/segments-for-viewport";
+import { classcode } from "../../../models/api-models";
 import { ZoomLevelInView, getZoomLevelInView } from "../../../models/map-grid";
 import { useCallback, useMemo } from "react";
 

@@ -3,15 +3,13 @@ import { StreetSegment } from "../../../models/map-grid";
 import { useShallow } from "zustand/shallow";
 import { devtools } from "zustand/middleware";
 import { getRandomColor } from "../../../utils";
+import { StreetEvent, GroupId, emptyGroupId } from "./constants";
 
-export enum StreetEvent {
-  TrafficCrashes = "TRAFFIC_CRASHES",
-}
 type StreetMapFormActions = {
-  addGroup: ({ name }: { name: string }) => { id: string; color: string };
-  removeGroup: ({ id }: { id: string }) => boolean;
-  setCurrentGroup: ({ id }: { id: string }) => boolean;
-  editGroup: ({ id, name }: { id: string; name: string }) => boolean;
+  addGroup: ({ name }: { name: string }) => { id: GroupId; color: string };
+  removeGroup: ({ id }: { id: GroupId }) => boolean;
+  setCurrentGroup: ({ id }: { id: GroupId }) => boolean;
+  editGroup: ({ id, name }: { id: GroupId; name: string }) => boolean;
   toggleStreet: (streetSegment: StreetSegment) => boolean;
   addStreet: (StreetSegment: StreetSegment) => boolean;
   removeStreet: (cnn: number) => boolean;
@@ -21,16 +19,16 @@ type StreetMapFormActions = {
 };
 
 type StreetGroup = {
-  id: string;
+  id: GroupId;
   name: string;
   color: string;
   cnns: Map<number, StreetSegment>;
 };
 
 type StreetMapForm = {
-  streetGroups: Map<string, StreetGroup>;
-  _cnnToGroupId: Map<number, string>;
-  currentGroupId: string | null;
+  streetGroups: Map<GroupId, StreetGroup>;
+  _cnnToGroupId: Map<number, GroupId>;
+  currentGroupId: GroupId;
   streetEvent: StreetEvent;
   startDate: Date | null;
   endDate: Date | null;
@@ -45,7 +43,7 @@ const isStreetMapFormReady = (
   newState: Partial<StreetMapFormState>
 ): boolean => {
   const streetGroupHasCnn = (
-    streetGroup: Map<string, StreetGroup>
+    streetGroup: Map<GroupId, StreetGroup>
   ): boolean => {
     const streetGroups = Array.from(streetGroup.entries());
     return streetGroups.some(([_, streetGroup]) => {
@@ -75,10 +73,10 @@ const isStreetMapFormReady = (
 const getCurrentStreetGroup = (
   curState: StreetMapFormState
 ):
-  | [Map<string, StreetGroup>, StreetGroup, true]
+  | [Map<GroupId, StreetGroup>, StreetGroup, true]
   | [undefined, undefined, false] => {
   const updatedStreetGroups = new Map(curState.streetGroups);
-  const streetGroup = updatedStreetGroups.get(curState.currentGroupId ?? "");
+  const streetGroup = updatedStreetGroups.get(curState.currentGroupId);
   if (streetGroup == null) {
     return [undefined, undefined, false];
   }
@@ -105,7 +103,7 @@ const useStreetMapDataForm = create<StreetMapForm>()(
   devtools(
     (set) => ({
       streetGroups: new Map<string, StreetGroup>(),
-      currentGroupId: null,
+      currentGroupId: emptyGroupId,
       //cnns: new Map(),
       streetEvent: StreetEvent.TrafficCrashes,
       startDate: null,
@@ -117,9 +115,9 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           name,
         }: {
           name: string;
-        }): { id: string; color: string } => {
+        }): { id: GroupId; color: string } => {
           console.log("adding group");
-          const id = crypto.randomUUID();
+          const id = crypto.randomUUID() as GroupId;
           let color = "";
           set((state) => {
             const newStreetGroups = new Map(state.streetGroups);
@@ -136,7 +134,7 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           });
           return { id, color };
         },
-        removeGroup: ({ id }: { id: string }): boolean => {
+        removeGroup: ({ id }: { id: GroupId }): boolean => {
           console.log("removing group");
 
           let ret = true;
@@ -161,7 +159,7 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           });
           return ret;
         },
-        editGroup: ({ id, name }: { id: string; name: string }): boolean => {
+        editGroup: ({ id, name }: { id: GroupId; name: string }): boolean => {
           console.log("editing group");
 
           let ret = true;
@@ -181,7 +179,7 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           });
           return ret;
         },
-        setCurrentGroup: ({ id }: { id: string }): boolean => {
+        setCurrentGroup: ({ id }: { id: GroupId }): boolean => {
           console.log("setting current group", id);
 
           let ret = true;
@@ -328,7 +326,7 @@ export const useIsReady = (): boolean => {
 export const useCnns = (): StreetSegment[] => {
   return useStreetMapDataForm(
     useShallow((state) => {
-      const currentGroup = state.streetGroups.get(state.currentGroupId ?? "");
+      const currentGroup = state.streetGroups.get(state.currentGroupId);
       if (currentGroup == null) {
         return [];
       }
@@ -346,7 +344,7 @@ export const useStreetGroups = (): Map<string, StreetGroup> => {
 export const useCurrentStreetGroup = (): StreetGroup | null => {
   return useStreetMapDataForm(
     useShallow((state) => {
-      return state.streetGroups.get(state.currentGroupId ?? "") ?? null;
+      return state.streetGroups.get(state.currentGroupId) ?? null;
     })
   );
 };
