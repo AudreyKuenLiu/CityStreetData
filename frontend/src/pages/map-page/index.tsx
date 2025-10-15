@@ -15,7 +15,8 @@ import { useCrashDataForStreets } from "./hooks/use-crash-data-for-streets";
 
 export const MapPage: React.FC = () => {
   const { getStreetSegmentsForZoomLevel } = useStreetsForMapView();
-  const { getCrashes, isLoading, canGetCrashes } = useCrashDataForStreets();
+  const { getCrashes, data, isLoading, canGetCrashes } =
+    useCrashDataForStreets();
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
       <Splitter>
