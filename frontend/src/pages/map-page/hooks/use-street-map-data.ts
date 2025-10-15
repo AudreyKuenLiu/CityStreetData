@@ -1,247 +1,287 @@
 import React from "react";
 import JSZip from "jszip";
-import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-//import { db, Friend } from "./dexieDb";
-import { db } from "./duckDB";
+import sqlite3InitModule, { Database } from '@sqlite.org/sqlite-wasm';
+import {asyncSQLiteExec} from "../../../utils/index";
+import * as fflate from 'fflate';
+import {unzip} from 'unzipit'
+
+import {ZipReader, HttpReader, BlobWriter} from '@zip.js/zip.js'
 
 export const useStreetMapData = (): void => {
-  const { data } = useQuery({
-    queryKey: ["test.zip"],
-    staleTime: Infinity,
-    queryFn: async () => {
-      return await axios.get(`/test.zip?cb=${Date.now()}`, {
-        responseType: "arraybuffer",
-      });
-    },
-  });
+
   React.useEffect(() => {
-    if (!data) return;
+  
+    (async () => {
 
-    const initDb = async (): Promise<void> => {
-      const zip = await JSZip.loadAsync(data.data);
-      const files = Object.values(zip.files);
+      /* ==========
+      Version 1 - About 920ms on Laban's computer with cache disabled
+      ===========*/
 
-      const dbFile = files[0];
-      const dbFileArrayData = await dbFile.async("uint8array");
+      const v1_synchronous = async () => {
 
-      await db.registerFileBuffer("test.db", dbFileArrayData);
-      const c = await db.connect();
-      console.time("setup extensions");
-      await c.query("INSTALL spatial;");
-      await c.query("load spatial;");
-      await c.query("INSTALL httpfs;");
-      await c.query("LOAD httpfs;");
-      console.timeEnd("setup extensions");
-      console.time("attach db");
-      await c.query("ATTACH 'test.db' AS db");
-      console.timeEnd("attach db");
+        console.log("v1_synchronous")
+        console.time("End to end run (from download to ready-to-use db)")
+        
+        // Fetch raw data
+        console.time("Download file")
+        const db_zip = await axios.get(`/new_sqlite_database.db.zip?cb=${Date.now()}`, {
+          responseType: "arraybuffer",
+        });
+        console.timeEnd("Download file")
+        
+        // Expand and convert to in-memory db file
+        console.time("Unzip file")
+        const db_file = await(Object.values((await JSZip.loadAsync(db_zip.data)).files)[0].async("uint8array"));
+        console.timeEnd("Unzip file")
 
-      console.time("duckdb query execute streets");
-      const resultStreets = await c.query(
-        `select 
-          si.cnn,
-          TRIM(si.street || ' ' || COALESCE(si.st_type, '')) as street, 
-          cc.class_code,
-          si.line
-        from 
-          db.sf_streets_and_intersections as si
-          join  
-          (select cnn, value as class_code from db.sf_street_feature_classcode) as cc on si.cnn = cc.cnn
-        where
-          si.active = 'true';
-        `
-      );
+        // Initialize empty SQL db 
+        console.time("Instantiate empty SQLite db")
+        sqlite3InitModule().then((sqlite3) => {
+          try {
+            const db = new sqlite3.oo1.DB();
+            console.timeEnd("Instantiate empty SQLite db")
+            
+            console.time("Load SQLite DB")
+            const data = sqlite3.wasm.allocFromTypedArray(db_file);
+            if (db.pointer){
+              sqlite3.capi.sqlite3_deserialize(
+                db.pointer,
+                'main',
+                data,
+                db_file.byteLength,
+                db_file.byteLength,
+                sqlite3.capi.SQLITE_DESERIALIZE_FREEONCLOSE
+              )
+            }
+            console.timeEnd("Load SQLite DB")
+            console.timeEnd("End to end run (from download to ready-to-use db)")
 
-      console.log("this is the result streets", resultStreets.toArray());
-
-      console.timeEnd("duckdb query execute streets");
-
-      console.time("duckdb query execute crashes");
-      const resultCrashes = await c.query(
-        `
-        WITH selected_streets AS (
-          SELECT
-            cnn, f_node_cnn, t_node_cnn
-          FROM
-            db.sf_streets_and_intersections
-          WHERE 
-            cnn in (4161000, 5959000, 521000, 4160000, 522000, 10267101, 10267201, 10266201, 10266101, 4162000)
-        ),
-        unique_intersections AS (
-          SELECT
-            intersection_cnn as cnn 
-          FROM (
-            (
-              SELECT 
-                DISTINCT(f_node_cnn) as intersection_cnn 
-              FROM
-                selected_streets
+            // Run a statement to prove it works
+            console.log(
+              db.exec(`
+                SELECT cnn, f_node_cnn, t_node_cnn
+                FROM sf_streets_and_intersections
+                WHERE  cnn in (4161000, 5959000, 521000, 4160000, 522000, 10267101, 10267201, 10266201, 10266101, 4162000);`, 
+                {returnValue: "resultRows"}
+              )
             )
-            UNION
-            (
-              SELECT
-                DISTINCT(t_node_cnn) as intersection_cnn
-              FROM
-                selected_streets
-            )
-          )
-        ),
-        unique_streets AS (
-          SELECT
-            DISTINCT(cnn) as cnn
-          FROM
-            selected_streets
-        ),
-        selected_intersections_and_streets AS (
-          SELECT
-            *
-          FROM
-          (
-            (SELECT * from unique_intersections)
-            UNION
-            (SELECT * from unique_streets)
-          )
-          ORDER BY 1
-        )
-        SELECT
-          sis.cnn, crashes.*
-        FROM
-          (
-            SELECT
-              *
-            FROM
-              selected_intersections_and_streets
-          ) as sis
-          LEFT JOIN
-          (
-            SELECT
-              cnn, occured_at, collision_severity, collision_type, number_killed, number_injured 
-            FROM db.sf_events_traffic_crashes 
-            WHERE
-              collision_severity in ('fatal', 'severe', 'other_visible', 'complaint_of_pain', 'medical')
-          ) as crashes
-          ON (sis.cnn = crashes.cnn)
-        ORDER BY crashes.occured_at;
-        `
-      );
-      console.timeEnd("duckdb query execute crashes");
+            
+            return db;
 
-      console.log("this is the result crashes", resultCrashes.toArray());
+          } catch (err) {
+            console.log(err)
+            console.log("Error instantiating database :'(");
+          }
+        })
+        
+      };
 
-      const result2 = await c.query(`
-        select count(*) from db.sf_streets_and_intersections;
-      `);
-      console.log("this is result2", result2.data);
+      /* ==========
+      Version 2 - About 900ms on Laban's computer with cache disabled
+      ===========*/
 
-      const result3 = await c.query(`
-        select count(*) from db.sf_street_feature_classcode;
-      `);
-      console.log("this is result3", result3.data);
-    };
-    initDb();
-  }, [data]);
-  /*
-  const { data } = useQuery({
-    queryKey: ["initdata.zip"],
-    //staleTime: Infinity,
-    queryFn: async () => {
-      return await axios.get(`/initdata.zip?cb=${Date.now()}`, {
-        responseType: "arraybuffer",
-      });
-    },
-  });
-  console.log("this is the data response", data);
-  // Unzip and list files when data is loaded
-  React.useEffect(() => {
-    if (!data) return;
-    const unzip = async (): Promise<void> => {
-      const c = await db.connect();
-      await c.query(
-        `CREATE TABLE IF NOT EXISTS people(id INTEGER, name VARCHAR);`
-      );
-
-      const zip = await JSZip.loadAsync(data.data);
-      const files = Object.values(zip.files);
-
-      console.time(`Unzip and process all files`);
-      for (const file of files) {
-        console.time(`Unzip and process a file ${file.name}`);
-        if (!file.dir) {
-          // Read file as text
-          const text = await file.async("text");
-          // Split into lines
-          const lines = text.split(/\r?\n/);
-          // Process each line
-          let totalLines = 0;
-
-          const data: { id: number; name: string }[] = [];
-          lines.forEach((line, idx) => {
-            // Do something with each line
-            totalLines += 1;
-            //console.log(`File: ${relativePath}, Line ${idx + 1}:`, line);
-            data.push({
-              id: idx,
-              name: "1",
-            });
-          });
-          await db.registerFileText("rows.json", JSON.stringify(data));
-          await c.insertJSONFromPath("rows.json", {
-            name: "people",
-            create: false,
-          });
-
-          console.log("these are the total lines", totalLines);
-          console.timeEnd(`Unzip and process a file ${file.name}`);
+      const instantiateDB = async () => {
+        console.time("Instantiate empty SQLite db")
+        const sqlite3 = await sqlite3InitModule()
+        try {
+          const db = new sqlite3.oo1.DB();
+          console.timeEnd("Instantiate empty SQLite db")
+          return [sqlite3, db]
         }
+        catch (err) {
+          console.log(err)
+          console.log("Error instantiating database :'(");
+        }
+      };
+
+      const downloadFile = async () => {
+        
+        // Fetch raw data
+        console.time("Download file")
+        const db_zip = await axios.get(`/new_sqlite_database.db.zip?cb=${Date.now()}`, {
+          responseType: "arraybuffer",
+        });
+        console.timeEnd("Download file")
+        
+        // Expand and convert to in-memory db file
+        console.time("Unzip file")
+        const db_file = await(Object.values((await JSZip.loadAsync(db_zip.data)).files)[0].async("uint8array"));
+        console.timeEnd("Unzip file")
+
+        return db_file
+      };
+
+      const loadDB = async(sqlite3: any, db: Database, fileBuffer: Uint8Array) => {
+
+        console.time("Load SQLite DB")
+        const data = sqlite3.wasm.allocFromTypedArray(fileBuffer);
+        if (db.pointer) {
+          sqlite3.capi.sqlite3_deserialize(
+            db.pointer,
+            'main',
+            data,
+            fileBuffer.byteLength,
+            fileBuffer.byteLength,
+            sqlite3.capi.SQLITE_DESERIALIZE_FREEONCLOSE
+          )
+        }
+        console.timeEnd("Load SQLite DB")
+        return db;
       }
 
-      console.timeEnd(`Unzip and process all files`);
+      const runTestQuery = (db: Database) => {
+        // Run a statement to prove it works
+        console.log(
+          db.exec(`
+                SELECT cnn, f_node_cnn, t_node_cnn
+                FROM sf_streets_and_intersections
+                WHERE  cnn in (4161000, 5959000, 521000, 4160000, 522000, 10267101, 10267201, 10266201, 10266101, 4162000);`,
+            { returnValue: "resultRows" }
+          )
+        )
 
-      // List all files and folders
-      // zip.forEach(async (relativePath, file) => {
-      //   console.time(`Unzip and process a file ${file.name}`);
-      //   if (!file.dir) {
-      //     // Read file as text
-      //     const text = await file.async("text");
-      //     // Split into lines
-      //     const lines = text.split(/\r?\n/);
-      //     // Process each line
-      //     let totalLines = 0;
-      //     const data: { id: number; name: string }[] = [];
-      //     lines.forEach((line, idx) => {
-      //       // Do something with each line
-      //       totalLines += 1;
-      //       //console.log(`File: ${relativePath}, Line ${idx + 1}:`, line);
-      //       data.push({
-      //         id: idx,
-      //         name: "1",
-      //       });
-      //     });
-      //     await db.registerFileText("rows.json", JSON.stringify(data));
-      //     await c.insertJSONFromPath("rows.json", {
-      //       name: "people",
-      //       create: false,
-      //     });
+      }
 
-      //     //db.friends.bulkAdd(friends);
-      //     // for (const line of data) {
-      //     //   await c.query(
-      //     //     `INSERT INTO people VALUES (${line.id}, ${line.name});`
-      //     //   );
-      //     // }
+      const v2_parallel = async () =>{
+        console.log("v2_parallel")
+        console.time("End to end run (from download to ready-to-use db)")
 
-      //     console.log("these are the total lines", totalLines);
-      //     console.timeEnd(`Unzip and process a file ${file.name}`);
-      //   }
-      // });
+        const [dbConfig, dbData] = await Promise.all([instantiateDB(), downloadFile()]);
+        console.log(dbData)
+        await loadDB(dbConfig[0], dbConfig[1], dbData);
 
-      // Example: read a file as text
-      // const text = await zip.file("somefile.txt")?.async("text");
-    };
+        console.timeEnd("End to end run (from download to ready-to-use db)")
+        runTestQuery(dbConfig[1])
 
-    unzip();
-  }, [data]);
-  */
-  return;
-};
+      }
+
+
+      /* ==========
+      Version 3 - About 1000ms on Laban's computer with cache disabled
+      (Unexpected - thought fflate would be faster tbh)
+      ===========*/
+
+      const downloadFileZipJs = async () => {
+  
+        // Fetch raw data
+        console.time("Download file")
+        const db_zip = await axios.get(`/new_sqlite_database.db.zip?cb=${Date.now()}`, {
+          responseType: "arraybuffer",
+        });
+        console.timeEnd("Download file")
+
+        // Expand and convert to in-memory db file
+        console.time("Convert file")
+        const raw_bytes = new Uint8Array(db_zip.data)
+        console.timeEnd("Convert file")
+        console.time("Unzip file")
+        const db_file = fflate.unzipSync(raw_bytes)
+        console.timeEnd("Unzip file")
+
+        return db_file
+      };
+
+      const v3_parallel = async () =>{
+        console.log("v3_parallel")
+        console.time("End to end run (from download to ready-to-use db)")
+        const [dbConfig, dbData] = await Promise.all([instantiateDB(), downloadFileZipJs()]);
+        await loadDB(dbConfig[0], dbConfig[1], dbData["new_sqlite_database.db"]);
+        console.timeEnd("End to end run (from download to ready-to-use db)")
+        runTestQuery(dbConfig[1])
+      }
+
+
+      /* ==========
+      Version 4 - About 9500ms on Laban's computer with cache disabled
+      ===========*/
+
+      const downloadFileZipJsAsync = async () => {
+        console.time("File Start")  
+        // Fetch raw data
+        console.time("Download file")
+        const db_zip = await axios.get(`/new_sqlite_database.db.zip?cb=${Date.now()}`, {
+          responseType: "arraybuffer",
+        });
+        console.timeEnd("Download file")
+
+        // Expand and convert to in-memory db file
+        console.time("Convert file")
+        const raw_bytes = new Uint8Array(db_zip.data)
+        console.timeEnd("Convert file")
+        console.time("Unzip file")
+        const db_file =  asyncWrapper(raw_bytes)
+         
+        return db_file
+      };
+
+      const asyncWrapper = (data: Uint8Array) => {
+        return new Promise((resolve, reject) =>{
+          fflate.unzip(data, (err, data) => {
+            console.timeEnd("Unzip file")
+            if (err){
+              reject(err)
+            }else{
+              resolve(data)
+            }
+          })
+        }) 
+      }
+
+      const v4_parallel = async () =>{
+        console.log("v4_parallel")
+        console.time("End to end run (from download to ready-to-use db)")
+        console.time("Promise end to end run")
+        const [dbConfig, dbData] = await Promise.all([instantiateDB(), downloadFileZipJsAsync()]);
+        console.timeEnd("Promise end to end run")
+        await loadDB(dbConfig[0], dbConfig[1], dbData["new_sqlite_database.db"]);
+        console.timeEnd("End to end run (from download to ready-to-use db)")
+        runTestQuery(dbConfig[1])
+      }
+      
+      /* ==========
+      Version 5 - About 700ms on Laban's computer with cache disabled
+      This runs everything in parallel and switches to unzip library
+      ===========*/
+
+        const downloadFileuzipAsync = async () => {
+        console.time("File Start")  
+        // Fetch raw data
+        console.time("Download file")
+        const db_zip = await axios.get(`/new_sqlite_database.db.zip?cb=${Date.now()}`, {
+          responseType: "arraybuffer",
+        });
+        console.timeEnd("Download file")
+
+        // Expand and convert to in-memory db file
+        console.time("Convert file")
+        const raw_bytes = new Uint8Array(db_zip.data)
+        console.timeEnd("Convert file")
+        console.time("Unzip file")
+        const db_file = await ((await unzip(raw_bytes))["entries"]["new_sqlite_database.db"].arrayBuffer())
+        console.timeEnd("Unzip file")
+        return db_file
+      };
+
+  
+  
+      const v5_parallel = async () =>{
+        console.log("v5_parallel")
+        console.time("End to end run (from download to ready-to-use db)")
+        console.time("Promise end to end run")
+        const [dbConfig, dbData] = await Promise.all([instantiateDB(), downloadFileuzipAsync()]);
+        console.timeEnd("Promise end to end run")
+        await loadDB(dbConfig[0], dbConfig[1], dbData);
+        console.timeEnd("End to end run (from download to ready-to-use db)")
+        runTestQuery(dbConfig[1])
+      }
+
+      // await v1_synchronous();
+      // await v2_parallel();
+      // await v3_parallel();
+      // await v4_parallel();  
+      await v5_parallel();  
+      
+    })();
+  });
+}

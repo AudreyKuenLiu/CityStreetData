@@ -8,25 +8,29 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "watch-build": "chokidar 'src/**/*' -c 'npm run build && cp ./initdata.zip ./dist && cp ./test.zip ./dist'"
+    "watch-build": "chokidar 'src/**/*' -c 'npm run build && cp ./initdata.zip ./dist && cp ./test.zip ./dist && cp ./new_sqlite_database.db.zip ./dist'"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@heroicons/react": "^2.2.0",
     "@redux-devtools/extension": "^3.3.0",
+    "@sqlite.org/sqlite-wasm": "^3.50.4-build1",
     "@tanstack/react-query": "^5.85.9",
     "@tanstack/react-router": "^1.131.30",
     "@tanstack/react-router-devtools": "^1.131.30",
     "@turf/turf": "^7.2.0",
+    "@zip.js/zip.js": "^2.8.7",
     "antd": "^5.27.1",
     "axios": "^1.11.0",
+    "fflate": "^0.8.2",
     "jszip": "^3.10.1",
     "lodash": "^4.17.21",
     "maplibre-gl": "^5.7.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-map-gl": "^8.0.4",
+    "unzipit": "^1.4.3",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

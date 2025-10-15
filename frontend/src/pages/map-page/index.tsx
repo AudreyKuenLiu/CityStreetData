@@ -11,18 +11,18 @@ import {
 } from "../../constants/map-dimensions";
 import { ControlPanel } from "./control-panel";
 //import "allotment/dist/style.css";
-import { useStreetMapControl } from "./hooks/use-street-map-control";
+// import { useStreetMapControl } from "./hooks/use-street-map-control";
 import { useStreetMapData } from "./hooks/use-street-map-data";
 
 export const MapPage: React.FC = () => {
-  const { getStreetSegmentsForZoomLevel } = useStreetMapControl();
+  // const { getStreetSegmentsForZoomLevel } = useStreetMapControl();
   useStreetMapData();
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
       <Splitter>
         <Splitter.Panel style={{ position: "relative" }}>
           <ControlPanel />
-          <MapView
+          {/* <MapView
             initalNESWBounds={[
               SanFranciscoNEPoint[0],
               SanFranciscoNEPoint[1],
@@ -31,7 +31,7 @@ export const MapPage: React.FC = () => {
             ]}
             centerLatLon={[...SanFranciscoCenterLatLon]}
             getStreetSegmentsForZoomLevel={getStreetSegmentsForZoomLevel}
-          />
+          /> */}
         </Splitter.Panel>
         <Splitter.Panel defaultSize={0}>
           <div>Additional Content</div>
