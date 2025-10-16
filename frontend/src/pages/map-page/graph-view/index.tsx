@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { GroupId } from "../store/constants";
 import { CrashEvents } from "../../../models/api-models";
 import { ResponsiveLine } from "@nivo/line";
-import { Flex } from "antd";
-import Title from "antd/es/typography/Title";
+import { Flex, Typography } from "antd";
 import { useStreetGroups } from "../store/street-map-data-form";
 
 interface GraphViewParams {
@@ -37,11 +36,10 @@ export const GraphView = ({
   return (
     <Flex
       style={{
-        height: "100%",
-        width: "100%",
         padding: "20px",
-        gap: "15px",
+        gap: "60px",
         flexWrap: "wrap",
+        position: "absolute",
         zIndex: 2,
       }}
     >
@@ -78,55 +76,64 @@ export const GraphView = ({
         console.timeEnd("processing");
 
         return (
-          <div
+          <Flex
             style={{
-              width: 500,
-              height: 500,
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            <Title>{streetGroups.get(id)?.name}</Title>
-            <ResponsiveLine
-              data={[lineData]}
-              curve="linear"
-              xScale={{
-                type: "time",
-                precision: "day",
-                useUTC: false,
+            <Typography.Title level={3}>
+              {streetGroups.get(id)?.name}
+            </Typography.Title>
+            <div
+              style={{
+                width: 500,
+                height: 500,
               }}
-              enableGridX={false}
-              yScale={{
-                type: "linear",
-                min: 0,
-                max: "auto",
-                stacked: false,
-                reverse: false,
-              }}
-              axisBottom={{
-                tickValues: "every 1 year",
-                tickRotation: 45,
-                format: "%Y",
-                legend: "Date",
-                legendOffset: 40,
-                legendPosition: "middle",
-              }}
-              axisLeft={{
-                tickSize: 5,
-                tickPadding: 5,
-                tickRotation: 0,
-                legendOffset: -40,
-                legend: "People Injured and Killed",
-                legendPosition: "middle",
-                tickValues: yValuesArr,
-              }}
-              pointSize={10}
-              lineWidth={2}
-              pointColor={{ theme: "background" }}
-              pointBorderWidth={2}
-              pointBorderColor={{ from: "serieColor" }}
-              useMesh={true}
-              margin={{ bottom: 50, left: 50, top: 50, right: 50 }}
-            />
-          </div>
+            >
+              <ResponsiveLine
+                data={[lineData]}
+                curve="linear"
+                xScale={{
+                  type: "time",
+                  precision: "day",
+                  useUTC: false,
+                }}
+                enableGridX={false}
+                yScale={{
+                  type: "linear",
+                  min: 0,
+                  max: "auto",
+                  stacked: false,
+                  reverse: false,
+                }}
+                axisBottom={{
+                  tickValues: "every 1 year",
+                  tickRotation: 45,
+                  format: "%Y",
+                  legend: "Date",
+                  legendOffset: 40,
+                  legendPosition: "middle",
+                }}
+                axisLeft={{
+                  tickSize: 5,
+                  tickPadding: 5,
+                  tickRotation: 0,
+                  legendOffset: -40,
+                  legend: "People Injured and Killed",
+                  legendPosition: "middle",
+                  tickValues: yValuesArr,
+                }}
+                pointSize={10}
+                lineWidth={2}
+                pointColor={{ theme: "background" }}
+                pointBorderWidth={2}
+                pointBorderColor={{ from: "serieColor" }}
+                useMesh={true}
+                margin={{ bottom: 50, left: 50, top: 15, right: 50 }}
+              />
+            </div>
+          </Flex>
         );
       })}
     </Flex>

@@ -29,6 +29,7 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   const startTime = useStartDate();
   const endTime = useEndDate();
   const isReady = useIsReady();
+  console.log("these are the street groups", streetGroups);
 
   const result = useQuery({
     queryKey: ["crashesForCnns", "cnns", startTime, endTime, streetGroups],
@@ -39,6 +40,13 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
       const allResults = Array.from(streetGroups.values()).map(
         async (streetGroup) => {
           const cnns = Array.from(streetGroup.cnns.keys());
+          if (cnns.length === 0) {
+            return {
+              id: streetGroup.id,
+              response: [],
+            };
+          }
+
           const response = await axios.get<ApiCrashEvents[]>(
             `/api/crashesForCnns`,
             {
