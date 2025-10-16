@@ -6,7 +6,7 @@ import {
 } from "../../../../models/map-grid";
 import axios from "axios";
 import { useRef } from "react";
-import { classcode, ViewportSegment } from "../../../../models/api-models";
+import { classCode, ViewportSegment } from "../../../../models/api-models";
 
 type useStreetSegmentsForViewportParams = {
   nePoint: [number, number];
@@ -19,22 +19,22 @@ type useStreetSegmentsForViewportReturn = {
   isLoading: boolean;
 };
 
-const zoomLevelToClassCodes = (zoomLevel: number): classcode[] => {
+const zoomLevelToclassCodes = (zoomLevel: number): classCode[] => {
   const zoomInView = getZoomLevelInView(zoomLevel);
-  const classcodeViewOne = [
-    classcode.Freeways,
-    classcode.HighwayOrMajorStreet,
-    classcode.FreewayRamp,
+  const classCodeViewOne = [
+    classCode.Freeways,
+    classCode.HighwayOrMajorStreet,
+    classCode.FreewayRamp,
   ];
-  const classcodeViewTwo = [classcode.Arterial, classcode.Collector];
-  const classcodeViewThree = [classcode.Residential];
+  const classCodeViewTwo = [classCode.Arterial, classCode.Collector];
+  const classCodeViewThree = [classCode.Residential];
   if (zoomInView === ZoomLevelInView.ONE) {
-    return classcodeViewOne;
+    return classCodeViewOne;
   }
   if (zoomInView === ZoomLevelInView.TWO) {
-    return [...classcodeViewOne, ...classcodeViewTwo];
+    return [...classCodeViewOne, ...classCodeViewTwo];
   }
-  return [...classcodeViewOne, ...classcodeViewTwo, ...classcodeViewThree];
+  return [...classCodeViewOne, ...classCodeViewTwo, ...classCodeViewThree];
 };
 
 export const useStreetSegmentsForViewport = ({
@@ -62,7 +62,7 @@ export const useStreetSegmentsForViewport = ({
           nePoint: [viewedCells[0], viewedCells[1]].toString(),
           swPoint: [viewedCells[2], viewedCells[3]].toString(),
           filters: JSON.stringify({
-            classCodes: zoomLevelToClassCodes(zoomLevel),
+            classCodes: zoomLevelToclassCodes(zoomLevel),
           }),
         },
       });

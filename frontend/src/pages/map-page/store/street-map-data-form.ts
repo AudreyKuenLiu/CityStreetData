@@ -283,22 +283,21 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           });
         },
         setStartDate: (startDate): void => {
-          console.log("setting start date");
-
+          const newDate = startDate != null ? new Date(startDate) : null;
           set((state) => {
             return {
-              startDate,
-              isReady: isStreetMapFormReady(state, { startDate }),
+              startDate: newDate,
+              isReady: isStreetMapFormReady(state, { startDate: newDate }),
             };
           });
         },
         setEndDate: (endDate): void => {
-          console.log("setting end date");
+          const newDate = endDate != null ? new Date(endDate) : null;
 
           set((state) => {
             return {
-              endDate,
-              isReady: isStreetMapFormReady(state, { endDate }),
+              endDate: newDate,
+              isReady: isStreetMapFormReady(state, { endDate: newDate }),
             };
           });
         },
@@ -309,15 +308,15 @@ const useStreetMapDataForm = create<StreetMapForm>()(
 );
 
 export const useStartDate = (): Date | null => {
-  return useStreetMapDataForm(useShallow((state) => state.startDate));
+  return useStreetMapDataForm((state) => state.startDate);
 };
 
 export const useEndDate = (): Date | null => {
-  return useStreetMapDataForm(useShallow((state) => state.endDate));
+  return useStreetMapDataForm((state) => state.endDate);
 };
 
 export const useStreetEvent = (): StreetEvent => {
-  return useStreetMapDataForm(useShallow((state) => state.streetEvent));
+  return useStreetMapDataForm((state) => state.streetEvent);
 };
 
 export const useIsReady = (): boolean => {

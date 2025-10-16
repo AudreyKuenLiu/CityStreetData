@@ -125,6 +125,7 @@ export const ControlPanel = memo(
           <DatePicker.RangePicker
             size="large"
             onChange={(value) => {
+              console.log("the date is changing");
               if (
                 value == null ||
                 value[0]?.date == null ||

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import axios, { AxiosResponse } from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { dataTagSymbol, useQuery } from "@tanstack/react-query";
 import {
   useEndDate,
   useIsReady,
@@ -8,7 +8,12 @@ import {
   useStreetGroups,
 } from "../store/street-map-data-form";
 import { dateToPacificRFC3339Time } from "../../../utils";
-import { CrashEvents } from "../../../models/api-models";
+import {
+  collisionTypeSchema,
+  collisionSeveritySchema,
+  ApiCrashEvents,
+  CrashEvents,
+} from "../../../models/api-models";
 import { GroupId } from "../store/constants";
 
 interface useCrashDataForStreetsReturn {
@@ -25,14 +30,8 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   const isReady = useIsReady();
 
   const result = useQuery({
-    queryKey: [
-      "crashesForCnns",
-      "cnns",
-      startTime,
-      endTime,
-      streetGroups,
-    ] as const,
-    staleTime: Infinity,
+    queryKey: ["crashesForCnns", "cnns", startTime, endTime, streetGroups],
+    staleTime: 0,
     enabled: false,
     queryFn: async (): Promise<{ id: GroupId; response: CrashEvents[] }[]> => {
       const pacificStartTime = dateToPacificRFC3339Time(startTime);
@@ -40,7 +39,7 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
       const allResults = Array.from(streetGroups.values()).map(
         async (streetGroup) => {
           const cnns = Array.from(streetGroup.cnns.keys());
-          const response = await axios.get<CrashEvents[]>(
+          const response = await axios.get<ApiCrashEvents[]>(
             `/api/crashesForCnns`,
             {
               params: {
@@ -53,7 +52,19 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
 
           return {
             id: streetGroup.id,
-            response: response.data,
+            response: response.data.map((data) => {
+              return {
+                cnn: data.cnn,
+                occuredAt:
+                  data.occured_at != null ? new Date(data.occured_at) : null,
+                collisionSeverity: collisionSeveritySchema.parse(
+                  data.collision_severity
+                ),
+                collisionType: collisionTypeSchema.parse(data.collision_type),
+                numberKilled: data.number_killed,
+                numberInjured: data.number_injured,
+              };
+            }),
           };
         }
       );

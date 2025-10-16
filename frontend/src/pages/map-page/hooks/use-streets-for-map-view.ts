@@ -5,7 +5,7 @@ import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
 } from "../../../constants/map-dimensions";
-import { classcode } from "../../../models/api-models";
+import { classCode } from "../../../models/api-models";
 import { ZoomLevelInView, getZoomLevelInView } from "../../../models/map-grid";
 import { useCallback, useMemo } from "react";
 
@@ -15,21 +15,21 @@ type useStreetsForMapViewReturn = {
 
 export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
   const classCodesForViews = [
-    [classcode.Freeways, classcode.HighwayOrMajorStreet, classcode.FreewayRamp],
+    [classCode.Freeways, classCode.HighwayOrMajorStreet, classCode.FreewayRamp],
     [
-      classcode.Freeways,
-      classcode.HighwayOrMajorStreet,
-      classcode.FreewayRamp,
-      classcode.Arterial,
-      classcode.Collector,
+      classCode.Freeways,
+      classCode.HighwayOrMajorStreet,
+      classCode.FreewayRamp,
+      classCode.Arterial,
+      classCode.Collector,
     ],
     [
-      classcode.Freeways,
-      classcode.HighwayOrMajorStreet,
-      classcode.FreewayRamp,
-      classcode.Arterial,
-      classcode.Collector,
-      classcode.Residential,
+      classCode.Freeways,
+      classCode.HighwayOrMajorStreet,
+      classCode.FreewayRamp,
+      classCode.Arterial,
+      classCode.Collector,
+      classCode.Residential,
     ],
   ];
   const combinedQueries = useSuspenseQueries({

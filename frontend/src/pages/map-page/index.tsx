@@ -19,7 +19,7 @@ export const MapPage: React.FC = () => {
     useCrashDataForStreets();
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
-      <Splitter>
+      <Splitter lazy={true}>
         <Splitter.Panel style={{ position: "relative" }}>
           <ControlPanel runQuery={getCrashes} canRunQuery={canGetCrashes} />
           <MapView
@@ -33,7 +33,7 @@ export const MapPage: React.FC = () => {
             getStreetSegmentsForZoomLevel={getStreetSegmentsForZoomLevel}
           />
         </Splitter.Panel>
-        <Splitter.Panel defaultSize={0}>
+        <Splitter.Panel defaultSize={0} collapsible={true} min={500}>
           <GraphView isLoading={isLoading} groupCrashes={data} />
         </Splitter.Panel>
       </Splitter>
