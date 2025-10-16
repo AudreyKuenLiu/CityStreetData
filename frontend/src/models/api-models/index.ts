@@ -1,5 +1,4 @@
 import { LineString } from "geojson";
-import { keyBy, values, valuesIn } from "lodash";
 import { z } from "zod";
 
 export const classCodeSchema = z.object({
@@ -28,7 +27,7 @@ export const collisionTypeSchema = z.literal([
   "overturned",
   "vehicle_pedestrian",
   "hit_object",
-  "read_end",
+  "rear_end",
   "broadside",
   "sideswipe",
   "not_stated",

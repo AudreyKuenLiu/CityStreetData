@@ -57,10 +57,14 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
                 cnn: data.cnn,
                 occuredAt:
                   data.occured_at != null ? new Date(data.occured_at) : null,
-                collisionSeverity: collisionSeveritySchema.parse(
-                  data.collision_severity
-                ),
-                collisionType: collisionTypeSchema.parse(data.collision_type),
+                collisionSeverity:
+                  data.collision_severity != null
+                    ? collisionSeveritySchema.parse(data.collision_severity)
+                    : data.collision_severity,
+                collisionType:
+                  data.collision_type != null
+                    ? collisionTypeSchema.parse(data.collision_type)
+                    : data.collision_type,
                 numberKilled: data.number_killed,
                 numberInjured: data.number_injured,
               };
@@ -82,6 +86,7 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
     }
     return groupCrashesMap;
   }, [result.data]);
+  console.log("these are the crashes", groupCrashes, result);
 
   return {
     getCrashes,
