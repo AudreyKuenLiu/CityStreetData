@@ -1,33 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { GroupId } from "../store/constants";
 import { CrashEvents } from "../../../models/api-models";
 import { ResponsiveLine } from "@nivo/line";
 import { Flex } from "antd";
+import Title from "antd/es/typography/Title";
+import { useStreetGroups } from "../store/street-map-data-form";
 
 interface GraphViewParams {
   isLoading: boolean;
+  isSuccess: boolean;
   groupCrashes: Map<GroupId, CrashEvents[]>;
 }
 
 export const GraphView = ({
   isLoading,
+  isSuccess,
   groupCrashes,
 }: GraphViewParams): React.JSX.Element => {
-  console.log("loading graphView", isLoading, groupCrashes);
+  const [crashEvents, setCrashEvents] = useState<Map<GroupId, CrashEvents[]>>(
+    new Map()
+  );
+  const streetGroups = useStreetGroups();
+  console.log("loading graphView", isLoading, isSuccess, groupCrashes);
+
+  useEffect(() => {
+    if (isSuccess) {
+      console.log("setting crash events");
+      setCrashEvents(groupCrashes);
+    }
+  }, [isSuccess, groupCrashes]);
+
   if (isLoading) {
     return <div></div>;
   }
+
   return (
     <Flex
       style={{
-        margin: "60px",
-        gap: "30px",
+        height: "100%",
+        width: "100%",
+        padding: "20px",
+        gap: "15px",
         flexWrap: "wrap",
         zIndex: 2,
-        position: "absolute",
       }}
     >
-      {Array.from(groupCrashes.entries()).map(([id, groupCrash]) => {
+      {Array.from(crashEvents.entries()).map(([id, groupCrash]) => {
         console.time("processing");
         const sortedGroupCrashes = groupCrash
           .sort((crashEventA, crashEventB) => {
@@ -39,7 +57,12 @@ export const GraphView = ({
           })
           .filter((groupCrash) => groupCrash.occuredAt != null);
 
+        let maxVal = 0;
         const data = sortedGroupCrashes.map((crashEvent) => {
+          maxVal = Math.max(
+            maxVal,
+            crashEvent.numberInjured + crashEvent.numberKilled
+          );
           return {
             x: crashEvent.occuredAt,
             y: crashEvent.numberInjured + crashEvent.numberKilled,
@@ -51,49 +74,57 @@ export const GraphView = ({
           color: "red",
           data,
         };
+        const yValuesArr = Array.from({ length: maxVal + 1 }, (_, i) => i);
         console.timeEnd("processing");
 
         return (
-          <div style={{ height: 400, width: 400 }}>
+          <div
+            style={{
+              width: 500,
+              height: 500,
+            }}
+          >
+            <Title>{streetGroups.get(id)?.name}</Title>
             <ResponsiveLine
               data={[lineData]}
               curve="linear"
               xScale={{
                 type: "time",
-                precision: "month",
+                precision: "day",
                 useUTC: false,
               }}
+              enableGridX={false}
               yScale={{
                 type: "linear",
-                min: "auto",
+                min: 0,
                 max: "auto",
                 stacked: false,
                 reverse: false,
               }}
               axisBottom={{
-                tickValues: "every 1 month",
-                tickSize: 5,
-                tickPadding: 5,
+                tickValues: "every 1 year",
                 tickRotation: 45,
-                //format: "%b %d",
+                format: "%Y",
                 legend: "Date",
-                legendOffset: 70,
+                legendOffset: 40,
                 legendPosition: "middle",
               }}
               axisLeft={{
                 tickSize: 5,
                 tickPadding: 5,
                 tickRotation: 0,
-                legend: "Value",
                 legendOffset: -40,
+                legend: "People Injured and Killed",
                 legendPosition: "middle",
+                tickValues: yValuesArr,
               }}
               pointSize={10}
+              lineWidth={2}
               pointColor={{ theme: "background" }}
               pointBorderWidth={2}
               pointBorderColor={{ from: "serieColor" }}
-              pointLabelYOffset={-12}
               useMesh={true}
+              margin={{ bottom: 50, left: 50, top: 50, right: 50 }}
             />
           </div>
         );

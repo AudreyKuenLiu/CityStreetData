@@ -19,6 +19,7 @@ import { GroupId } from "../store/constants";
 interface useCrashDataForStreetsReturn {
   canGetCrashes: boolean;
   getCrashes: () => Promise<void>;
+  isSuccess: boolean;
   isLoading: boolean;
   data: Map<GroupId, CrashEvents[]>;
 }
@@ -31,7 +32,6 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
 
   const result = useQuery({
     queryKey: ["crashesForCnns", "cnns", startTime, endTime, streetGroups],
-    staleTime: 0,
     enabled: false,
     queryFn: async (): Promise<{ id: GroupId; response: CrashEvents[] }[]> => {
       const pacificStartTime = dateToPacificRFC3339Time(startTime);
@@ -86,11 +86,11 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
     }
     return groupCrashesMap;
   }, [result.data]);
-  console.log("these are the crashes", groupCrashes, result);
 
   return {
     getCrashes,
     canGetCrashes: isReady,
+    isSuccess: result.isSuccess,
     isLoading: result.isLoading,
     data: groupCrashes,
   };
