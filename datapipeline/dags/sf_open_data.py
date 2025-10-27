@@ -3,25 +3,19 @@ import os
 import requests
 import json
 import logging
-import psycopg2
 import pandas as pd
 from io import StringIO
-from airflow.decorators import dag, task
+from airflow.sdk import dag, task
 from airflow.models.taskinstance import TaskInstance
 from datetime import datetime, timedelta
-from utils import csvIO_to_stringIO, get_num_rows
+from utils import string_to_df, get_num_rows
+from conn import initConnection
 
 sf_app_token = os.environ.get("SF_DATA_APP_TOKEN")
-project_dir = os.environ.get("AIRFLOW_PROJ_DIR", ".")
-pg_user = os.environ.get("PGUSER")
-pg_password = os.environ.get("PGPASSWORD")
-pg_host = os.environ.get("PGHOST")
-pg_port = os.environ.get("PGPORT")
-pg_database = os.environ.get("PGDATABASE")
+project_dir = os.environ.get("AIRFLOW_HOME", ".")
 
 CONFIG_FILE=f"{project_dir}/dags/data_sf_config.json"
 DATA_DIR=f"{project_dir}/data"
-MAX_FILE_SIZE_IN_BYTES =100*2**20
 
 def read_config():
     with open(CONFIG_FILE, 'r') as file:
@@ -58,50 +52,42 @@ def load_to_db(table_id: str, api_endpoint: str, staging_fields: list[dict], par
     file_date = logical_date.strftime("%Y%m%d")
     data_table_name = f"{table_id}_{file_date}_raw"
     params["$offset"] = 0
-    with psycopg2.connect(
-        dbname=pg_database,
-        user=pg_user,
-        password=pg_password,
-        host=pg_host,
-        port=pg_port
-    ) as conn:
-        cur = conn.cursor()
-        cur.execute(f"DROP TABLE IF EXISTS {data_table_name}")
-        sql_data_staging_file = read_sql_file(f"{project_dir}/dags/sql/staging_tables/{table_id}_staging.sql")
-        sql_data_staging_file = sql_data_staging_file.format(suffix=f"{file_date}_raw")
-        if len(sql_data_staging_file) == 0:
-            return 
-        cur.execute(sql_data_staging_file)
 
-        while True:
-            result_str = pull_from_data_sf(api_endpoint, params)
-            if (result_str is None or len(result_str) == 0):
-                break
+    cur, conn = initConnection()
+    cur = conn.cursor()
+    cur.execute(f"DROP TABLE IF EXISTS {data_table_name}")
+    sql_data_staging_file = read_sql_file(f"{project_dir}/dags/sql/staging_tables/{table_id}_staging.sql")
+    sql_data_staging_file = sql_data_staging_file.format(suffix=f"{file_date}_raw")
+    if len(sql_data_staging_file) == 0:
+        return 
+    cur.executescript(sql_data_staging_file)
 
-            file_date = logical_date.strftime("%Y%m%d")
-            csv_IO = StringIO(result_str)
-            csv_IO_to_load = StringIO()
+    while True:
+        result_str = pull_from_data_sf(api_endpoint, params)
+        if (result_str is None or len(result_str) == 0):
+            break
 
-            csv_IO_to_load = csvIO_to_stringIO(csv_IO, staging_fields)
+        file_date = logical_date.strftime("%Y%m%d")
+        df = string_to_df(result_str, staging_fields)
 
-            # Break if no more data or only 1 row is returned (which is the header)
-            numRowsToLoad = get_num_rows(csv_IO_to_load)
-            if (numRowsToLoad == 0):
-                break
+        # Break if no more data or only 1 row is returned (which is the header)
+        numRowsToLoad = len(df)
+        if (numRowsToLoad == 0):
+            break
 
-            staging_fields_str = ", ".join(staging_fields)
-            logging.info(f"loading data to db table {data_table_name} ({staging_fields_str}): {numRowsToLoad} rows")
+        staging_fields_str = ", ".join(staging_fields)
+        logging.info(f"loading data to db table {data_table_name} ({staging_fields_str}): {numRowsToLoad} rows")
 
-            cur.copy_expert(sql=f"COPY {data_table_name} ({staging_fields_str}) FROM STDIN WITH CSV HEADER", file=csv_IO_to_load, size=MAX_FILE_SIZE_IN_BYTES)
-            params["$offset"] += params["$limit"]
+        df[staging_fields].to_sql(data_table_name, conn, if_exists='append', index=False)
+        params["$offset"] += params["$limit"]
 
-        sql_load_file = read_sql_file(f"{project_dir}/dags/sql/{table_id}.sql")
-        sql_load_file = sql_load_file.format(data_table_name=data_table_name)
-        if len(sql_load_file) > 0:
-            cur.execute(sql_load_file)
+    sql_load_file = read_sql_file(f"{project_dir}/dags/sql/{table_id}.sql")
+    sql_load_file = sql_load_file.format(data_table_name=data_table_name)
+    if len(sql_load_file) > 0:
+        cur.executescript(sql_load_file)
 
-        conn.commit()
-        cur.close()
+    conn.commit()
+    cur.close()
 
     return
 

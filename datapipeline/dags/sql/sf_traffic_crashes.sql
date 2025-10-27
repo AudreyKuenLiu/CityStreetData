@@ -1,4 +1,3 @@
-SET TIME ZONE 'America/Los_Angeles';
 WITH data_to_add AS (
 SELECT
     unique_id,
@@ -52,7 +51,7 @@ SELECT
     party2_type,
     party2_dir_of_travel,
     party2_move_pre_acc,
-    point,
+    PointFromText(point, 4326) as point,
     data_as_of,
     data_updated_at,
     data_loaded_at,
@@ -75,6 +74,7 @@ INSERT INTO sf_events_traffic_crashes(
     collision_type,
     number_killed,
     number_injured,
+    sf_data_id,
     metadata
 )
 SELECT
@@ -86,8 +86,9 @@ SELECT
     text_to_collision_type(dta.type_of_collision) as collision_type,
     COALESCE(dta.number_killed, 0) as number_killed,
     COALESCE(dta.number_injured, 0) as number_injured,
-    json_build_object(
-        'crash_unique_id', unique_id,
+    unique_id as sf_data_id,
+    json_object(
+        'sf_data_id', unique_id,
         'case_id_pkey', case_id_pkey,
         'tb_latitude', tb_latitude,
         'tb_longitude', tb_longitude,
@@ -105,8 +106,6 @@ SELECT
         'direction', direction,
         'weather_1', weather_1,
         'weather_2', weather_2,
-        -- 'collision_severity', dta.collision_severity,
-        -- 'type_of_collision', dta.type_of_collision,
         'mviw', mviw,
         'ped_action', ped_action,
         'road_surface', road_surface,
@@ -119,8 +118,6 @@ SELECT
         'vz_pcf_group', vz_pcf_group,
         'vz_pcf_description', vz_pcf_description,
         'vz_pcf_link', vz_pcf_link,
-        -- 'number_killed', COALESCE(dta.number_killed, 0),
-        -- 'number_injured', COALESCE(dta.number_injured, 0),
         'street_view', street_view,
         'dph_col_grp', dph_col_grp,
         'dph_col_grp_description', dph_col_grp_description,
@@ -131,9 +128,6 @@ SELECT
         'party2_type', party2_type,
         'party2_dir_of_travel', party2_dir_of_travel,
         'party2_move_pre_acc', party2_move_pre_acc,
-        --'data_as_of', data_as_of,
-        --'data_updated_at', data_updated_at,
-        --'data_loaded_at', data_loaded_at,
         'analysis_neighborhood', analysis_neighborhood,
         'supervisor_district', supervisor_district,
         'police_district', police_district
@@ -141,9 +135,9 @@ SELECT
 FROM
     data_to_add as dta
     LEFT JOIN 
-    sf_events_traffic_crashes ON dta.unique_id = sf_events_traffic_crashes.metadata->>'crash_unique_id'
+    sf_events_traffic_crashes ON dta.unique_id = sf_events_traffic_crashes.sf_data_id
 WHERE
-    sf_events_traffic_crashes.metadata->>'crash_unique_id' IS NULL
+    sf_events_traffic_crashes.sf_data_id IS NULL
 ;
 
 UPDATE sf_events_traffic_crashes AS sfe
@@ -155,9 +149,9 @@ SET
     collision_type = text_to_collision_type(dtu.type_of_collision),
     number_injured = COALESCE(dtu.number_injured, 0),
     number_killed = COALESCE(dtu.number_killed, 0),
-    point = dtu.point,
-    metadata = json_build_object(
-        'crash_unique_id', unique_id,
+    point = PointFromText(dtu.point, 4326),
+    metadata = json_object(
+        'sf_data_id', unique_id,
         'case_id_pkey', case_id_pkey,
         'tb_latitude', tb_latitude,
         'tb_longitude', tb_longitude,
@@ -175,8 +169,6 @@ SET
         'direction', direction,
         'weather_1', weather_1,
         'weather_2', weather_2,
-        -- 'collision_severity', dtu.collision_severity,
-        -- 'type_of_collision', dtu.type_of_collision,
         'mviw', mviw,
         'ped_action', ped_action,
         'road_surface', road_surface,
@@ -189,8 +181,6 @@ SET
         'vz_pcf_group', vz_pcf_group,
         'vz_pcf_description', vz_pcf_description,
         'vz_pcf_link', vz_pcf_link,
-        -- 'number_killed', dtu.number_killed,
-        -- 'number_injured', dtu.number_injured,
         'street_view', street_view,
         'dph_col_grp', dph_col_grp,
         'dph_col_grp_description', dph_col_grp_description,
@@ -201,9 +191,6 @@ SET
         'party2_type', party2_type,
         'party2_dir_of_travel', party2_dir_of_travel,
         'party2_move_pre_acc', party2_move_pre_acc,
-        --'data_as_of', data_as_of,
-        --'data_updated_at', data_updated_at,
-        --'data_loaded_at', data_loaded_at,
         'analysis_neighborhood', analysis_neighborhood,
         'supervisor_district', supervisor_district,
         'police_district', police_district
@@ -211,7 +198,7 @@ SET
 FROM
   {data_table_name} as dtu
 WHERE
-  sfe.metadata->>'crash_unique_id' = dtu.unique_id
+  sfe.sf_data_id = dtu.unique_id
   AND (
     sfe.occured_at != dtu.collision_datetime OR
     (cnn != CASE WHEN dtu.cnn_sgmt_fkey IS NULL THEN COALESCE(dtu.cnn_intrsctn_fkey, 0) ELSE COALESCE(dtu.cnn_sgmt_fkey, 0) END) OR
@@ -220,9 +207,9 @@ WHERE
     sfe.collision_type != text_to_collision_type(dtu.type_of_collision) OR
     sfe.number_injured != COALESCE(dtu.number_injured, 0) OR
     sfe.number_killed != COALESCE(dtu.number_killed, 0) OR
-    NOT ST_OrderingEquals(sfe.point, dtu.point) OR
-    sfe.metadata::JSONB != json_build_object(
-        'crash_unique_id', unique_id,
+    NOT ST_Equals(sfe.point, PointFromText(dtu.point, 4326)) OR
+    sfe.metadata != json_object(
+        'sf_data_id', unique_id,
         'case_id_pkey', case_id_pkey,
         'tb_latitude', tb_latitude,
         'tb_longitude', tb_longitude,
@@ -240,8 +227,6 @@ WHERE
         'direction', direction,
         'weather_1', weather_1,
         'weather_2', weather_2,
-        --'collision_severity', dtu.collision_severity,
-        --'type_of_collision', dtu.type_of_collision,
         'mviw', mviw,
         'ped_action', ped_action,
         'road_surface', road_surface,
@@ -254,8 +239,6 @@ WHERE
         'vz_pcf_group', vz_pcf_group,
         'vz_pcf_description', vz_pcf_description,
         'vz_pcf_link', vz_pcf_link,
-        --'number_killed', COALESCE(dtu.number_killed, 0),
-        --'number_injured', COALESCE(dtu.number_injured, 0),
         'street_view', street_view,
         'dph_col_grp', dph_col_grp,
         'dph_col_grp_description', dph_col_grp_description,
@@ -266,270 +249,8 @@ WHERE
         'party2_type', party2_type,
         'party2_dir_of_travel', party2_dir_of_travel,
         'party2_move_pre_acc', party2_move_pre_acc,
-        --'data_as_of', data_as_of,
-        --'data_updated_at', data_updated_at,
-        --'data_loaded_at', data_loaded_at,
         'analysis_neighborhood', analysis_neighborhood,
         'supervisor_district', supervisor_district,
         'police_district', police_district
-    )::JSONB
+    )
 );
-
-
--- WITH data_to_add AS (
--- SELECT
---     unique_id,
---     cnn_intrsctn_fkey,
---     cnn_sgmt_fkey,
---     case_id_pkey,
---     tb_latitude,
---     tb_longitude,
---     geocode_source,
---     geocode_location,
---     collision_datetime,
---     collision_date,
---     collision_time,
---     accident_year,
---     month,
---     day_of_week,
---     time_cat,
---     juris,
---     officer_id,
---     reporting_district,
---     beat_number,
---     primary_rd,
---     secondary_rd,
---     distance,
---     direction,
---     weather_1,
---     weather_2,
---     collision_severity,
---     type_of_collision,
---     mviw,
---     ped_action,
---     road_surface,
---     road_cond_1,
---     road_cond_2,
---     lighting,
---     control_device,
---     intersection,
---     vz_pcf_code,
---     vz_pcf_group,
---     vz_pcf_description,
---     vz_pcf_link,
---     number_killed,
---     number_injured,
---     street_view,
---     dph_col_grp,
---     dph_col_grp_description,
---     party_at_fault,
---     party1_type,
---     party1_dir_of_travel,
---     party1_move_pre_acc,
---     party2_type,
---     party2_dir_of_travel,
---     party2_move_pre_acc,
---     point,
---     data_as_of,
---     data_updated_at,
---     data_loaded_at,
---     analysis_neighborhood,
---     supervisor_district,
---     police_district
--- FROM
---     {data_table_name}
--- WHERE
---     cnn_intrsctn_fkey IS NOT NULL 
---     OR 
---     cnn_sgmt_fkey IS NOT NULL
--- )
--- INSERT INTO sf_events(
---     occured_at,
---     event_type,
---     cnn,
---     point,
---     metadata
--- )
--- SELECT
---     collision_datetime as occured_at,
---     'traffic_crash_resulting_in_injury' as event_type,
---     CASE WHEN cnn_sgmt_fkey IS NULL THEN cnn_intrsctn_fkey ELSE cnn_sgmt_fkey END as cnn,
---     dta.point as point,
---     json_build_object(
---         'crash_unique_id', unique_id,
---         'case_id_pkey', case_id_pkey,
---         'tb_latitude', tb_latitude,
---         'tb_longitude', tb_longitude,
---         'geocode_source', geocode_source,
---         'geocode_location', geocode_location,
---         'day_of_week', day_of_week,
---         'time_cat', time_cat,
---         'juris', juris,
---         'officer_id', officer_id,
---         'reporting_district', reporting_district,
---         'beat_number', beat_number,
---         'primary_rd', primary_rd,
---         'secondary_rd', secondary_rd,
---         'distance', distance,
---         'direction', direction,
---         'weather_1', weather_1,
---         'weather_2', weather_2,
---         'collision_severity', collision_severity,
---         'type_of_collision', type_of_collision,
---         'mviw', mviw,
---         'ped_action', ped_action,
---         'road_surface', road_surface,
---         'road_cond_1', road_cond_1,
---         'road_cond_2', road_cond_2,
---         'lighting', lighting,
---         'control_device', control_device,
---         'intersection', intersection,
---         'vz_pcf_code', vz_pcf_code,
---         'vz_pcf_group', vz_pcf_group,
---         'vz_pcf_description', vz_pcf_description,
---         'vz_pcf_link', vz_pcf_link,
---         'number_killed', number_killed,
---         'number_injured', number_injured,
---         'street_view', street_view,
---         'dph_col_grp', dph_col_grp,
---         'dph_col_grp_description', dph_col_grp_description,
---         'party_at_fault', party_at_fault,
---         'party1_type', party1_type,
---         'party1_dir_of_travel', party1_dir_of_travel,
---         'party1_move_pre_acc', party1_move_pre_acc,
---         'party2_type', party2_type,
---         'party2_dir_of_travel', party2_dir_of_travel,
---         'party2_move_pre_acc', party2_move_pre_acc,
---         --'data_as_of', data_as_of,
---         --'data_updated_at', data_updated_at,
---         --'data_loaded_at', data_loaded_at,
---         'analysis_neighborhood', analysis_neighborhood,
---         'supervisor_district', supervisor_district,
---         'police_district', police_district
---     ) as metadata
--- FROM
---     data_to_add as dta
---     LEFT JOIN 
---     sf_events ON dta.unique_id = sf_events.metadata->>'crash_unique_id'
--- WHERE
---     sf_events.metadata->>'crash_unique_id' IS NULL
--- ;
-
--- UPDATE sf_events AS sfe
--- SET 
---     occured_at = collision_datetime,
---     cnn = CASE WHEN cnn_sgmt_fkey IS NULL THEN cnn_intrsctn_fkey ELSE cnn_sgmt_fkey END,
---     point = dtu.point,
---     metadata = json_build_object(
---         'crash_unique_id', unique_id,
---         'case_id_pkey', case_id_pkey,
---         'tb_latitude', tb_latitude,
---         'tb_longitude', tb_longitude,
---         'geocode_source', geocode_source,
---         'geocode_location', geocode_location,
---         'day_of_week', day_of_week,
---         'time_cat', time_cat,
---         'juris', juris,
---         'officer_id', officer_id,
---         'reporting_district', reporting_district,
---         'beat_number', beat_number,
---         'primary_rd', primary_rd,
---         'secondary_rd', secondary_rd,
---         'distance', distance,
---         'direction', direction,
---         'weather_1', weather_1,
---         'weather_2', weather_2,
---         'collision_severity', collision_severity,
---         'type_of_collision', type_of_collision,
---         'mviw', mviw,
---         'ped_action', ped_action,
---         'road_surface', road_surface,
---         'road_cond_1', road_cond_1,
---         'road_cond_2', road_cond_2,
---         'lighting', lighting,
---         'control_device', control_device,
---         'intersection', intersection,
---         'vz_pcf_code', vz_pcf_code,
---         'vz_pcf_group', vz_pcf_group,
---         'vz_pcf_description', vz_pcf_description,
---         'vz_pcf_link', vz_pcf_link,
---         'number_killed', number_killed,
---         'number_injured', number_injured,
---         'street_view', street_view,
---         'dph_col_grp', dph_col_grp,
---         'dph_col_grp_description', dph_col_grp_description,
---         'party_at_fault', party_at_fault,
---         'party1_type', party1_type,
---         'party1_dir_of_travel', party1_dir_of_travel,
---         'party1_move_pre_acc', party1_move_pre_acc,
---         'party2_type', party2_type,
---         'party2_dir_of_travel', party2_dir_of_travel,
---         'party2_move_pre_acc', party2_move_pre_acc,
---         --'data_as_of', data_as_of,
---         --'data_updated_at', data_updated_at,
---         --'data_loaded_at', data_loaded_at,
---         'analysis_neighborhood', analysis_neighborhood,
---         'supervisor_district', supervisor_district,
---         'police_district', police_district
---     )
--- FROM
---   {data_table_name} as dtu
--- WHERE
---   sfe.metadata->>'crash_unique_id' = dtu.unique_id
---   AND (
---     sfe.occured_at != dtu.collision_datetime OR
---     (cnn != CASE WHEN dtu.cnn_sgmt_fkey IS NULL THEN COALESCE(dtu.cnn_intrsctn_fkey, 0) ELSE COALESCE(dtu.cnn_sgmt_fkey, 0) END) OR
---     NOT ST_OrderingEquals(sfe.point, dtu.point) OR
---     sfe.metadata::JSONB != json_build_object(
---         'crash_unique_id', unique_id,
---         'case_id_pkey', case_id_pkey,
---         'tb_latitude', tb_latitude,
---         'tb_longitude', tb_longitude,
---         'geocode_source', geocode_source,
---         'geocode_location', geocode_location,
---         'day_of_week', day_of_week,
---         'time_cat', time_cat,
---         'juris', juris,
---         'officer_id', officer_id,
---         'reporting_district', reporting_district,
---         'beat_number', beat_number,
---         'primary_rd', primary_rd,
---         'secondary_rd', secondary_rd,
---         'distance', distance,
---         'direction', direction,
---         'weather_1', weather_1,
---         'weather_2', weather_2,
---         'collision_severity', collision_severity,
---         'type_of_collision', type_of_collision,
---         'mviw', mviw,
---         'ped_action', ped_action,
---         'road_surface', road_surface,
---         'road_cond_1', road_cond_1,
---         'road_cond_2', road_cond_2,
---         'lighting', lighting,
---         'control_device', control_device,
---         'intersection', intersection,
---         'vz_pcf_code', vz_pcf_code,
---         'vz_pcf_group', vz_pcf_group,
---         'vz_pcf_description', vz_pcf_description,
---         'vz_pcf_link', vz_pcf_link,
---         'number_killed', number_killed,
---         'number_injured', number_injured,
---         'street_view', street_view,
---         'dph_col_grp', dph_col_grp,
---         'dph_col_grp_description', dph_col_grp_description,
---         'party_at_fault', party_at_fault,
---         'party1_type', party1_type,
---         'party1_dir_of_travel', party1_dir_of_travel,
---         'party1_move_pre_acc', party1_move_pre_acc,
---         'party2_type', party2_type,
---         'party2_dir_of_travel', party2_dir_of_travel,
---         'party2_move_pre_acc', party2_move_pre_acc,
---         --'data_as_of', data_as_of,
---         --'data_updated_at', data_updated_at,
---         --'data_loaded_at', data_loaded_at,
---         'analysis_neighborhood', analysis_neighborhood,
---         'supervisor_district', supervisor_district,
---         'police_district', police_district
---     )::JSONB
--- );

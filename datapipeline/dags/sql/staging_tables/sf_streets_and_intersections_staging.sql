@@ -1,35 +1,51 @@
-CREATE TABLE sf_streets_and_intersections_{suffix} (
-    cnn NUMERIC,
-    lf_fadd NUMERIC,
-    lf_toadd NUMERIC,
-    rt_fadd NUMERIC,
-    rt_toadd NUMERIC,
-    street VARCHAR(32),
-    st_type VARCHAR(8),
-    f_st VARCHAR(64),
-    t_st VARCHAR(64),
-    f_node_cnn NUMERIC,
-    t_node_cnn NUMERIC,
-    accepted BOOLEAN,
-    active BOOLEAN,
-    classcode NUMERIC,
-    date_added TIMESTAMP,
-    date_altered TIMESTAMP,
-    date_dropped TIMESTAMP,
-    gds_chg_id_add VARCHAR(32),
-    gds_chg_id_altered VARCHAR(32),
-    gds_chg_id_dropped VARCHAR(32),
-    jurisdiction VARCHAR(8),
-    layer VARCHAR(32),
-    nhood VARCHAR(32),
-    oneway VARCHAR(4),
-    street_gc VARCHAR(32),
-    streetname VARCHAR(32),
-    streetname_gc VARCHAR(32),
-    zip_code NUMERIC,
-    analysis_neighborhood VARCHAR(32),
-    supervisor_district VARCHAR(32),
-    line geometry(LineString, 4326),
-    data_as_of TIMESTAMP,
-    data_loaded_at TIMESTAMP
+CREATE TABLE IF NOT EXISTS sf_streets_and_intersections_{suffix} (
+    cnn                    INTEGER,
+    lf_fadd                INTEGER,
+    lf_toadd               INTEGER,
+    rt_fadd                INTEGER,
+    rt_toadd               INTEGER,
+    street                 TEXT,
+    st_type                TEXT,
+    f_st                   TEXT,
+    t_st                   TEXT,
+    f_node_cnn             INTEGER,
+    t_node_cnn             INTEGER,
+    accepted               BOOLEAN,
+    active                 BOOLEAN,
+    classcode              INTEGER,
+    date_added             DATETIME,
+    date_altered           DATETIME,
+    date_dropped           DATETIME,
+    gds_chg_id_add         TEXT,
+    gds_chg_id_altered     TEXT,
+    gds_chg_id_dropped     TEXT,
+    jurisdiction           TEXT,
+    layer                  TEXT,
+    nhood                  TEXT,
+    oneway                 TEXT,
+    street_gc              TEXT,
+    streetname             TEXT,
+    streetname_gc          TEXT,
+    zip_code               INTEGER,
+    line                   TEXT,
+    analysis_neighborhood  TEXT,
+    supervisor_district    TEXT,
+    data_as_of             DATETIME,
+    data_loaded_at         DATETIME
 );
+
+CREATE TRIGGER IF NOT EXISTS update_dates_sf_streets_and_intersections_{suffix} 
+AFTER INSERT ON sf_streets_and_intersections_{suffix}
+FOR EACH ROW
+BEGIN
+    UPDATE 
+        sf_streets_and_intersections_{suffix} 
+    SET 
+        date_added = dateTimeStrToEpoch(NEW.date_added), 
+        date_altered = dateTimeStrToEpoch(NEW.date_altered), 
+        date_dropped = dateTimeStrToEpoch(NEW.date_dropped), 
+        data_as_of = dateTimeStrToEpoch(NEW.data_as_of), 
+        data_loaded_at = dateTimeStrToEpoch(NEW.data_loaded_at)
+    WHERE
+        cnn = NEW.cnn;
+END;

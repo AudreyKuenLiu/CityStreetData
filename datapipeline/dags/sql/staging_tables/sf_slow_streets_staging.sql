@@ -1,25 +1,39 @@
 CREATE TABLE sf_slow_streets_{suffix} (
-    objectid NUMERIC,
-    shape geometry(LineString, 4326),
-    classcode NUMERIC,
-    cnn NUMERIC,
-    f_node_cnn NUMERIC,
+    objectid INTEGER,
+    shape TEXT,
+    classcode INTEGER,
+    cnn INTEGER,
+    f_node_cnn INTEGER,
     f_st TEXT,
     nhood TEXT,
-    oneway VARCHAR(4),
-    st_type VARCHAR(16),
+    oneway TEXT,
+    st_type TEXT,
     streetname TEXT,
     t_st TEXT,
-    zip_code NUMERIC,
-    slw_st NUMERIC,
-    length NUMERIC,
+    zip_code INTEGER,
+    slw_st INTEGER,
+    length INTEGER,
     extents TEXT,
     status TEXT,
-    phase NUMERIC,
-    install_date TIMESTAMP,
-    agency VARCHAR(16),
+    phase INTEGER,
+    install_date DATETIME,
+    agency TEXT,
     type TEXT,
-    supervisor_district VARCHAR(32),
-    data_as_of TIMESTAMP,
-    data_loaded_at TIMESTAMP
+    supervisor_district TEXT,
+    data_as_of DATETIME,
+    data_loaded_at DATETIME 
 );
+
+CREATE TRIGGER IF NOT EXISTS update_dates_sf_slow_streets_{suffix}
+AFTER INSERT ON sf_slow_streets_{suffix}
+FOR EACH ROW
+BEGIN
+    UPDATE 
+        sf_slow_streets_{suffix}
+    SET 
+        install_date = dateTimeStrToEpoch(NEW.install_date), 
+        data_as_of = dateTimeStrToEpoch(NEW.data_as_of), 
+        data_loaded_at = dateTimeStrToEpoch(NEW.data_loaded_at)
+    WHERE
+        cnn = NEW.cnn;
+END;

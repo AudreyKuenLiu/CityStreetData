@@ -1,22 +1,37 @@
 CREATE TABLE sf_speed_limits_per_street_segment_{suffix} (
-    objectid VARCHAR(64),
+    objectid TEXT,
     cnn INTEGER,
-    street VARCHAR(64),
-    st_type VARCHAR(8),
-    from_st VARCHAR(64),
-    to_st VARCHAR(64),
-    speedlimit SMALLINT,
-    schoolzone VARCHAR(8),
-    schoolzone_limit SMALLINT,
-    mtab_date TIMESTAMP,
-    mtab_motion VARCHAR(32),
-    mtab_reso_text VARCHAR(32),
-    status VARCHAR(32),
-    workorder VARCHAR(16),
-    install_date TIMESTAMP,
-    shape geometry(MultiLineString, 4326),
-    data_as_of TIMESTAMP,
-    data_loaded_at TIMESTAMP,
-    analysis_neighborhood VARCHAR(64),
-    supervisor_district VARCHAR(32)
+    street TEXT,
+    st_type TEXT,
+    from_st TEXT,
+    to_st TEXT,
+    speedlimit INTEGER,
+    schoolzone TEXT,
+    schoolzone_limit INTEGER,
+    mtab_date DATETIME,
+    mtab_motion TEXT,
+    mtab_reso_text TEXT,
+    status TEXT,
+    workorder TEXT,
+    install_date DATETIME,
+    shape TEXT,
+    data_as_of DATETIME,
+    data_loaded_at DATETIME,
+    analysis_neighborhood TEXT,
+    supervisor_district TEXT
 );
+
+CREATE TRIGGER IF NOT EXISTS update_dates_sf_speed_limits_per_street_segment_{suffix}
+AFTER INSERT ON sf_speed_limits_per_street_segment_{suffix}
+FOR EACH ROW
+BEGIN
+    UPDATE 
+        sf_speed_limits_per_street_segment_{suffix}
+    SET 
+        mtab_date = dateTimeStrToEpoch(NEW.mtab_date), 
+        install_date = dateTimeStrToEpoch(NEW.install_date), 
+        data_as_of = dateTimeStrToEpoch(NEW.data_as_of), 
+        data_loaded_at = dateTimeStrToEpoch(NEW.data_loaded_at)
+    WHERE
+        objectid = NEW.objectid;
+END;
