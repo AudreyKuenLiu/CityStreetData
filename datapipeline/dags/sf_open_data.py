@@ -88,6 +88,7 @@ def load_to_db(table_id: str, api_endpoint: str, staging_fields: list[dict], par
 
     conn.commit()
     cur.close()
+    conn.close()
 
     return
 

@@ -11,7 +11,6 @@ from conn import initConnection
 
 sf_app_token = os.environ.get("SF_DATA_APP_TOKEN")
 project_dir = os.environ.get("AIRFLOW_HOME", ".")
-cur, conn = initConnection()
 
 CONFIG_FILE = f"{project_dir}/dags/data_sf_config.json"
 ID_TO_CSV_FILE = {
@@ -42,6 +41,8 @@ def read_sql_file(sql_file_path: str):
 
 @task
 def load_to_db(table_id: str, staging_fields: list[dict]):
+    cur, conn = initConnection()
+
     sql_data_staging_file = read_sql_file(f"{project_dir}/dags/sql/staging_tables/{table_id}_staging.sql")
     sql_data_staging_file = sql_data_staging_file.format(suffix=f"initdata_raw")
     if len(sql_data_staging_file) == 0:

@@ -99,6 +99,7 @@ export const GraphView = ({
                   precision: "day",
                   useUTC: false,
                 }}
+                crosshairType="x"
                 enableGridX={false}
                 yScale={{
                   type: "linear",
@@ -109,7 +110,7 @@ export const GraphView = ({
                 }}
                 axisBottom={{
                   tickValues: "every 1 year",
-                  tickRotation: 45,
+                  tickRotation: 30,
                   format: "%Y",
                   legend: "Date",
                   legendOffset: 40,

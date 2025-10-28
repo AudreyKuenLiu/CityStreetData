@@ -9,6 +9,34 @@ sqlite3 $SQLITE_DB <<-'EOSQL'
     SELECT load_extension('mod_spatialite');
     SELECT InitSpatialMetaData();
 
+    CREATE TABLE IF NOT EXISTS time_days (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        epoch_date INTEGER,
+        string_date TEXT
+    );
+    CREATE UNIQUE INDEX time_days_epoch_date ON time_days(epoch_date); 
+
+    CREATE TABLE IF NOT EXISTS time_weeks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        epoch_date INTEGER,
+        string_date TEXT
+    );
+    CREATE UNIQUE INDEX time_weeks_epoch_date ON time_weeks(epoch_date); 
+
+    CREATE TABLE IF NOT EXISTS time_months (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        epoch_date INTEGER,
+        string_date TEXT
+    );
+    CREATE UNIQUE INDEX time_months_epoch_date ON time_months(epoch_date); 
+
+    CREATE TABLE IF NOT EXISTS time_years (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        epoch_date INTEGER,
+        string_date TEXT
+    );
+    CREATE UNIQUE INDEX time_years_epoch_date ON time_years(epoch_date); 
+
     CREATE TABLE IF NOT EXISTS sf_streets_and_intersections (
         id                     INTEGER PRIMARY KEY AUTOINCREMENT,
         created_at             INTEGER NOT NULL DEFAULT (strftime('%s','now')),

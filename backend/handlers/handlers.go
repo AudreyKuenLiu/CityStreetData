@@ -19,7 +19,6 @@ import (
 type handlers struct {
 	echoInstance     *echo.Echo
 	logger           *slog.Logger
-	dummyController  *dc.DummyController
 	sfDataController *dc.SfDataController
 	validate         *validator.Validate
 }
@@ -30,7 +29,6 @@ type Params struct {
 
 func NewHandlers(p Params) (*handlers, error) {
 	logger := slog.Default()
-	dummyController := dc.NewDummyController()
 	sfDataController, err := dc.NewSFDataController(logger)
 	validate := validator.New()
 	if err != nil {
@@ -39,7 +37,6 @@ func NewHandlers(p Params) (*handlers, error) {
 
 	h := handlers{
 		echoInstance:     p.EchoInstance,
-		dummyController:  dummyController,
 		sfDataController: sfDataController,
 		validate:         validate,
 		logger:           logger,
@@ -49,7 +46,6 @@ func NewHandlers(p Params) (*handlers, error) {
 }
 
 func (h *handlers) InitHandlers() error {
-	h.echoInstance.GET("/api/ping", h.pingDB)
 	h.echoInstance.GET("/api/segmentsForViewport", h.getSegmentsForViewport)
 	h.echoInstance.GET("/api/segmentsForGrid", h.getSegmentsForGrid)
 	h.echoInstance.GET("/api/crashesForCnns", h.getCrashesForCnns)
@@ -154,18 +150,4 @@ func (h *handlers) getSegmentsForGrid(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, result)
-}
-
-func (h *handlers) pingDB(c echo.Context) error {
-	rows, err := h.dummyController.PingDB()
-	h.logger.Info("returning from pingdb", "rows", rows, "error", err)
-	if err != nil {
-		return err
-	}
-
-	jsonData, err := json.Marshal(rows)
-	if err != nil {
-		return err
-	}
-	return c.String(http.StatusOK, string(jsonData))
 }
