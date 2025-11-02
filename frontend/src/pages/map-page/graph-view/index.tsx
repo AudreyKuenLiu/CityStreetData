@@ -1,24 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { GroupId } from "../store/constants";
-import { CrashEvents } from "../../../models/api-models";
-import { ResponsiveLine } from "@nivo/line";
+//import { CrashEvents } from "../../../models/api-models";
+import type { StreetData } from "../hooks/use-crash-data-for-streets";
+//import { ResponsiveLine } from "@nivo/line";
+import { ResponsiveBar } from "@nivo/bar";
 import { Flex, Typography } from "antd";
 import { useStreetGroups } from "../store/street-map-data-form";
+import { dateToPacificTimeMonth } from "../../../utils";
 
 interface GraphViewParams {
   isLoading: boolean;
   isSuccess: boolean;
-  groupCrashes: Map<GroupId, CrashEvents[]>;
+  groupCrashes: StreetData;
+  panelSize: number;
+  dateRange: [Date | null, Date | null];
 }
 
 export const GraphView = ({
   isLoading,
   isSuccess,
   groupCrashes,
+  panelSize,
+  dateRange,
 }: GraphViewParams): React.JSX.Element => {
-  const [crashEvents, setCrashEvents] = useState<Map<GroupId, CrashEvents[]>>(
-    new Map()
-  );
+  const [crashEvents, setCrashEvents] = useState<StreetData>(new Map());
   const streetGroups = useStreetGroups();
   console.log("loading graphView", isLoading, isSuccess, groupCrashes);
 
@@ -40,10 +45,57 @@ export const GraphView = ({
         gap: "60px",
         flexWrap: "wrap",
         position: "absolute",
+        width: `${panelSize}px`,
         zIndex: 2,
       }}
     >
       {Array.from(crashEvents.entries()).map(([id, groupCrash]) => {
+        const sortedGroupCrashes = groupCrash.sort(
+          (crashEventA, crashEventB) => {
+            const crashTimeA = crashEventA[0]?.getTime();
+            const crashTimeB = crashEventB[0]?.getTime();
+            return crashTimeA - crashTimeB;
+          }
+        );
+        const crashBarData = sortedGroupCrashes.map(([time, crashStats]) => {
+          return {
+            time: dateToPacificTimeMonth(time),
+            ...crashStats,
+          };
+        });
+
+        return (
+          <Flex
+            style={{
+              flexDirection: "column",
+              alignItems: "center",
+              flexGrow: 1,
+            }}
+          >
+            <Typography.Title level={3}>
+              {streetGroups.get(id)?.name}
+            </Typography.Title>
+            <div
+              style={{
+                width: "100%",
+                minWidth: 500,
+                height: "500px",
+              }}
+            >
+              <ResponsiveBar
+                data={crashBarData}
+                axisBottom={{
+                  tickRotation: 45,
+                }}
+                keys={["numberInjured", "numberKilled"]}
+                margin={{ bottom: 50, left: 50, top: 15, right: 50 }}
+                indexBy="time"
+              />
+            </div>
+          </Flex>
+        );
+      })}
+      {/* {Array.from(crashEvents.entries()).map(([id, groupCrash]) => {
         console.time("processing");
         const sortedGroupCrashes = groupCrash
           .sort((crashEventA, crashEventB) => {
@@ -136,7 +188,7 @@ export const GraphView = ({
             </div>
           </Flex>
         );
-      })}
+      })} */}
     </Flex>
   );
 };

@@ -3,6 +3,8 @@ package controllers
 import (
 	"citystreetdata/controllers/types"
 	rTypes "citystreetdata/repositories/types"
+	dtypes "citystreetdata/types"
+	"time"
 
 	repo "citystreetdata/repositories"
 	"context"
@@ -26,6 +28,57 @@ func NewSFDataController(logger *slog.Logger) (*SfDataController, error) {
 	return &SfDataController{
 		sfDataRepository: sfDataRepository,
 		logger:           logger,
+	}, nil
+}
+
+func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params *types.GetCrashDataForStreetsParams) (*types.GetCrashDataForStreetsReturn, error) {
+	if params == nil {
+		return nil, fmt.Errorf("no params passed to GetCrashDataForStreets")
+	}
+
+	crashes, err := sfc.sfDataRepository.GetTrafficCrashesForStreets(ctx, &rTypes.GetTrafficForStreetsParams{
+		CNNs:      params.CNNs,
+		StartTime: params.StartTime,
+		EndTime:   params.EndTime,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	//initilize segments
+	dateToCrashesGroupMap := map[int64]types.CrashStats{}
+	timeSlices := []int64{}
+	startTime := params.StartTime
+	endTime := params.EndTime
+	itTime := startTime
+
+	for itTime.Unix() < endTime.Unix() {
+		dateToCrashesGroupMap[itTime.Unix()] = types.CrashStats{}
+		timeSlices = append(timeSlices, itTime.Unix())
+		itTime = itTime.Add(time.Duration(params.SegmentSize.SegmentInSeconds()) * time.Second)
+	}
+
+	findClosestTime := func(occuredTime int64) int64 {
+		index := (occuredTime - startTime.Unix()) / params.SegmentSize.SegmentInSeconds()
+		return timeSlices[index]
+	}
+
+	for _, crashData := range crashes {
+		closestTime := findClosestTime(crashData.OccuredAt.Unix())
+		crashStats := dateToCrashesGroupMap[closestTime]
+		if crashData.CollisionSeverity != nil && *crashData.CollisionSeverity == dtypes.Severe {
+			crashStats.NumberSeriouslyInjured += crashData.NumberInjured
+		}
+		crashStats.NumberInjured += crashData.NumberInjured
+		crashStats.NumberKilled += crashData.NumberKilled
+		crashStats.NumberOfCrashes += 1
+		dateToCrashesGroupMap[closestTime] = crashStats
+	}
+
+	sfc.logger.Info("this is the return map", "map", dateToCrashesGroupMap)
+
+	return &types.GetCrashDataForStreetsReturn{
+		Data: dateToCrashesGroupMap,
 	}, nil
 }
 

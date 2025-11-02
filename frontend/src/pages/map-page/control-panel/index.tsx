@@ -21,7 +21,6 @@ export const ControlPanel = memo(
     runQuery: () => Promise<void>;
     canRunQuery: boolean;
   }): React.JSX.Element => {
-    console.log("can get crashes", canRunQuery);
     const {
       addGroup,
       setCurrentGroup,

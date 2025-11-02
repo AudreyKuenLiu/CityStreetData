@@ -46,3 +46,46 @@ type GetCrashesForStreetsParams struct {
 	StartTime time.Time
 	EndTime   time.Time
 }
+
+type TimeSegmentSize string
+
+const (
+	Weeks    TimeSegmentSize = "W"
+	Months   TimeSegmentSize = "30D"
+	Quarters TimeSegmentSize = "90D"
+	Years    TimeSegmentSize = "Y"
+)
+
+func (t TimeSegmentSize) SegmentInSeconds() int64 {
+	daysSeconds := 60 * 60 * 24
+	switch t {
+	case Weeks:
+		return int64(daysSeconds) * 7
+	case Months:
+		return int64(daysSeconds) * 30
+	case Quarters:
+		return int64(daysSeconds) * 90
+	case Years:
+		return int64(daysSeconds) * 365
+
+	}
+	return 0
+}
+
+type GetCrashDataForStreetsParams struct {
+	CNNs        []int
+	SegmentSize TimeSegmentSize
+	StartTime   time.Time
+	EndTime     time.Time
+}
+
+type CrashStats struct {
+	NumberKilled           int `json:"numberKilled"`
+	NumberInjured          int `json:"numberInjured"`
+	NumberSeriouslyInjured int `json:"numberSeriouslyInjured"`
+	NumberOfCrashes        int `json:"numberOfCrashes"`
+}
+
+type GetCrashDataForStreetsReturn struct {
+	Data map[int64]CrashStats
+}

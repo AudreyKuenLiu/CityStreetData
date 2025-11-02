@@ -58,3 +58,10 @@ export type CrashEvents = {
   numberKilled: number;
   numberInjured: number;
 };
+
+export type CrashStats = {
+  numberKilled: number;
+  numberInjured: number;
+  numnberOfCrashes: number;
+  numberSeriouslyInjured: number;
+};

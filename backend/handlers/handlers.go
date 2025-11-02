@@ -49,7 +49,45 @@ func (h *handlers) InitHandlers() error {
 	h.echoInstance.GET("/api/segmentsForViewport", h.getSegmentsForViewport)
 	h.echoInstance.GET("/api/segmentsForGrid", h.getSegmentsForGrid)
 	h.echoInstance.GET("/api/crashesForCnns", h.getCrashesForCnns)
+	h.echoInstance.GET("/api/crashDataForStreets", h.getCrashDataForStreets)
 	return nil
+}
+
+func (h *handlers) getCrashDataForStreets(c echo.Context) error {
+	//return c.JSON(http.StatusOK, true)
+	h.logger.Info("calling getting crashes")
+	cnnsStr := c.QueryParam("cnns")
+	startTimeStr := c.QueryParam("startTime")
+	endTimeStr := c.QueryParam("endTime")
+
+	cnns := []int{}
+	if len(cnnsStr) > 0 {
+		err := json.Unmarshal([]byte(cnnsStr), &cnns)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
+		}
+	}
+	startTime, err := time.Parse(time.RFC3339, startTimeStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
+	}
+	endTime, err := time.Parse(time.RFC3339, endTimeStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
+	}
+
+	result, err := h.sfDataController.GetCrashDataForStreets(c.Request().Context(), &cTypes.GetCrashDataForStreetsParams{
+		CNNs:        cnns,
+		SegmentSize: "30D",
+		StartTime:   startTime,
+		EndTime:     endTime,
+	})
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting traffic crashes for cnns: %v", err))
+	}
+
+	return c.JSON(http.StatusOK, result.Data)
 }
 
 func (h *handlers) getCrashesForCnns(c echo.Context) error {

@@ -98,11 +98,11 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 		)
 		SELECT
 			sis.cnn,
-			COALESCE(crashes.occured_at, 0),
+			crashes.occured_at,
 			crashes.collision_severity,
 			crashes.collision_type,
-			COALESCE(crashes.number_killed, 0),
-			COALESCE(crashes.number_injured, 0)
+			crashes.number_killed,
+			crashes.number_injured
 		FROM
 			(
 				SELECT
@@ -110,7 +110,7 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 				FROM
 				selected_intersections_and_streets
 			) as sis
-			LEFT JOIN
+			JOIN
 			(
 				SELECT
 					cnn, occured_at, collision_severity, collision_type, number_killed, number_injured

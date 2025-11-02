@@ -12,3 +12,9 @@ export const dateToPacificRFC3339Time = (date: Date | null): string => {
     timeZone: "America/Los_Angeles",
   });
 };
+
+export const dateToPacificTimeMonth = (date: Date): string => {
+  return format(date ?? new Date(), "yyyy-MM-dd", {
+    timeZone: "America/Los_Angeles",
+  });
+};
