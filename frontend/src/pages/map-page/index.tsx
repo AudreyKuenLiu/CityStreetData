@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { MapView } from "./map-view";
 import { Splitter } from "antd";
@@ -17,15 +17,10 @@ export const MapPage: React.FC = () => {
   const { getStreetSegmentsForZoomLevel } = useStreetsForMapView();
   const { getCrashes, data, isLoading, isSuccess, canGetCrashes, dateRange } =
     useCrashDataForStreets();
-  const [panelSizes, setPanelSizes] = useState([0, 0]);
+
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
-      <Splitter
-        lazy={true}
-        onResizeEnd={(event) => {
-          setPanelSizes(event);
-        }}
-      >
+      <Splitter lazy={true}>
         <Splitter.Panel style={{ position: "relative" }}>
           <ControlPanel runQuery={getCrashes} canRunQuery={canGetCrashes} />
           <MapView
@@ -44,7 +39,6 @@ export const MapPage: React.FC = () => {
             isLoading={isLoading}
             isSuccess={isSuccess}
             groupCrashes={data}
-            panelSize={panelSizes[1]}
             dateRange={dateRange}
           />
         </Splitter.Panel>

@@ -22,7 +22,6 @@ export type StreetData = Map<GroupId, DateCrashStats[]>;
 
 interface useCrashDataForStreetsReturn {
   canGetCrashes: boolean;
-  dateRange: [Date | null, Date | null];
   getCrashes: () => Promise<void>;
   isSuccess: boolean;
   isLoading: boolean;
@@ -154,10 +153,6 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
 
   return {
     getCrashes,
-    dateRange: useMemo(
-      () => [queriedStartDate, queriedEndDate],
-      [queriedStartDate, queriedEndDate]
-    ),
     canGetCrashes: isReady,
     isSuccess: result.isSuccess,
     isLoading: result.isLoading,
