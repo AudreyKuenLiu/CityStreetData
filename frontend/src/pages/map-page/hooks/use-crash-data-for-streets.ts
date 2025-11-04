@@ -6,6 +6,7 @@ import {
   useIsReady,
   useStartDate,
   useStreetGroups,
+  useTimeSegment,
 } from "../store/street-map-data-form";
 import { dateToPacificRFC3339Time } from "../../../utils";
 import {
@@ -32,9 +33,8 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   const streetGroups = useStreetGroups();
   const startTime = useStartDate();
   const endTime = useEndDate();
+  const timeSegment = useTimeSegment();
   const isReady = useIsReady();
-  const [queriedStartDate, setQueriedStartDate] = useState<Date | null>(null);
-  const [queriedEndDate, setQueriedEndDate] = useState<Date | null>(null);
 
   //console.log("these are the street groups", streetGroups);
 
@@ -92,8 +92,15 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   // });
 
   const result = useQuery({
-    queryKey: ["crashDataForStreets", startTime, endTime, streetGroups],
+    queryKey: [
+      "crashDataForStreets",
+      startTime,
+      endTime,
+      streetGroups,
+      timeSegment,
+    ],
     enabled: false,
+    gcTime: 0,
     queryFn: async (): Promise<
       { id: GroupId; response: DateCrashStats[] }[]
     > => {
@@ -116,6 +123,7 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
                 cnns: JSON.stringify(cnns),
                 startTime: pacificStartTime,
                 endTime: pacificEndTime,
+                timeSegment,
               },
             }
           );
@@ -136,8 +144,6 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   });
 
   const getCrashes = async (): Promise<void> => {
-    setQueriedStartDate(startTime);
-    setQueriedEndDate(endTime);
     console.log("calling refetch again");
     //await oldResult.refetch();
     await result.refetch();

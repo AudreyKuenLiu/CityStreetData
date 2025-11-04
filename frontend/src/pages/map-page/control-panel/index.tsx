@@ -4,12 +4,18 @@ import { SearchOutlined } from "@ant-design/icons";
 import { GroupSelector } from "./group-selector/group-selector";
 import { useRef } from "react";
 import type { RefSelectProps } from "antd";
-import { StreetEventLabels, StreetEventOptions } from "./constants";
+import {
+  StreetEventLabels,
+  StreetEventOptions,
+  TimeSegmentLabels,
+  TimeSegmentOptions,
+} from "./constants";
 import {
   useActions,
   useCurrentStreetGroup,
   useStreetGroups,
-  useStreetEvent,
+  useTimeSegment,
+  //useStreetEvent,
 } from "../store/street-map-data-form";
 import { convertToGroupId } from "../store/constants";
 
@@ -28,11 +34,13 @@ export const ControlPanel = memo(
       editGroup,
       setEndDate,
       setStartDate,
-      setStreetEvent,
+      //setStreetEvent,
+      setTimeSegment,
     } = useActions();
     const currentStreetGroup = useCurrentStreetGroup();
     const streetGroups = useStreetGroups();
-    const streetEvent = useStreetEvent();
+    //const streetEvent = useStreetEvent();
+    const timeSegment = useTimeSegment();
     const groups = Array.from(streetGroups.values()).map((streetGroup) => {
       return {
         id: streetGroup.id,
@@ -40,7 +48,8 @@ export const ControlPanel = memo(
         color: streetGroup.color,
       };
     });
-    const selectRef = useRef<RefSelectProps>(null);
+    //const eventSelectRef = useRef<RefSelectProps>(null);
+    const timeSegmentSelectRef = useRef<RefSelectProps>(null);
 
     return (
       <Flex
@@ -101,12 +110,12 @@ export const ControlPanel = memo(
               return editGroup({ id: groupId, name });
             }}
           />
-          <Select
+          {/* <Select
             size="large"
-            ref={selectRef}
+            ref={eventSelectRef}
             placeholder="Select an event"
             onInputKeyDown={(e) => {
-              selectRef.current?.blur();
+              eventSelectRef.current?.blur();
               e.stopPropagation();
             }}
             value={[
@@ -118,11 +127,36 @@ export const ControlPanel = memo(
             options={StreetEventOptions}
             onSelect={(_, option) => {
               setStreetEvent(option.value);
-              selectRef.current?.blur();
+              eventSelectRef.current?.blur();
+            }}
+          /> */}
+          <Select
+            size="large"
+            ref={timeSegmentSelectRef}
+            placeholder="Every 'X' Days"
+            onInputKeyDown={(e) => {
+              timeSegmentSelectRef.current?.blur();
+              e.stopPropagation();
+            }}
+            options={TimeSegmentOptions}
+            value={
+              timeSegment != null
+                ? [
+                    {
+                      value: timeSegment,
+                      label: TimeSegmentLabels[timeSegment],
+                    },
+                  ]
+                : null
+            }
+            onSelect={(_, option) => {
+              setTimeSegment(option.value);
+              timeSegmentSelectRef.current?.blur();
             }}
           />
           <DatePicker.RangePicker
             size="large"
+            placeholder={["From Start Date", "To End Date"]}
             onChange={(value) => {
               console.log("the date is changing");
               if (

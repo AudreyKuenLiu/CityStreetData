@@ -15,7 +15,7 @@ import { useCrashDataForStreets } from "./hooks/use-crash-data-for-streets";
 
 export const MapPage: React.FC = () => {
   const { getStreetSegmentsForZoomLevel } = useStreetsForMapView();
-  const { getCrashes, data, isLoading, isSuccess, canGetCrashes, dateRange } =
+  const { getCrashes, data, isLoading, isSuccess, canGetCrashes } =
     useCrashDataForStreets();
 
   return (
@@ -39,7 +39,6 @@ export const MapPage: React.FC = () => {
             isLoading={isLoading}
             isSuccess={isSuccess}
             groupCrashes={data}
-            dateRange={dateRange}
           />
         </Splitter.Panel>
       </Splitter>

@@ -4,7 +4,7 @@ import (
 	"citystreetdata/controllers/types"
 	rTypes "citystreetdata/repositories/types"
 	dtypes "citystreetdata/types"
-	"time"
+	"math"
 
 	repo "citystreetdata/repositories"
 	"context"
@@ -55,16 +55,38 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 	for itTime.Unix() < endTime.Unix() {
 		dateToCrashesGroupMap[itTime.Unix()] = types.CrashStats{}
 		timeSlices = append(timeSlices, itTime.Unix())
-		itTime = itTime.Add(time.Duration(params.SegmentSize.SegmentInSeconds()) * time.Second)
+		years, months, days := params.SegmentSize.SegmentInYearMonthDays()
+		itTime = itTime.AddDate(years, months, days)
 	}
 
-	findClosestTime := func(occuredTime int64) int64 {
-		index := (occuredTime - startTime.Unix()) / params.SegmentSize.SegmentInSeconds()
-		return timeSlices[index]
+	findClosestTime := func(occuredTime int64) (int64, error) {
+		start := 0
+		end := len(timeSlices) - 1
+		for start <= end {
+			mid := (start + end) / 2
+			midVal := timeSlices[mid]
+			nextMidVal := int64(math.MaxInt64)
+			if mid+1 < len(timeSlices) {
+				nextMidVal = timeSlices[mid+1]
+			}
+			if occuredTime >= midVal && occuredTime < nextMidVal {
+				return midVal, nil
+			}
+			if occuredTime < midVal {
+				end = mid - 1
+			}
+			if occuredTime > midVal {
+				start = mid + 1
+			}
+		}
+		return 0, fmt.Errorf("could not find closest time")
 	}
 
 	for _, crashData := range crashes {
-		closestTime := findClosestTime(crashData.OccuredAt.Unix())
+		closestTime, err := findClosestTime(crashData.OccuredAt.Unix())
+		if err != nil {
+			return nil, err
+		}
 		crashStats := dateToCrashesGroupMap[closestTime]
 		if crashData.CollisionSeverity != nil && *crashData.CollisionSeverity == dtypes.Severe {
 			crashStats.NumberSeriouslyInjured += crashData.NumberInjured

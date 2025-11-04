@@ -54,11 +54,10 @@ func (h *handlers) InitHandlers() error {
 }
 
 func (h *handlers) getCrashDataForStreets(c echo.Context) error {
-	//return c.JSON(http.StatusOK, true)
-	h.logger.Info("calling getting crashes")
 	cnnsStr := c.QueryParam("cnns")
 	startTimeStr := c.QueryParam("startTime")
 	endTimeStr := c.QueryParam("endTime")
+	timeSegment := c.QueryParam("timeSegment")
 
 	cnns := []int{}
 	if len(cnnsStr) > 0 {
@@ -75,10 +74,14 @@ func (h *handlers) getCrashDataForStreets(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
 	}
+	segmentSize, err := cTypes.StrToSegment(timeSegment)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing timeSegment: %v", err))
+	}
 
 	result, err := h.sfDataController.GetCrashDataForStreets(c.Request().Context(), &cTypes.GetCrashDataForStreetsParams{
 		CNNs:        cnns,
-		SegmentSize: "30D",
+		SegmentSize: segmentSize,
 		StartTime:   startTime,
 		EndTime:     endTime,
 	})

@@ -4,6 +4,12 @@ export enum StreetEvent {
   TrafficCrashes = "TRAFFIC_CRASHES",
 }
 
+export enum TimeSegments {
+  ThirtyDays = "30D",
+  NinetyDays = "90D",
+  OneYear = "1Y",
+}
+
 export type GroupId = Brand<string, "GroupId">;
 export const emptyGroupId = "00000000-0000-0000-0000-000000000000" as GroupId;
 

@@ -3,6 +3,7 @@ package types
 import (
 	rTypes "citystreetdata/repositories/types"
 	"citystreetdata/types"
+	"fmt"
 	"time"
 
 	"github.com/twpayne/go-geos"
@@ -50,17 +51,26 @@ type GetCrashesForStreetsParams struct {
 type TimeSegmentSize string
 
 const (
-	Weeks    TimeSegmentSize = "W"
 	Months   TimeSegmentSize = "30D"
 	Quarters TimeSegmentSize = "90D"
-	Years    TimeSegmentSize = "Y"
+	Years    TimeSegmentSize = "1Y"
 )
+
+func StrToSegment(s string) (TimeSegmentSize, error) {
+	err := fmt.Errorf("could not parse to set segment")
+	if s == string(Months) {
+		return Months, nil
+	} else if s == string(Quarters) {
+		return Quarters, nil
+	} else if s == string(Years) {
+		return Years, nil
+	}
+	return TimeSegmentSize(""), err
+}
 
 func (t TimeSegmentSize) SegmentInSeconds() int64 {
 	daysSeconds := 60 * 60 * 24
 	switch t {
-	case Weeks:
-		return int64(daysSeconds) * 7
 	case Months:
 		return int64(daysSeconds) * 30
 	case Quarters:
@@ -70,6 +80,19 @@ func (t TimeSegmentSize) SegmentInSeconds() int64 {
 
 	}
 	return 0
+}
+
+func (t TimeSegmentSize) SegmentInYearMonthDays() (int, int, int) {
+	switch t {
+	case Months:
+		return 0, 1, 0
+	case Quarters:
+		return 0, 3, 0
+	case Years:
+		return 1, 0, 0
+
+	}
+	return 0, 0, 0
 }
 
 type GetCrashDataForStreetsParams struct {

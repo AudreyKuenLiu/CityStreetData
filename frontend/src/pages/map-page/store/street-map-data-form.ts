@@ -3,7 +3,7 @@ import { StreetSegment } from "../../../models/map-grid";
 import { useShallow } from "zustand/shallow";
 import { devtools } from "zustand/middleware";
 import { getRandomColor } from "../../../utils";
-import { StreetEvent, GroupId, emptyGroupId } from "./constants";
+import { StreetEvent, GroupId, emptyGroupId, TimeSegments } from "./constants";
 
 type StreetMapFormActions = {
   addGroup: ({ name }: { name: string }) => { id: GroupId; color: string };
@@ -13,6 +13,7 @@ type StreetMapFormActions = {
   toggleStreet: (streetSegment: StreetSegment) => boolean;
   addStreet: (StreetSegment: StreetSegment) => boolean;
   removeStreet: (cnn: number) => boolean;
+  setTimeSegment: (timeSegment: TimeSegments) => void;
   setStreetEvent: (streetEvent: StreetEvent) => void;
   setStartDate: (startDate: Date | null) => void;
   setEndDate: (endDate: Date | null) => void;
@@ -32,6 +33,7 @@ type StreetMapForm = {
   streetEvent: StreetEvent;
   startDate: Date | null;
   endDate: Date | null;
+  timeSegment: TimeSegments | null;
   isReady: boolean;
   actions: StreetMapFormActions;
 };
@@ -54,10 +56,10 @@ const isStreetMapFormReady = (
     newState.streetGroups !== undefined
       ? streetGroupHasCnn(newState.streetGroups)
       : streetGroupHasCnn(oldState.streetGroups);
-  const hasStreetEvent =
-    newState.streetEvent !== undefined
-      ? newState.streetEvent != null
-      : oldState.streetEvent != null;
+  // const hasStreetEvent =
+  //   newState.streetEvent !== undefined
+  //     ? newState.streetEvent != null
+  //     : oldState.streetEvent != null;
   const hasStartDate =
     newState.startDate !== undefined
       ? newState.startDate != null
@@ -66,8 +68,20 @@ const isStreetMapFormReady = (
     newState.endDate !== undefined
       ? newState.endDate != null
       : oldState.endDate != null;
+  const hasTimeSegment =
+    newState.timeSegment !== undefined
+      ? newState.timeSegment != null
+      : oldState.timeSegment != null;
 
-  return hasCnns && hasStreetEvent && hasStartDate && hasEndDate;
+  console.log("it is ready", hasCnns, hasEndDate, hasStartDate, hasTimeSegment);
+
+  return (
+    hasCnns &&
+    // &&  hasStreetEvent
+    hasStartDate &&
+    hasEndDate &&
+    hasTimeSegment
+  );
 };
 
 const getCurrentStreetGroup = (
@@ -104,8 +118,8 @@ const useStreetMapDataForm = create<StreetMapForm>()(
     (set) => ({
       streetGroups: new Map<string, StreetGroup>(),
       currentGroupId: emptyGroupId,
-      //cnns: new Map(),
       streetEvent: StreetEvent.TrafficCrashes,
+      timeSegment: null,
       startDate: null,
       endDate: null,
       isReady: false,
@@ -273,12 +287,21 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           return ret;
         },
         setStreetEvent: (streetEvent): void => {
-          console.log("setting street event");
-
           set((state) => {
             return {
               streetEvent,
               isReady: isStreetMapFormReady(state, { streetEvent }),
+            };
+          });
+        },
+        setTimeSegment: (timeSegment): void => {
+          console.log("setting time segment", timeSegment);
+          set((state) => {
+            return {
+              timeSegment,
+              isReady: isStreetMapFormReady(state, {
+                timeSegment,
+              }),
             };
           });
         },
@@ -293,7 +316,6 @@ const useStreetMapDataForm = create<StreetMapForm>()(
         },
         setEndDate: (endDate): void => {
           const newDate = endDate != null ? new Date(endDate) : null;
-
           set((state) => {
             return {
               endDate: newDate,
@@ -306,6 +328,10 @@ const useStreetMapDataForm = create<StreetMapForm>()(
     { name: "StreetMapDataForm" }
   )
 );
+
+export const useTimeSegment = (): TimeSegments | null => {
+  return useStreetMapDataForm((state) => state.timeSegment);
+};
 
 export const useStartDate = (): Date | null => {
   return useStreetMapDataForm((state) => state.startDate);
