@@ -5,8 +5,8 @@ export enum StreetEvent {
 }
 
 export enum TimeSegments {
-  ThirtyDays = "30D",
-  NinetyDays = "90D",
+  OneMonth = "1M",
+  ThreeMonths = "3M",
   OneYear = "1Y",
 }
 

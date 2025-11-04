@@ -12,19 +12,19 @@ export const StreetEventOptions = [
 ] satisfies { value: StreetEvent; label: string }[];
 
 export const TimeSegmentLabels = {
-  [TimeSegments.ThirtyDays]: "30 Days",
-  [TimeSegments.NinetyDays]: "90 Days",
+  [TimeSegments.OneMonth]: "1 Month",
+  [TimeSegments.ThreeMonths]: "3 Months",
   [TimeSegments.OneYear]: "1 Year",
 };
 
 export const TimeSegmentOptions = [
   {
-    value: TimeSegments.ThirtyDays,
-    label: "30 Days",
+    value: TimeSegments.OneMonth,
+    label: "1 Month",
   },
   {
-    value: TimeSegments.NinetyDays,
-    label: "90 Days",
+    value: TimeSegments.ThreeMonths,
+    label: "3 Months",
   },
   {
     value: TimeSegments.OneYear,

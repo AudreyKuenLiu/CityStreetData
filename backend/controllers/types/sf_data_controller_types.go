@@ -51,8 +51,8 @@ type GetCrashesForStreetsParams struct {
 type TimeSegmentSize string
 
 const (
-	Months   TimeSegmentSize = "30D"
-	Quarters TimeSegmentSize = "90D"
+	Months   TimeSegmentSize = "1M"
+	Quarters TimeSegmentSize = "3M"
 	Years    TimeSegmentSize = "1Y"
 )
 
