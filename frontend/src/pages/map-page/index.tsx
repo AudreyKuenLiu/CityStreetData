@@ -17,12 +17,30 @@ export const MapPage: React.FC = () => {
   const { getStreetSegmentsForZoomLevel } = useStreetsForMapView();
   const { getCrashes, data, isLoading, isSuccess, canGetCrashes } =
     useCrashDataForStreets();
+  const [sizes, setSizes] = useState<(number | string)[]>(["100%", 0]);
 
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
-      <Splitter lazy={true}>
-        <Splitter.Panel style={{ position: "relative" }}>
-          <ControlPanel runQuery={getCrashes} canRunQuery={canGetCrashes} />
+      <Splitter
+        lazy={true}
+        onResizeEnd={(sizes) => {
+          console.log("setting sizes", sizes);
+          setSizes(sizes);
+        }}
+      >
+        <Splitter.Panel
+          style={{ position: "relative" }}
+          resizable={true}
+          collapsible={true}
+          size={sizes[0]}
+        >
+          <ControlPanel
+            runQuery={async () => {
+              await getCrashes();
+              if (sizes[1] === 0) setSizes(["80%", "25%"]);
+            }}
+            canRunQuery={canGetCrashes}
+          />
           <MapView
             initalNESWBounds={[
               SanFranciscoNEPoint[0],
@@ -34,7 +52,7 @@ export const MapPage: React.FC = () => {
             getStreetSegmentsForZoomLevel={getStreetSegmentsForZoomLevel}
           />
         </Splitter.Panel>
-        <Splitter.Panel defaultSize={0} collapsible={true} min={500}>
+        <Splitter.Panel defaultSize={0} collapsible={true} size={sizes[1]}>
           <GraphView
             isLoading={isLoading}
             isSuccess={isSuccess}

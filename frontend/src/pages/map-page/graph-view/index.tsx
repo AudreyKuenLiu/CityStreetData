@@ -176,6 +176,7 @@ export const GraphView = ({
                   }
                   return label.data.yFormatted;
                 }}
+                useMesh={false}
                 pointSize={8}
                 axisLeft={{
                   format: (e) => {
