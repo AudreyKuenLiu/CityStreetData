@@ -104,12 +104,17 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
     queryFn: async (): Promise<
       { id: GroupId; response: DateCrashStats[] }[]
     > => {
-      const pacificStartTime = dateToPacificRFC3339Time(startTime);
-      const pacificEndTime = dateToPacificRFC3339Time(endTime);
+      // const pacificStartTime = dateToPacificRFC3339Time(startTime);
+      // const pacificEndTime = dateToPacificRFC3339Time(endTime);
+      // console.log(
+      //   "this is the startTime, endTime",
+      //   startTime,
+      //   pacificStartTime
+      // );
       const allResults = Array.from(streetGroups.values()).map(
         async (streetGroup) => {
           const cnns = Array.from(streetGroup.cnns.keys());
-          if (cnns.length === 0) {
+          if (cnns.length === 0 || startTime == null || endTime == null) {
             return {
               id: streetGroup.id,
               response: [],
@@ -121,8 +126,8 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
             {
               params: {
                 cnns: JSON.stringify(cnns),
-                startTime: pacificStartTime,
-                endTime: pacificEndTime,
+                startTime: startTime.getTime() / 1000,
+                endTime: endTime.getTime() / 1000,
                 timeSegment,
               },
             }

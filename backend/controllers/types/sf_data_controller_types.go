@@ -103,10 +103,10 @@ type GetCrashDataForStreetsParams struct {
 }
 
 type CrashStats struct {
-	NumberKilled           int `json:"numberKilled"`
-	NumberInjured          int `json:"numberInjured"`
-	NumberSeriouslyInjured int `json:"numberSeriouslyInjured"`
-	NumberOfCrashes        int `json:"numberOfCrashes"`
+	NumberKilled          int `json:"numberKilled"`
+	NumberInjured         int `json:"numberInjured"`
+	NumberSeverelyInjured int `json:"numberSeverelyInjured"`
+	NumberOfCrashes       int `json:"numberOfCrashes"`
 }
 
 type GetCrashDataForStreetsReturn struct {

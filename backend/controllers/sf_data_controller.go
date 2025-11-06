@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 )
 
 type SfDataController struct {
@@ -50,11 +51,13 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 	timeSlices := []int64{}
 	startTime := params.StartTime
 	endTime := params.EndTime
-	itTime := startTime
+	loc, _ := time.LoadLocation("America/Los_Angeles")
+	itTime := startTime.In(loc)
 
 	for itTime.Unix() < endTime.Unix() {
-		dateToCrashesGroupMap[itTime.Unix()] = types.CrashStats{}
-		timeSlices = append(timeSlices, itTime.Unix())
+		unixTime := itTime.Unix()
+		dateToCrashesGroupMap[unixTime] = types.CrashStats{}
+		timeSlices = append(timeSlices, unixTime)
 		years, months, days := params.SegmentSize.SegmentInYearMonthDays()
 		itTime = itTime.AddDate(years, months, days)
 	}
@@ -89,15 +92,13 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		}
 		crashStats := dateToCrashesGroupMap[closestTime]
 		if crashData.CollisionSeverity != nil && *crashData.CollisionSeverity == dtypes.Severe {
-			crashStats.NumberSeriouslyInjured += crashData.NumberInjured
+			crashStats.NumberSeverelyInjured += crashData.NumberInjured
 		}
 		crashStats.NumberInjured += crashData.NumberInjured
 		crashStats.NumberKilled += crashData.NumberKilled
 		crashStats.NumberOfCrashes += 1
 		dateToCrashesGroupMap[closestTime] = crashStats
 	}
-
-	sfc.logger.Info("this is the return map", "map", dateToCrashesGroupMap)
 
 	return &types.GetCrashDataForStreetsReturn{
 		Data: dateToCrashesGroupMap,

@@ -62,6 +62,6 @@ export type CrashEvents = {
 export type CrashStats = {
   numberKilled: number;
   numberInjured: number;
-  numnberOfCrashes: number;
-  numberSeriouslyInjured: number;
+  numberOfCrashes: number;
+  numberSeverelyInjured: number;
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import type { StreetData } from "../hooks/use-crash-data-for-streets";
-import { ResponsiveLine } from "@nivo/line";
+import { ResponsiveLine, SliceTooltipProps } from "@nivo/line";
 import { Flex, Typography } from "antd";
 import { useStreetGroups } from "../store/street-map-data-form";
 import { XFilled } from "@ant-design/icons";
@@ -10,6 +10,14 @@ interface GraphViewParams {
   isSuccess: boolean;
   groupCrashes: StreetData;
 }
+
+type sliceData = {
+  id: string;
+  data: {
+    x: Date;
+    y: number;
+  }[];
+};
 
 export const GraphView = ({
   isLoading,
@@ -64,7 +72,7 @@ export const GraphView = ({
           ([time, crashEvents]) => {
             return {
               x: time,
-              y: crashEvents.numberSeriouslyInjured,
+              y: crashEvents.numberSeverelyInjured,
             };
           }
         );
@@ -72,16 +80,25 @@ export const GraphView = ({
           ([time, crashEvents]) => {
             return {
               x: time,
-              y: crashEvents.numberInjured - crashEvents.numberSeriouslyInjured,
+              y: crashEvents.numberInjured - crashEvents.numberSeverelyInjured,
             };
           }
         );
+        const tickValues = sortedGroupCrashes.map(([time, _]) => time);
+        // const vehicleCrashes = sortedGroupCrashes.map(([time, crashEvents]) => {
+        //   return {
+        //     x: time,
+        //     y: crashEvents.numberOfCrashes,
+        //   };
+        // });
+        //console.log("this ist he nonSeverInjuriesData", nonSevereInjuriesData);
         const combinedData = [
           { id: "Fatalities", data: fatalitiesData },
           { id: "Severe Injuries", data: severeInjuriesData },
           { id: "Injuries", data: nonSevereInjuriesData },
+          //{ id: "Vehicle Crashes", data: vehicleCrashes },
         ];
-        const totalWidth = Math.max(sortedGroupCrashes.length * 30, 1400);
+        const totalWidth = Math.max(sortedGroupCrashes.length * 80, 1400);
 
         return (
           <Flex
@@ -172,7 +189,9 @@ export const GraphView = ({
                 }}
                 axisBottom={{
                   format: "%Y-%m-%d",
+                  tickValues: tickValues,
                 }}
+                sliceTooltip={sliceTooltip}
                 xScale={{
                   type: "time",
                 }}
@@ -191,6 +210,54 @@ export const GraphView = ({
         );
       })}
     </Flex>
+  );
+};
+
+const sliceTooltip = ({
+  slice,
+}: SliceTooltipProps<sliceData>): React.JSX.Element => {
+  return (
+    <div
+      style={{
+        background: "white",
+        padding: "14px",
+        width: "200px",
+        border: "1px solid #ccc",
+        transform: "translate(115px, -100px)",
+        borderRadius: 5,
+      }}
+    >
+      <Typography.Title level={4} style={{ marginTop: 0 }}>
+        {slice.points[0].data.x.toDateString()}
+      </Typography.Title>
+      <Flex
+        style={{
+          flexDirection: "column",
+        }}
+      >
+        {slice.points.map((point) => (
+          <Flex
+            key={point.id}
+            style={{
+              justifyContent: "space-between",
+              color: point.seriesColor,
+              padding: "3px 0",
+            }}
+          >
+            <Flex style={{ alignItems: "center", gap: "0.3em" }}>
+              <XFilled
+                style={{
+                  fontSize: "12px",
+                  color: point.seriesColor,
+                }}
+              />
+              <Typography.Text strong>{point.seriesId}</Typography.Text>
+            </Flex>
+            <Typography.Text>{point.data.yFormatted}</Typography.Text>
+          </Flex>
+        ))}
+      </Flex>
+    </div>
   );
 };
 
@@ -256,8 +323,8 @@ export const GraphView = ({
 //           return {
 //             time: dateToPacificTimeMonth(time),
 //             injuries:
-//               crashStats.numberInjured - crashStats.numberSeriouslyInjured,
-//             severeInjuries: crashStats.numberSeriouslyInjured,
+//               crashStats.numberInjured - crashStats.numberSeverelyInjured,
+//             severeInjuries: crashStats.numberSeverelyInjured,
 //             fatalities: crashStats.numberKilled,
 //           };
 //         });

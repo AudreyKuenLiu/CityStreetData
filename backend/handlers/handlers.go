@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 
 	dc "citystreetdata/controllers"
@@ -55,8 +56,8 @@ func (h *handlers) InitHandlers() error {
 
 func (h *handlers) getCrashDataForStreets(c echo.Context) error {
 	cnnsStr := c.QueryParam("cnns")
-	startTimeStr := c.QueryParam("startTime")
-	endTimeStr := c.QueryParam("endTime")
+	startTimeString := c.QueryParam("startTime")
+	endTimeString := c.QueryParam("endTime")
 	timeSegment := c.QueryParam("timeSegment")
 
 	cnns := []int{}
@@ -66,11 +67,13 @@ func (h *handlers) getCrashDataForStreets(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
 		}
 	}
-	startTime, err := time.Parse(time.RFC3339, startTimeStr)
+	startTimeEpoch, err := strconv.ParseInt(startTimeString, 10, 64)
+	startTime := time.Unix(startTimeEpoch, 0)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
 	}
-	endTime, err := time.Parse(time.RFC3339, endTimeStr)
+	endTimeEpoch, err := strconv.ParseInt(endTimeString, 10, 64)
+	endTime := time.Unix(endTimeEpoch, 0)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
 	}
