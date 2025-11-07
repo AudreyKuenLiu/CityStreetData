@@ -26,17 +26,8 @@ export const MapView = ({
   getStreetSegmentsForZoomLevel: (zoomLevel: number) => StreetSegment[];
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
-  const {
-    onMouseEnter,
-    onMouseLeave,
-    hoverInfo,
-    onHover,
-    cursor,
-    key,
-    setKey,
-    viewState,
-    setViewState,
-  } = useMapControls({ centerLatLon });
+  const { hoverInfo, onHover, key, setKey, viewState, setViewState } =
+    useMapControls({ centerLatLon });
   const { toggleStreet } = useActions();
   const { configs } = useSelectedSteets();
   const layerIds = configs.map((config) => {
@@ -83,8 +74,6 @@ export const MapView = ({
           initalNESWBounds[1],
           initalNESWBounds[0],
         ]}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
         onClick={(event: MapLayerMouseEvent) => {
           const features = event.features;
           if (
@@ -98,7 +87,6 @@ export const MapView = ({
             setKey(key + 1); //super-hack this line is responsibe for "rerendering" the map when clicked
           }
         }}
-        cursor={cursor}
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
         interactiveLayerIds={[streetLayerId, hoveredLayerId, ...layerIds]}

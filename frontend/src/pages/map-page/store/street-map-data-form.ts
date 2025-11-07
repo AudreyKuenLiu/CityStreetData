@@ -75,8 +75,6 @@ const isStreetMapFormReady = (
       ? newState.timeSegment != null
       : oldState.timeSegment != null;
 
-  console.log("it is ready", hasCnns, hasEndDate, hasStartDate, hasTimeSegment);
-
   return (
     hasCnns &&
     // &&  hasStreetEvent

@@ -180,7 +180,6 @@ export const ControlPanel = memo(
             size="large"
             placeholder={["From Start Date", "To End Date"]}
             onChange={(value) => {
-              console.log("the date is changing");
               if (
                 value == null ||
                 value[0]?.date == null ||

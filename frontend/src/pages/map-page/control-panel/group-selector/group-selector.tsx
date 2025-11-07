@@ -40,7 +40,6 @@ export const GroupSelector = ({
   useEffect(() => {
     if (groups.length === 0 && index === 1) {
       const group = onAddItem(`Group ${index++}`);
-      console.log("setting onselect item");
       onSelectItem(group.id);
     }
   }, [groups, onAddItem, onSelectItem]);

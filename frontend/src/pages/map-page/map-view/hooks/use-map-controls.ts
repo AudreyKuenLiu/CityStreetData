@@ -1,16 +1,12 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ViewState } from "react-map-gl/maplibre";
 import { DEFAULT_ZOOM } from "../constants";
 import { useActions } from "../../store/street-map-data-form";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
-import _ from "lodash";
 
 interface useMapControlsReturn {
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
   hoverInfo: { cnn: string } | null;
   onHover: (event: MapLayerMouseEvent) => void;
-  cursor: string;
   key: number;
   setKey: (nextKey: number) => void;
   viewState: ViewState;
@@ -23,7 +19,6 @@ export const useMapControls = ({
   centerLatLon: [number, number];
 }): useMapControlsReturn => {
   const timeMs = useRef<number>(0);
-  const [cursor, setCursor] = useState<string>("grab");
   const [hoverInfo, setHoverInfo] = useState<{ cnn: string } | null>(null);
   const [key, setKey] = useState(0);
   const [isXPressed, setIsXPressed] = useState(false);
@@ -70,12 +65,6 @@ export const useMapControls = ({
 
   const throttledHover = (event: MapLayerMouseEvent): void =>
     throttleFunc(onHover, event);
-  const onMouseEnter = useCallback(() => {
-    throttleFunc(() => setCursor("pointer"));
-  }, []);
-  const onMouseLeave = useCallback(() => {
-    throttleFunc(() => setCursor("grab"));
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
@@ -106,11 +95,8 @@ export const useMapControls = ({
   });
 
   return {
-    onMouseEnter,
-    onMouseLeave,
     hoverInfo,
     onHover: throttledHover,
-    cursor,
     key,
     setKey,
     viewState,
