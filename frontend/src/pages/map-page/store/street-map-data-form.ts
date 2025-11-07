@@ -17,6 +17,7 @@ type StreetMapFormActions = {
   setStreetEvent: (streetEvent: StreetEvent) => void;
   setStartDate: (startDate: Date | null) => void;
   setEndDate: (endDate: Date | null) => void;
+  resetIsDirty: () => void;
 };
 
 type StreetGroup = {
@@ -35,6 +36,7 @@ type StreetMapForm = {
   endDate: Date | null;
   timeSegment: TimeSegments | null;
   isReady: boolean;
+  isDirty: boolean;
   actions: StreetMapFormActions;
 };
 
@@ -86,15 +88,12 @@ const isStreetMapFormReady = (
 
 const getCurrentStreetGroup = (
   curState: StreetMapFormState
-):
-  | [Map<GroupId, StreetGroup>, StreetGroup, true]
-  | [undefined, undefined, false] => {
-  const updatedStreetGroups = new Map(curState.streetGroups);
-  const streetGroup = updatedStreetGroups.get(curState.currentGroupId);
+): [StreetGroup, true] | [undefined, false] => {
+  const streetGroup = curState.streetGroups.get(curState.currentGroupId);
   if (streetGroup == null) {
-    return [undefined, undefined, false];
+    return [undefined, false];
   }
-  return [updatedStreetGroups, streetGroup, true];
+  return [streetGroup, true];
 };
 const removeCnnFromGroup = (
   curState: StreetMapFormState,
@@ -112,6 +111,16 @@ const removeCnnFromGroup = (
   oldStreetSegmentGroup.cnns.delete(cnn);
   return true;
 };
+const addStreetToGroup = (
+  curState: StreetMapForm,
+  curStreetGroup: StreetGroup,
+  streetSegment: StreetSegment
+): void => {
+  const cnnMap = curStreetGroup.cnns;
+  removeCnnFromGroup(curState, streetSegment.cnn);
+  cnnMap.set(streetSegment.cnn, streetSegment);
+  curState._cnnToGroupId.set(streetSegment.cnn, curStreetGroup.id);
+};
 
 const useStreetMapDataForm = create<StreetMapForm>()(
   devtools(
@@ -123,6 +132,7 @@ const useStreetMapDataForm = create<StreetMapForm>()(
       startDate: null,
       endDate: null,
       isReady: false,
+      isDirty: false,
       _cnnToGroupId: new Map<number, string>(), //more of an internal field to keep track of where cnns are do not use in selector
       actions: {
         addGroup: ({
@@ -130,7 +140,6 @@ const useStreetMapDataForm = create<StreetMapForm>()(
         }: {
           name: string;
         }): { id: GroupId; color: string } => {
-          console.log("adding group");
           const id = crypto.randomUUID() as GroupId;
           let color = "";
           set((state) => {
@@ -149,8 +158,6 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           return { id, color };
         },
         removeGroup: ({ id }: { id: GroupId }): boolean => {
-          console.log("removing group");
-
           let ret = true;
           set((state) => {
             if (!state.streetGroups.has(id)) {
@@ -174,8 +181,6 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           return ret;
         },
         editGroup: ({ id, name }: { id: GroupId; name: string }): boolean => {
-          console.log("editing group");
-
           let ret = true;
           set((state) => {
             const updatedMap = new Map(state.streetGroups);
@@ -195,7 +200,6 @@ const useStreetMapDataForm = create<StreetMapForm>()(
         },
         setCurrentGroup: ({ id }: { id: GroupId }): boolean => {
           console.log("setting current group", id);
-
           let ret = true;
           set((state) => {
             if (!state.streetGroups.has(id)) {
@@ -209,12 +213,9 @@ const useStreetMapDataForm = create<StreetMapForm>()(
           return ret;
         },
         toggleStreet: (streetSegment: StreetSegment): boolean => {
-          console.log("toggling street");
-
           let ret = true;
           set((state) => {
-            const [updatedStreetGroups, streetGroup, isNull] =
-              getCurrentStreetGroup(state);
+            const [streetGroup, isNull] = getCurrentStreetGroup(state);
             if (isNull === false) {
               ret = false;
               return {};
@@ -224,64 +225,49 @@ const useStreetMapDataForm = create<StreetMapForm>()(
             if (cnnMap.has(streetSegment.cnn)) {
               cnnMap.delete(streetSegment.cnn);
             } else {
-              removeCnnFromGroup(state, streetSegment.cnn);
-              cnnMap.set(streetSegment.cnn, streetSegment);
-              state._cnnToGroupId.set(streetSegment.cnn, streetGroup.id);
+              addStreetToGroup(state, streetGroup, streetSegment);
             }
 
             return {
-              streetGroups: updatedStreetGroups,
-              _cnnToGroupId: state._cnnToGroupId,
               isReady: isStreetMapFormReady(state, {
-                streetGroups: updatedStreetGroups,
+                streetGroups: state.streetGroups,
               }),
+              isDirty: true,
             };
           });
           return ret;
         },
         addStreet: (streetSegment: StreetSegment): boolean => {
-          console.log("adding street");
-
           let ret = true;
           set((state) => {
-            const [updatedStreetGroups, streetGroup, isNull] =
-              getCurrentStreetGroup(state);
+            const [streetGroup, isNull] = getCurrentStreetGroup(state);
             if (isNull === false) {
               ret = false;
               return {};
             }
-
-            const cnnMap = streetGroup.cnns;
-            removeCnnFromGroup(state, streetSegment.cnn);
-            cnnMap.set(streetSegment.cnn, streetSegment);
-            state._cnnToGroupId.set(streetSegment.cnn, streetGroup.id);
-
+            addStreetToGroup(state, streetGroup, streetSegment);
             return {
-              streetGroups: updatedStreetGroups,
-              _cnnToGroupId: state._cnnToGroupId,
               isReady: isStreetMapFormReady(state, {
-                streetGroups: updatedStreetGroups,
+                streetGroups: state.streetGroups,
               }),
+              isDirty: true,
             };
           });
           return ret;
         },
         removeStreet: (cnn: number): boolean => {
-          console.log("removing street");
-
           let ret = true;
           set((state) => {
-            if (removeCnnFromGroup(state, cnn) === false) {
+            if (!removeCnnFromGroup(state, cnn)) {
               ret = false;
               return {};
             }
 
             return {
-              streetGroups: state.streetGroups,
-              _cnnToGroupId: state._cnnToGroupId,
               isReady: isStreetMapFormReady(state, {
                 streetGroups: state.streetGroups,
               }),
+              isDirty: true,
             };
           });
           return ret;
@@ -291,17 +277,18 @@ const useStreetMapDataForm = create<StreetMapForm>()(
             return {
               streetEvent,
               isReady: isStreetMapFormReady(state, { streetEvent }),
+              isDirty: true,
             };
           });
         },
         setTimeSegment: (timeSegment): void => {
-          console.log("setting time segment", timeSegment);
           set((state) => {
             return {
               timeSegment,
               isReady: isStreetMapFormReady(state, {
                 timeSegment,
               }),
+              isDirty: true,
             };
           });
         },
@@ -311,6 +298,7 @@ const useStreetMapDataForm = create<StreetMapForm>()(
             return {
               startDate: newDate,
               isReady: isStreetMapFormReady(state, { startDate: newDate }),
+              isDirty: true,
             };
           });
         },
@@ -320,6 +308,14 @@ const useStreetMapDataForm = create<StreetMapForm>()(
             return {
               endDate: newDate,
               isReady: isStreetMapFormReady(state, { endDate: newDate }),
+              isDirty: true,
+            };
+          });
+        },
+        resetIsDirty: (): void => {
+          set(() => {
+            return {
+              isDirty: false,
             };
           });
         },
@@ -332,19 +328,18 @@ const useStreetMapDataForm = create<StreetMapForm>()(
 export const useTimeSegment = (): TimeSegments | null => {
   return useStreetMapDataForm((state) => state.timeSegment);
 };
-
 export const useStartDate = (): Date | null => {
   return useStreetMapDataForm((state) => state.startDate);
 };
-
 export const useEndDate = (): Date | null => {
   return useStreetMapDataForm((state) => state.endDate);
 };
-
 export const useStreetEvent = (): StreetEvent => {
   return useStreetMapDataForm((state) => state.streetEvent);
 };
-
+export const useIsDirty = (): boolean => {
+  return useStreetMapDataForm(useShallow((state) => state.isDirty));
+};
 export const useIsReady = (): boolean => {
   return useStreetMapDataForm(useShallow((state) => state.isReady));
 };

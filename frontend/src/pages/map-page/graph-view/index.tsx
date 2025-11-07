@@ -26,11 +26,9 @@ export const GraphView = ({
 }: GraphViewParams): React.JSX.Element => {
   const [crashEvents, setCrashEvents] = useState<StreetData>(new Map());
   const streetGroups = useStreetGroups();
-  console.log("loading graphView", isLoading, isSuccess, groupCrashes);
 
   useEffect(() => {
     if (isSuccess) {
-      console.log("setting crash events");
       setCrashEvents(groupCrashes);
     }
   }, [isSuccess, groupCrashes]);

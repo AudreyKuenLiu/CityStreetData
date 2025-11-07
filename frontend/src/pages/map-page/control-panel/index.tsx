@@ -1,6 +1,6 @@
-import React, { memo } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Select, Button, DatePicker, Flex } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { RedoOutlined, SearchOutlined } from "@ant-design/icons";
 import { GroupSelector } from "./group-selector/group-selector";
 import { useRef } from "react";
 import type { RefSelectProps } from "antd";
@@ -14,6 +14,7 @@ import {
   useActions,
   useCurrentStreetGroup,
   useStreetGroups,
+  useIsDirty,
   useTimeSegment,
   //useStreetEvent,
 } from "../store/street-map-data-form";
@@ -40,6 +41,8 @@ export const ControlPanel = memo(
     const currentStreetGroup = useCurrentStreetGroup();
     const streetGroups = useStreetGroups();
     //const streetEvent = useStreetEvent();
+    const isDirty = useIsDirty();
+    const [validRun, setValidRun] = useState(false);
     const timeSegment = useTimeSegment();
     const groups = Array.from(streetGroups.values()).map((streetGroup) => {
       return {
@@ -50,6 +53,25 @@ export const ControlPanel = memo(
     });
     //const eventSelectRef = useRef<RefSelectProps>(null);
     const timeSegmentSelectRef = useRef<RefSelectProps>(null);
+
+    useEffect(() => {
+      const handleKeyDown = async (e: KeyboardEvent): Promise<void> => {
+        if (e.key === "Enter" && canRunQuery) {
+          await runQuery();
+          setValidRun(true);
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return (): void => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }, [canRunQuery, runQuery]);
+
+    useEffect(() => {
+      if (!canRunQuery) {
+        setValidRun(false);
+      }
+    }, [canRunQuery]);
 
     return (
       <Flex
@@ -133,7 +155,7 @@ export const ControlPanel = memo(
           <Select
             size="large"
             ref={timeSegmentSelectRef}
-            placeholder="Every 'X' Days"
+            placeholder="Crashes every 'X' Days"
             onInputKeyDown={(e) => {
               timeSegmentSelectRef.current?.blur();
               e.stopPropagation();
@@ -175,15 +197,20 @@ export const ControlPanel = memo(
           <Button
             size="large"
             type="primary"
-            icon={<SearchOutlined />}
+            icon={isDirty && validRun ? <RedoOutlined /> : <SearchOutlined />}
             disabled={!canRunQuery}
             onClick={async () => {
               await runQuery();
+              setValidRun(true);
             }}
             style={{
               justifyContent: "center",
               // for some reason this button is always transparent when disabled
-              backgroundColor: !canRunQuery ? "#d9d9d9" : undefined,
+              backgroundColor: !canRunQuery
+                ? "#d9d9d9"
+                : isDirty && validRun
+                  ? "#ed8821"
+                  : undefined,
             }}
           >
             Query

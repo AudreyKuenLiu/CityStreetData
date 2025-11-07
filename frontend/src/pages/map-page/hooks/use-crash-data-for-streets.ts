@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import { dataTagSymbol, useQuery } from "@tanstack/react-query";
 import {
+  useActions,
   useEndDate,
   useIsReady,
   useStartDate,
@@ -34,6 +35,7 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   const endTime = useEndDate();
   const timeSegment = useTimeSegment();
   const isReady = useIsReady();
+  const { resetIsDirty } = useActions();
   //console.log("these are the street groups", streetGroups);
 
   // const oldResult = useQuery({
@@ -141,6 +143,7 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   const getCrashes = async (): Promise<void> => {
     //await oldResult.refetch();
     await result.refetch();
+    resetIsDirty();
   };
   const groupCrashes = useMemo(() => {
     const data = result.data ?? [];
