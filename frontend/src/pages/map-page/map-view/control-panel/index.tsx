@@ -17,8 +17,8 @@ import {
   useIsDirty,
   useTimeSegment,
   //useStreetEvent,
-} from "../store/street-map-data-form";
-import { convertToGroupId } from "../store/constants";
+} from "../../store/street-map-data-form";
+import { convertToGroupId } from "../../store/constants";
 
 export const ControlPanel = memo(
   ({
@@ -56,7 +56,7 @@ export const ControlPanel = memo(
 
     useEffect(() => {
       const handleKeyDown = async (e: KeyboardEvent): Promise<void> => {
-        if (e.key === "Enter" && canRunQuery) {
+        if (e.key === "Enter" && canRunQuery && isDirty) {
           await runQuery();
           setValidRun(true);
         }
@@ -65,7 +65,7 @@ export const ControlPanel = memo(
       return (): void => {
         window.removeEventListener("keydown", handleKeyDown);
       };
-    }, [canRunQuery, runQuery]);
+    }, [canRunQuery, runQuery, isDirty]);
 
     useEffect(() => {
       if (!canRunQuery) {
@@ -199,7 +199,9 @@ export const ControlPanel = memo(
             icon={isDirty && validRun ? <RedoOutlined /> : <SearchOutlined />}
             disabled={!canRunQuery}
             onClick={async () => {
-              await runQuery();
+              if (isDirty) {
+                await runQuery();
+              }
               setValidRun(true);
             }}
             style={{

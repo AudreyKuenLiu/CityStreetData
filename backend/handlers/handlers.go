@@ -93,7 +93,7 @@ func (h *handlers) getCrashDataForStreets(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting traffic crashes for cnns: %v", err))
 	}
 
-	return c.JSON(http.StatusOK, result.Data)
+	return c.JSON(http.StatusOK, result)
 }
 
 func (h *handlers) getCrashesForCnns(c echo.Context) error {

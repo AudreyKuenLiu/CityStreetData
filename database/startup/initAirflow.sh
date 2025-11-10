@@ -22,7 +22,7 @@ pip install lxml;
 pip install beautifulsoup4;
 pip install flask_session;
 pip install "flask-appbuilder<5.0.0";
-pip install 'apache-airflow==3.1.0';
+pip install 'apache-airflow==3.1.2';
 pip install apache-airflow-providers-fab;
 pip install graphviz;
 #python dependencies

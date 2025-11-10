@@ -41,7 +41,7 @@ export const GraphView = ({
     <Flex
       style={{
         overflow: "scroll",
-        padding: "50px",
+        padding: "20px",
         flexWrap: "wrap",
         alignContent: "flex-start",
         gap: "20px",
@@ -109,6 +109,7 @@ export const GraphView = ({
               paddingTop: "20px",
               paddingRight: "20px",
               height: "500px",
+              //boxShadow: "0 3px 6px rgba(0,0,0,.05),0 3px 6px rgba(0,0,0,.05)",
             }}
           >
             <Flex
@@ -117,7 +118,6 @@ export const GraphView = ({
                 alignItems: "center",
                 gap: "1.5em",
                 paddingLeft: "24px",
-                marginBottom: "1em",
               }}
             >
               <XFilled
@@ -161,6 +161,7 @@ export const GraphView = ({
                     legend: {
                       text: {
                         fontWeight: "bold",
+                        fontSize: 14,
                       },
                     },
                   },
@@ -187,7 +188,8 @@ export const GraphView = ({
                   legendOffset: -40,
                 }}
                 axisBottom={{
-                  format: "%Y-%m-%d",
+                  format: "%Y-%b-%d",
+                  tickPadding: 10,
                   tickValues: tickValues,
                 }}
                 sliceTooltip={sliceTooltip}
@@ -202,7 +204,7 @@ export const GraphView = ({
                   reverse: false,
                 }}
                 enableSlices="x"
-                margin={{ bottom: 40, left: 80, top: 50, right: 30 }}
+                margin={{ bottom: 40, left: 80, top: 50, right: 40 }}
               />
             </div>
           </Flex>

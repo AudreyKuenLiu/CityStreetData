@@ -19,6 +19,25 @@ type GetSegmentsWithinPolygonParams struct {
 	Filters *types.StreetFeatureFilters
 }
 
+type GetFeatureForStreetParams struct {
+	CNNs      []int
+	StartTime time.Time
+	EndTime   time.Time
+}
+
+type FeatureType = string
+
+const (
+	SpeedLimit FeatureType = "SpeedLimit"
+)
+
+type StreetFeature struct {
+	FeatureType FeatureType
+	CNN         int
+	CompletedAt time.Time
+	Value       string
+}
+
 type GetTrafficForStreetsParams struct {
 	CNNs                []int
 	CollisionSeverities *[]types.CollisionSeverity

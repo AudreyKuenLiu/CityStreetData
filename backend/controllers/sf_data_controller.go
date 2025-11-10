@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sort"
 	"time"
 )
 
@@ -37,6 +38,7 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		return nil, fmt.Errorf("no params passed to GetCrashDataForStreets")
 	}
 
+	//pull data from Repos
 	crashes, err := sfc.sfDataRepository.GetTrafficCrashesForStreets(ctx, &rTypes.GetTrafficForStreetsParams{
 		CNNs:      params.CNNs,
 		StartTime: params.StartTime,
@@ -45,9 +47,20 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 	if err != nil {
 		return nil, err
 	}
+	sort.Slice(crashes, func(i, j int) bool {
+		return crashes[i].OccuredAt.Unix() < crashes[j].OccuredAt.Unix()
+	})
+
+	speedLimitFeatures, err := sfc.sfDataRepository.GetSpeedLimitForStreets(ctx,
+		&rTypes.GetFeatureForStreetParams{CNNs: params.CNNs, StartTime: params.StartTime, EndTime: params.EndTime},
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	//initilize segments
 	dateToCrashesGroupMap := map[int64]types.CrashStats{}
+	dateToStreetFeatures := map[int64][]rTypes.StreetFeature{}
 	timeSlices := []int64{}
 	startTime := params.StartTime
 	endTime := params.EndTime
@@ -57,39 +70,33 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 	for itTime.Unix() < endTime.Unix() {
 		unixTime := itTime.Unix()
 		dateToCrashesGroupMap[unixTime] = types.CrashStats{}
+		dateToStreetFeatures[unixTime] = []rTypes.StreetFeature{}
 		timeSlices = append(timeSlices, unixTime)
 		years, months, days := params.SegmentSize.SegmentInYearMonthDays()
 		itTime = itTime.AddDate(years, months, days)
 	}
 
-	findClosestTime := func(occuredTime int64) (int64, error) {
-		start := 0
-		end := len(timeSlices) - 1
-		for start <= end {
-			mid := (start + end) / 2
-			midVal := timeSlices[mid]
-			nextMidVal := int64(math.MaxInt64)
-			if mid+1 < len(timeSlices) {
-				nextMidVal = timeSlices[mid+1]
+	findClosestTime := func(occuredTime int64, curPos int) (int64, int) {
+		i := curPos
+		for i < len(timeSlices) {
+			curTime := timeSlices[i]
+			nextTime := int64(math.MaxInt64)
+			if i+1 < len(timeSlices) {
+				nextTime = timeSlices[i+1]
 			}
-			if occuredTime >= midVal && occuredTime < nextMidVal {
-				return midVal, nil
+			if curTime <= occuredTime && occuredTime < nextTime {
+				return curTime, i
 			}
-			if occuredTime < midVal {
-				end = mid - 1
-			}
-			if occuredTime > midVal {
-				start = mid + 1
-			}
+			i += 1
 		}
-		return 0, fmt.Errorf("could not find closest time")
+		return timeSlices[len(timeSlices)-1], i
 	}
 
+	//map to time segment
+	var closestTime int64
+	idx := 0
 	for _, crashData := range crashes {
-		closestTime, err := findClosestTime(crashData.OccuredAt.Unix())
-		if err != nil {
-			return nil, err
-		}
+		closestTime, idx = findClosestTime(crashData.OccuredAt.Unix(), idx)
 		crashStats := dateToCrashesGroupMap[closestTime]
 		if crashData.CollisionSeverity != nil && *crashData.CollisionSeverity == dtypes.Severe {
 			crashStats.NumberSeverelyInjured += crashData.NumberInjured
@@ -100,8 +107,15 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		dateToCrashesGroupMap[closestTime] = crashStats
 	}
 
+	idx = 0
+	for _, speedData := range speedLimitFeatures {
+		closestTime, idx = findClosestTime(speedData.CompletedAt.Unix(), idx)
+		dateToStreetFeatures[closestTime] = append(dateToStreetFeatures[closestTime], speedData)
+	}
+
 	return &types.GetCrashDataForStreetsReturn{
-		Data: dateToCrashesGroupMap,
+		Data:     dateToCrashesGroupMap,
+		Features: dateToStreetFeatures,
 	}, nil
 }
 

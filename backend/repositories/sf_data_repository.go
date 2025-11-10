@@ -43,6 +43,71 @@ func NewSFDataRepository(logger *slog.Logger) (*SfDataRepository, error) {
 	}, nil
 }
 
+func (sfr *SfDataRepository) GetSpeedLimitForStreets(ctx context.Context, params *types.GetFeatureForStreetParams) ([]types.StreetFeature, error) {
+	if params == nil || len(params.CNNs) == 0 {
+		return nil, fmt.Errorf("invalid params, must provide cnns")
+	}
+
+	conn, err := sfr.db.Conn(ctx)
+	if err != nil {
+		sfr.logger.Error("could not establish connection")
+		return nil, err
+	}
+
+	queryString := fmt.Sprintf(
+		`
+		WITH selected_streets AS (
+			SELECT cnn FROM sf_streets_and_intersections
+			WHERE cnn IN (%s)
+		)
+		SELECT
+			ss.cnn,
+			speed_limits.completed_at,
+			CAST(CASE WHEN use_defacto_limit = false THEN speed_limits.value ELSE 25 END AS TEXT)
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					selected_streets
+			) as ss
+			JOIN
+			(
+				SELECT
+					cnn, completed_at, value, use_defacto_limit
+				FROM sf_street_feature_speed_limit
+				WHERE
+					completed_at BETWEEN %d AND %d
+			) as speed_limits ON (ss.cnn = speed_limits.cnn)
+		ORDER BY speed_limits.completed_at
+	`,
+		utils.ArrayToSqlStringArray(params.CNNs, nil),
+		params.StartTime.Unix(),
+		params.EndTime.Unix(),
+	)
+
+	row, err := conn.QueryContext(ctx, queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	streetFeatures := []types.StreetFeature{}
+	for row.Next() {
+		var streetFeature = types.StreetFeature{FeatureType: types.SpeedLimit}
+		var completedAtInt int64
+
+		err := row.Scan(&streetFeature.CNN, &completedAtInt, &streetFeature.Value)
+		if err != nil {
+			return nil, err
+		}
+		streetFeature.CompletedAt = time.Unix(completedAtInt, 0)
+		streetFeatures = append(streetFeatures, streetFeature)
+	}
+
+	return streetFeatures, nil
+}
+
 func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, params *types.GetTrafficForStreetsParams) ([]types.CrashEvents, error) {
 	if params == nil || len(params.CNNs) == 0 {
 		return nil, fmt.Errorf("invalid params, must provide cnns")
@@ -117,8 +182,7 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 				FROM sf_events_traffic_crashes
 				WHERE
 					occured_at BETWEEN %d AND %d
-			) as crashes
-			ON (sis.cnn = crashes.cnn)
+			) as crashes ON (sis.cnn = crashes.cnn)
 		ORDER BY crashes.occured_at
 	`,
 		utils.ArrayToSqlStringArray(params.CNNs, nil),

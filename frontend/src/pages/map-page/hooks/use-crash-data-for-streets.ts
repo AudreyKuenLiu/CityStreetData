@@ -114,20 +114,19 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
             };
           }
 
-          const response = await axios.get<{ [key: number]: CrashStats }>(
-            `/api/crashDataForStreets`,
-            {
-              params: {
-                cnns: JSON.stringify(cnns),
-                startTime: startTime.getTime() / 1000,
-                endTime: endTime.getTime() / 1000,
-                timeSegment,
-              },
-            }
-          );
+          const response = await axios.get<{
+            data: { [key: number]: CrashStats };
+          }>(`/api/crashDataForStreets`, {
+            params: {
+              cnns: JSON.stringify(cnns),
+              startTime: startTime.getTime() / 1000,
+              endTime: endTime.getTime() / 1000,
+              timeSegment,
+            },
+          });
           return {
             id: streetGroup.id,
-            response: Array.from(Object.entries(response.data)).map(
+            response: Array.from(Object.entries(response.data.data)).map(
               ([unixTimestampSeconds, crashStats]) => {
                 const date = new Date(+unixTimestampSeconds * 1000);
                 return [date, crashStats] as const;
