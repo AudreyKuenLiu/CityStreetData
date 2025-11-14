@@ -10,7 +10,7 @@ export const GraphFilters = (): React.JSX.Element => {
         top: "0",
         left: "0",
         zIndex: "2",
-        minWidth: "500px",
+        minWidth: "800px",
       }}
     >
       <Radio.Group size="large">

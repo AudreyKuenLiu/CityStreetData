@@ -13,7 +13,7 @@ import { useActions } from "../store/street-map-data-form";
 import type { FeatureCollection, LineString } from "geojson";
 import { StreetSegment } from "../../../models/map-grid";
 import { useMapControls } from "./hooks/use-map-controls";
-import { useSelectedSteets } from "./hooks/use-selected-streets";
+import { useSelectedStreets } from "./hooks/use-selected-streets";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 export const MapView = ({
@@ -29,7 +29,7 @@ export const MapView = ({
   const { hoverInfo, onHover, key, setKey, viewState, setViewState } =
     useMapControls({ centerLatLon });
   const { toggleStreet } = useActions();
-  const { configs } = useSelectedSteets();
+  const { configs } = useSelectedStreets();
   const layerIds = configs.map((config) => {
     return config.layerStyle.id;
   });

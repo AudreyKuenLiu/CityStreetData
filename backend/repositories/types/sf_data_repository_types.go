@@ -32,10 +32,10 @@ const (
 )
 
 type StreetFeature struct {
-	FeatureType FeatureType
-	CNN         int
-	CompletedAt time.Time
-	Value       string
+	FeatureType FeatureType `json:"featureType"`
+	CNN         int         `json:"cnn"`
+	CompletedAt time.Time   `json:"completedAt"`
+	Value       string      `json:"value"`
 }
 
 type GetTrafficForStreetsParams struct {

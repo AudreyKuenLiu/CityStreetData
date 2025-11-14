@@ -16,9 +16,9 @@ import {
   useStreetGroups,
   useIsDirty,
   useTimeSegment,
+  convertToGroupId,
   //useStreetEvent,
 } from "../../store/street-map-data-form";
-import { convertToGroupId } from "../../store/constants";
 
 export const ControlPanel = memo(
   ({

@@ -3,7 +3,7 @@ import { StreetSegment } from "../../../../models/map-grid";
 import { LineLayerSpecification } from "maplibre-gl";
 import { useStreetGroups } from "../../store/street-map-data-form";
 
-interface useSelectedSteetsReturnType {
+interface useSelectedStreetsReturnType {
   configs: {
     sourceId: string;
     data: FeatureCollection<LineString, StreetSegment>;
@@ -11,7 +11,7 @@ interface useSelectedSteetsReturnType {
   }[];
 }
 
-export const useSelectedSteets = (): useSelectedSteetsReturnType => {
+export const useSelectedStreets = (): useSelectedStreetsReturnType => {
   const streetGroups = useStreetGroups();
 
   const configs = Array.from(streetGroups.entries()).map(

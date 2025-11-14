@@ -1,6 +1,6 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
-import { dataTagSymbol, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   useActions,
   useEndDate,
@@ -8,25 +8,24 @@ import {
   useStartDate,
   useStreetGroups,
   useTimeSegment,
+  //GroupId,
 } from "../store/street-map-data-form";
+import { CrashStats, StreetFeature } from "../../../models/api-models";
 import {
-  collisionTypeSchema,
-  collisionSeveritySchema,
-  ApiCrashEvents,
-  CrashEvents,
-  CrashStats,
-} from "../../../models/api-models";
-import { GroupId } from "../store/constants";
+  useActions as useGraphDataActions,
+  GraphGroupData,
+  GraphGroupFeatures,
+} from "../store/graph-data";
 
-type DateCrashStats = readonly [Date, CrashStats];
-export type StreetData = Map<GroupId, DateCrashStats[]>;
+// type DateCrashStats = readonly [Date, CrashStats];
+// export type StreetData = Map<GroupId, DateCrashStats[]>;
 
 interface useCrashDataForStreetsReturn {
   canGetCrashes: boolean;
   getCrashes: () => Promise<void>;
-  isSuccess: boolean;
+  // isSuccess: boolean;
   isLoading: boolean;
-  data: StreetData;
+  // data: StreetData;
 }
 
 export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
@@ -36,60 +35,8 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   const timeSegment = useTimeSegment();
   const isReady = useIsReady();
   const { resetIsDirty } = useActions();
-  //console.log("these are the street groups", streetGroups);
-
-  // const oldResult = useQuery({
-  //   queryKey: ["crashesForCnns", startTime, endTime, streetGroups],
-  //   enabled: false,
-  //   queryFn: async (): Promise<{ id: GroupId; response: CrashEvents[] }[]> => {
-  //     const pacificStartTime = dateToPacificRFC3339Time(startTime);
-  //     const pacificEndTime = dateToPacificRFC3339Time(endTime);
-  //     const allResults = Array.from(streetGroups.values()).map(
-  //       async (streetGroup) => {
-  //         const cnns = Array.from(streetGroup.cnns.keys());
-  //         if (cnns.length === 0) {
-  //           return {
-  //             id: streetGroup.id,
-  //             response: [],
-  //           };
-  //         }
-
-  //         const response = await axios.get<ApiCrashEvents[]>(
-  //           `/api/crashesForCnns`,
-  //           {
-  //             params: {
-  //               cnns: JSON.stringify(cnns),
-  //               startTime: pacificStartTime,
-  //               endTime: pacificEndTime,
-  //             },
-  //           }
-  //         );
-
-  //         return {
-  //           id: streetGroup.id,
-  //           response: response.data.map((data) => {
-  //             return {
-  //               cnn: data.cnn,
-  //               occuredAt:
-  //                 data.occured_at != null ? new Date(data.occured_at) : null,
-  //               collisionSeverity:
-  //                 data.collision_severity != null
-  //                   ? collisionSeveritySchema.parse(data.collision_severity)
-  //                   : data.collision_severity,
-  //               collisionType:
-  //                 data.collision_type != null
-  //                   ? collisionTypeSchema.parse(data.collision_type)
-  //                   : data.collision_type,
-  //               numberKilled: data.number_killed,
-  //               numberInjured: data.number_injured,
-  //             };
-  //           }),
-  //         };
-  //       }
-  //     );
-  //     return Promise.all(allResults);
-  //   },
-  // });
+  const { setGraphData } = useGraphDataActions();
+  console.log("rerendering hook");
 
   const result = useQuery({
     queryKey: [
@@ -101,21 +48,23 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
     ],
     enabled: false,
     gcTime: 0,
-    queryFn: async (): Promise<
-      { id: GroupId; response: DateCrashStats[] }[]
-    > => {
+    queryFn: async (): Promise<//{ id: GroupId; response: DateCrashStats[] }[]
+    { graphData: GraphGroupData; featuresData: GraphGroupFeatures }> => {
+      //{ id: GroupId; response: [GraphGroupData, GraphGroupFeatures] }[]
       const allResults = Array.from(streetGroups.values()).map(
         async (streetGroup) => {
           const cnns = Array.from(streetGroup.cnns.keys());
           if (cnns.length === 0 || startTime == null || endTime == null) {
             return {
               id: streetGroup.id,
-              response: [],
+              //data: [[], []] satisfies [],
+              // response: [],
             };
           }
 
           const response = await axios.get<{
             data: { [key: number]: CrashStats };
+            features: { [key: number]: StreetFeature[] };
           }>(`/api/crashDataForStreets`, {
             params: {
               cnns: JSON.stringify(cnns),
@@ -124,18 +73,45 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
               timeSegment,
             },
           });
+
+          const crashData = Array.from(Object.entries(response.data.data)).map(
+            ([unixTimestampSeconds, crashStats]) => {
+              const date = new Date(+unixTimestampSeconds * 1000);
+              return [date, crashStats] as const;
+            }
+          );
+          const featureData = Array.from(
+            Object.entries(response.data.features)
+          ).map(([unixTimestampSeconds, features]) => {
+            const date = new Date(+unixTimestampSeconds * 1000);
+            return [date, features] as const;
+          });
+
           return {
             id: streetGroup.id,
-            response: Array.from(Object.entries(response.data.data)).map(
-              ([unixTimestampSeconds, crashStats]) => {
-                const date = new Date(+unixTimestampSeconds * 1000);
-                return [date, crashStats] as const;
-              }
-            ),
-          };
+            data: [crashData, featureData] as const,
+            // response: Array.from(Object.entries(response.data.data)).map(
+            //   ([unixTimestampSeconds, crashStats]) => {
+            //     const date = new Date(+unixTimestampSeconds * 1000);
+            //     return [date, crashStats] as const;
+            //   }
+            // ),
+          } as const;
         }
       );
-      return Promise.all(allResults);
+
+      const response = await Promise.all(allResults);
+      const graphDataMap: GraphGroupData = new Map();
+      const featureDataMap: GraphGroupFeatures = new Map();
+
+      for (const res of response) {
+        const { id, data } = res;
+        const [crashData] = data ?? [];
+        graphDataMap.set(id, crashData ?? []);
+        //featureDataMap.set(id, )
+      }
+
+      return { graphData: graphDataMap, featuresData: featureDataMap };
     },
   });
 
@@ -144,20 +120,31 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
     await result.refetch();
     resetIsDirty();
   };
+  // const groupCrashes = useMemo(() => {
+  //   const data = result.data ?? [];
+  //   const groupCrashesMap = new Map<GroupId, DateCrashStats[]>();
+  //   for (const dataGroup of data) {
+  //     groupCrashesMap.set(dataGroup.id, dataGroup.response);
+  //   }
+  //   return groupCrashesMap;
+  // }, [result.data]);
   const groupCrashes = useMemo(() => {
-    const data = result.data ?? [];
-    const groupCrashesMap = new Map<GroupId, DateCrashStats[]>();
-    for (const dataGroup of data) {
-      groupCrashesMap.set(dataGroup.id, dataGroup.response);
-    }
-    return groupCrashesMap;
+    const data = result.data;
+    return data?.graphData ?? new Map();
   }, [result.data]);
+
+  useEffect(() => {
+    if (result.isSuccess) {
+      console.log("setting graph data");
+      setGraphData(groupCrashes);
+    }
+  }, [result.isSuccess, groupCrashes, setGraphData]);
 
   return {
     getCrashes,
     canGetCrashes: isReady,
-    isSuccess: result.isSuccess,
+    // isSuccess: result.isSuccess,
     isLoading: result.isLoading,
-    data: groupCrashes,
+    // data: groupCrashes,
   };
 };

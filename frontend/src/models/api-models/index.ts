@@ -65,3 +65,12 @@ export type CrashStats = {
   numberOfCrashes: number;
   numberSeverelyInjured: number;
 };
+
+export const streetFeatureTypeSchema = z.literal(["SpeedLimit"]);
+export type StreetFeatureType = z.infer<typeof streetFeatureTypeSchema>;
+
+export type StreetFeature = {
+  featureType: StreetFeatureType;
+  cnn: number;
+  value: string;
+};
