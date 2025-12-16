@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/shallow";
 import { devtools } from "zustand/middleware";
-import { GraphData, GroupLineData, GraphDataActions, GraphType } from "./types";
+import { GraphData, GraphDataActions, GraphType } from "./types";
 import { actions } from "./actions";
 
 const useGraphData = create<GraphData>()(
@@ -16,9 +16,9 @@ const useGraphData = create<GraphData>()(
   )
 );
 
-export const useTrafficCrashesData = (): GroupLineData<
-  ["Fatalities", "Severe Injuries", "Injuries", "Vehicle Crashes"]
-> => {
+export const useTrafficCrashesData = ():
+  | GraphData["graphGroupVehicleCrashes"]
+  | GraphData["graphGroupTrafficInjuriesAndFatalities"] => {
   return useGraphData(
     useShallow((state) => {
       if (state.currentGraphType === "Crashes") {

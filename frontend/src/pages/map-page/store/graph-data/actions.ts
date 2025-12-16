@@ -1,10 +1,5 @@
 import { StoreApi } from "zustand";
-import {
-  GraphData,
-  GraphDataActions,
-  GraphGroupData,
-  GroupLineData,
-} from "./types";
+import { GraphData, GraphDataActions, GraphGroupData } from "./types";
 
 const sortDateEvents = <T>(
   arr: (readonly [Date, T])[]
@@ -19,19 +14,79 @@ const sortDateEvents = <T>(
 
 const initializeVehicleCrashesData = (
   data: GraphGroupData
-): GroupLineData<["Vehicle Crashes"]> => {
+): GraphData["graphGroupVehicleCrashes"] => {
   const groupGraphDataArray = Array.from(data.entries());
   const groupIdGraphDataArray = groupGraphDataArray.map(([id, groupCrash]) => {
     const sortedGroupCrashes = sortDateEvents(groupCrash);
-    const vehicleCrashes = sortedGroupCrashes.map(([time, crashEvents]) => {
+    const otherCrashes = sortedGroupCrashes.map(([time, crashEvents]) => {
       return {
         x: time,
-        y: crashEvents.numberOfCrashes,
+        y:
+          crashEvents.numberOfCrashes -
+          crashEvents.numberOfVehicleOnlyCrashes -
+          crashEvents.numberOfVehicleBicycleCrashes -
+          crashEvents.numberOfVehiclePedestrianCrashes -
+          crashEvents.numberOfBicycleOnlyCrashes -
+          crashEvents.numberOfBicyclePedestrianCrashes,
       };
     });
+    const vehicleOnlyCrashes = sortedGroupCrashes.map(([time, crashEvents]) => {
+      return {
+        x: time,
+        y: crashEvents.numberOfVehicleOnlyCrashes,
+      };
+    });
+    const vehicleBicycleCrashes = sortedGroupCrashes.map(
+      ([time, crashEvents]) => {
+        return {
+          x: time,
+          y: crashEvents.numberOfVehicleBicycleCrashes,
+        };
+      }
+    );
+    const vehiclePedestrianCrashes = sortedGroupCrashes.map(
+      ([time, crashEvents]) => {
+        return {
+          x: time,
+          y: crashEvents.numberOfVehiclePedestrianCrashes,
+        };
+      }
+    );
+    const bicycleOnlyCrashes = sortedGroupCrashes.map(([time, crashEvents]) => {
+      return {
+        x: time,
+        y: crashEvents.numberOfBicycleOnlyCrashes,
+      };
+    });
+    const bicyclePedestrianCrashes = sortedGroupCrashes.map(
+      ([time, crashEvents]) => {
+        return {
+          x: time,
+          y: crashEvents.numberOfBicyclePedestrianCrashes,
+        };
+      }
+    );
+
     const tickValues = sortedGroupCrashes.map(([time, _]) => time);
     const combinedData = [
-      { id: "Vehicle Crashes", data: vehicleCrashes, color: "#000000" },
+      { id: "Other Crashes", data: otherCrashes, color: "#000000" },
+      {
+        id: "Bicycle Pedestrian Crashes",
+        data: bicyclePedestrianCrashes,
+        color: "#A376A2",
+      },
+      { id: "Bicycle Crashes", data: bicycleOnlyCrashes, color: "#8D5F8C" },
+      {
+        id: "Vehicle Pedestrian Crashes",
+        data: vehiclePedestrianCrashes,
+        color: "#2d4763ff",
+      },
+      {
+        id: "Vehicle Bicycle Crashes",
+        data: vehicleBicycleCrashes,
+        color: "#547792",
+      },
+      { id: "Vehicle Crashes", data: vehicleOnlyCrashes, color: "#94B4C1" },
     ] as const;
     return [id, tickValues, combinedData] as const;
   });
@@ -40,7 +95,7 @@ const initializeVehicleCrashesData = (
 
 const initializeTrafficInjuriesAndFatalitiesData = (
   data: GraphGroupData
-): GroupLineData<["Fatalities", "Severe Injuries", "Injuries"]> => {
+): GraphData["graphGroupTrafficInjuriesAndFatalities"] => {
   const groupGraphDataArray = Array.from(data.entries());
   const groupIdGraphDataArray = groupGraphDataArray.map(([id, groupCrash]) => {
     const sortedGroupCrashes = sortDateEvents(groupCrash);

@@ -62,8 +62,13 @@ export type CrashEvents = {
 export type CrashStats = {
   numberKilled: number;
   numberInjured: number;
-  numberOfCrashes: number;
   numberSeverelyInjured: number;
+  numberOfCrashes: number;
+  numberOfVehicleOnlyCrashes: number;
+  numberOfBicycleOnlyCrashes: number;
+  numberOfVehicleBicycleCrashes: number;
+  numberOfVehiclePedestrianCrashes: number;
+  numberOfBicyclePedestrianCrashes: number;
 };
 
 export const streetFeatureTypeSchema = z.literal(["SpeedLimit"]);

@@ -21,7 +21,16 @@ export type GraphDataActions = {
 export type GraphType = "Crashes" | "InjuriesAndFatalities";
 
 export type GraphData = {
-  graphGroupVehicleCrashes: GroupLineData<["Vehicle Crashes"]>;
+  graphGroupVehicleCrashes: GroupLineData<
+    [
+      "Other Crashes",
+      "Vehicle Crashes",
+      "Vehicle Bicycle Crashes",
+      "Vehicle Pedestrian Crashes",
+      "Bicycle Crashes",
+      "Bicycle Pedestrian Crashes",
+    ]
+  >;
   graphGroupTrafficInjuriesAndFatalities: GroupLineData<
     ["Fatalities", "Severe Injuries", "Injuries"]
   >;
