@@ -83,8 +83,15 @@ export const actions = ({
     setState(() => {
       return {
         graphGroupVehicleCrashes: initializeVehicleCrashesData(data),
-        graphGroupTrafficCrashesAndFatalities:
+        graphGroupTrafficInjuriesAndFatalities:
           initializeTrafficInjuriesAndFatalitiesData(data),
+      };
+    });
+  },
+  selectCurrentGraph: (graphType): void => {
+    setState(() => {
+      return {
+        currentGraphType: graphType,
       };
     });
   },

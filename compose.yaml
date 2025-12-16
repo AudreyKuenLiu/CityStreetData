@@ -19,7 +19,7 @@ services:
       nohup airflow triggerer -D >> /opt/airflow/triggerer_nohup.out &
       nohup airflow dag-processor >> /opt/airflow/dag_processor_nohup.out &
       deactivate;
-      cd /backend && air;
+      cd /backend && air -c .air.toml;
       "
     ports:
       - 80:8080

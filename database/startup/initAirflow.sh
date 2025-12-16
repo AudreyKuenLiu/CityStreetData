@@ -13,7 +13,7 @@ export _AIRFLOW_WWW_USER_PASSWORD=${_AIRFLOW_WWW_USER_PASSWORD}
 export AIRFLOW__CORE__EXECUTION_API_SERVER_URL=${AIRFLOW__CORE__EXECUTION_API_SERVER_URL}
 
 apt-get install -y locales;
-apt-get install -y python3 python3-pip python3.13-venv;
+apt-get install -y python3 python3-pip python3-venv;
 python3 -m venv /opt/airflow_venv;
 #airflow dependencies
 pip install --upgrade pip;

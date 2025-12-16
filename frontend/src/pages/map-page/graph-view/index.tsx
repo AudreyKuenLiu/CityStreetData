@@ -7,16 +7,11 @@ import { Flex } from "antd";
 
 interface GraphViewParams {
   isLoading: boolean;
-  // isSuccess: boolean;
-  // groupCrashes: StreetData;
 }
 
 export const GraphView = ({
   isLoading,
-  // isSuccess,
-  // groupCrashes,
 }: GraphViewParams): React.JSX.Element => {
-  console.log("rerendering graphview");
   if (isLoading) {
     return <div></div>;
   }
@@ -32,7 +27,6 @@ export const GraphView = ({
       }}
     >
       <GraphFilters />
-      {/* <GraphList isSuccess={isSuccess} groupCrashes={groupCrashes} /> */}
       <GraphList />
     </Flex>
   );

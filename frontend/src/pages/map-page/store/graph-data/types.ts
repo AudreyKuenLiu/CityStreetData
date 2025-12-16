@@ -15,13 +15,17 @@ export type LineData = {
 
 export type GraphDataActions = {
   setGraphData: (data: GraphGroupData) => void;
+  selectCurrentGraph: (graphType: GraphType) => void;
 };
+
+export type GraphType = "Crashes" | "InjuriesAndFatalities";
 
 export type GraphData = {
   graphGroupVehicleCrashes: GroupLineData<["Vehicle Crashes"]>;
-  graphGroupTrafficCrashesAndFatalities: GroupLineData<
+  graphGroupTrafficInjuriesAndFatalities: GroupLineData<
     ["Fatalities", "Severe Injuries", "Injuries"]
   >;
+  currentGraphType: GraphType;
   actions: GraphDataActions;
 };
 

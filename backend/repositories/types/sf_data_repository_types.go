@@ -47,10 +47,11 @@ type GetTrafficForStreetsParams struct {
 }
 
 type CrashEvents struct {
-	CNN               int                      `json:"cnn"`
-	OccuredAt         *time.Time               `json:"occured_at"`
-	CollisionSeverity *types.CollisionSeverity `json:"collision_severity"`
-	CollisionType     *types.CollisionType     `json:"collision_type"`
-	NumberKilled      int                      `json:"number_killed"`
-	NumberInjured     int                      `json:"number_injured"`
+	CNN                 int                      `json:"cnn"`
+	OccuredAt           *time.Time               `json:"occured_at"`
+	CollisionSeverity   *types.CollisionSeverity `json:"collision_severity"`
+	CollisionType       *types.CollisionType     `json:"collision_type"`
+	NumberKilled        int                      `json:"number_killed"`
+	NumberInjured       int                      `json:"number_injured"`
+	CrashClassification *types.DphGroup          `json:"crash_classification"`
 }

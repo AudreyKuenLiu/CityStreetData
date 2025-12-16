@@ -15,14 +15,8 @@ import { useCrashDataForStreets } from "./hooks/use-crash-data-for-streets";
 
 export const MapPage: React.FC = () => {
   const { getStreetSegmentsForZoomLevel } = useStreetsForMapView();
-  const {
-    getCrashes,
-    isLoading,
-    //data, isSuccess,
-    canGetCrashes,
-  } = useCrashDataForStreets();
+  const { getCrashes, isLoading, canGetCrashes } = useCrashDataForStreets();
   const [sizes, setSizes] = useState<(number | string)[]>(["100%", 0]);
-  console.log("these are the sizes", sizes);
 
   return (
     <ConfigProvider
@@ -65,11 +59,7 @@ export const MapPage: React.FC = () => {
             />
           </Splitter.Panel>
           <Splitter.Panel defaultSize={0} collapsible={true} size={sizes[1]}>
-            <GraphView
-              isLoading={isLoading}
-              // isSuccess={isSuccess}
-              // groupCrashes={data}
-            />
+            <GraphView isLoading={isLoading} />
           </Splitter.Panel>
         </Splitter>
       </Layout>

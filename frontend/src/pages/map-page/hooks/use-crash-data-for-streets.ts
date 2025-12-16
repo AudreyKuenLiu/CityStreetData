@@ -8,7 +8,6 @@ import {
   useStartDate,
   useStreetGroups,
   useTimeSegment,
-  //GroupId,
 } from "../store/street-map-data-form";
 import { CrashStats, StreetFeature } from "../../../models/api-models";
 import {
@@ -17,15 +16,10 @@ import {
   GraphGroupFeatures,
 } from "../store/graph-data";
 
-// type DateCrashStats = readonly [Date, CrashStats];
-// export type StreetData = Map<GroupId, DateCrashStats[]>;
-
 interface useCrashDataForStreetsReturn {
   canGetCrashes: boolean;
   getCrashes: () => Promise<void>;
-  // isSuccess: boolean;
   isLoading: boolean;
-  // data: StreetData;
 }
 
 export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
@@ -36,7 +30,6 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   const isReady = useIsReady();
   const { resetIsDirty } = useActions();
   const { setGraphData } = useGraphDataActions();
-  console.log("rerendering hook");
 
   const result = useQuery({
     queryKey: [
@@ -48,17 +41,16 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
     ],
     enabled: false,
     gcTime: 0,
-    queryFn: async (): Promise<//{ id: GroupId; response: DateCrashStats[] }[]
-    { graphData: GraphGroupData; featuresData: GraphGroupFeatures }> => {
-      //{ id: GroupId; response: [GraphGroupData, GraphGroupFeatures] }[]
+    queryFn: async (): Promise<{
+      graphData: GraphGroupData;
+      featuresData: GraphGroupFeatures;
+    }> => {
       const allResults = Array.from(streetGroups.values()).map(
         async (streetGroup) => {
           const cnns = Array.from(streetGroup.cnns.keys());
           if (cnns.length === 0 || startTime == null || endTime == null) {
             return {
               id: streetGroup.id,
-              //data: [[], []] satisfies [],
-              // response: [],
             };
           }
 
@@ -90,12 +82,6 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
           return {
             id: streetGroup.id,
             data: [crashData, featureData] as const,
-            // response: Array.from(Object.entries(response.data.data)).map(
-            //   ([unixTimestampSeconds, crashStats]) => {
-            //     const date = new Date(+unixTimestampSeconds * 1000);
-            //     return [date, crashStats] as const;
-            //   }
-            // ),
           } as const;
         }
       );
@@ -108,7 +94,6 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
         const { id, data } = res;
         const [crashData] = data ?? [];
         graphDataMap.set(id, crashData ?? []);
-        //featureDataMap.set(id, )
       }
 
       return { graphData: graphDataMap, featuresData: featureDataMap };
@@ -116,18 +101,10 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   });
 
   const getCrashes = async (): Promise<void> => {
-    //await oldResult.refetch();
     await result.refetch();
     resetIsDirty();
   };
-  // const groupCrashes = useMemo(() => {
-  //   const data = result.data ?? [];
-  //   const groupCrashesMap = new Map<GroupId, DateCrashStats[]>();
-  //   for (const dataGroup of data) {
-  //     groupCrashesMap.set(dataGroup.id, dataGroup.response);
-  //   }
-  //   return groupCrashesMap;
-  // }, [result.data]);
+
   const groupCrashes = useMemo(() => {
     const data = result.data;
     return data?.graphData ?? new Map();
@@ -143,8 +120,6 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   return {
     getCrashes,
     canGetCrashes: isReady,
-    // isSuccess: result.isSuccess,
     isLoading: result.isLoading,
-    // data: groupCrashes,
   };
 };

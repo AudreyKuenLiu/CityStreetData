@@ -103,6 +103,23 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		}
 		crashStats.NumberInjured += crashData.NumberInjured
 		crashStats.NumberKilled += crashData.NumberKilled
+		if crashData.CrashClassification != nil {
+			if *crashData.CrashClassification == dtypes.VehiclesOnly {
+				crashStats.NumberOfVehicleOnlyCrashes += 1
+			}
+			if *crashData.CrashClassification == dtypes.VehicleBicycle {
+				crashStats.NumberOfVehicleBicycleCrashes += 1
+			}
+			if *crashData.CrashClassification == dtypes.VehiclePedestrian {
+				crashStats.NumberOfVehiclePedestrianCrashes += 1
+			}
+			if *crashData.CrashClassification == dtypes.BicyclePedestrian {
+				crashStats.NumberOfBicyclePedestrianCrashes += 1
+			}
+			if *crashData.CrashClassification == dtypes.BicycleOnly {
+				crashStats.NumberOfBicycleOnlyCrashes += 1
+			}
+		}
 		crashStats.NumberOfCrashes += 1
 		dateToCrashesGroupMap[closestTime] = crashStats
 	}

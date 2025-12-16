@@ -1,7 +1,18 @@
 import React from "react";
 import { Flex, Select, Radio } from "antd";
+import type { GraphType } from "../store/graph-data";
+import { useActions, useCurrentGraphType } from "../store/graph-data";
+import { CheckboxGroupProps } from "antd/es/checkbox";
+
+const options: CheckboxGroupProps<GraphType>["options"] = [
+  { label: "Injuries and Deaths", value: "InjuriesAndFatalities" },
+  { label: "Traffic Crashes", value: "Crashes" },
+];
 
 export const GraphFilters = (): React.JSX.Element => {
+  const currentOption = useCurrentGraphType();
+  const { selectCurrentGraph } = useActions();
+  console.log("currentOption", currentOption);
   return (
     <Flex
       style={{
@@ -13,10 +24,16 @@ export const GraphFilters = (): React.JSX.Element => {
         minWidth: "800px",
       }}
     >
-      <Radio.Group size="large">
-        <Radio.Button value="a">Injuries and Deaths</Radio.Button>
-        <Radio.Button value="b">Traffic Crashes</Radio.Button>
-      </Radio.Group>
+      <Radio.Group
+        size="large"
+        options={options}
+        value={currentOption}
+        onChange={(e) => {
+          selectCurrentGraph(e.target.value);
+        }}
+        optionType="button"
+        buttonStyle="solid"
+      />
       <Select
         mode="multiple"
         placeholder="Street features"

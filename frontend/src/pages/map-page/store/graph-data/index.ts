@@ -1,2 +1,7 @@
-export type { GraphGroupData, GraphGroupFeatures, LineData } from "./types";
+export type {
+  GraphGroupData,
+  GraphGroupFeatures,
+  LineData,
+  GraphType,
+} from "./types";
 export * from "./selectors";

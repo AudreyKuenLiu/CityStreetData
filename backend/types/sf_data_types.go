@@ -60,3 +60,18 @@ const (
 	NotStated          CollisionType = "not_stated"
 	HeadOn             CollisionType = "head_on"
 )
+
+type DphGroup string
+
+const (
+	BicycleOnly              DphGroup = "FF"
+	VehiclesOnly             DphGroup = "AA"
+	VehicleBicycle           DphGroup = "CC"
+	VehiclePedestrian        DphGroup = "BB"
+	Unknown                  DphGroup = "II"
+	BicycleParkedCar         DphGroup = "EE"
+	BicyclePedestrian        DphGroup = "DD"
+	PedestrianOnly           DphGroup = "GG"
+	VehicleBicyclePedestrian DphGroup = "BB CC"
+	BicycleUnknown           DphGroup = "HH"
+)

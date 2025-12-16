@@ -36,6 +36,9 @@ func NewSFDataRepository(logger *slog.Logger) (*SfDataRepository, error) {
 		return nil, err
 	}
 	db.Exec("SELECT SetDecimalPrecision(15);")
+	// var result string
+	// db.QueryRow(`SELECT sqlite_version();`).Scan(&result)
+	// fmt.Println("result:", result)
 
 	return &SfDataRepository{
 		logger: logger,
@@ -167,7 +170,8 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 			crashes.collision_severity,
 			crashes.collision_type,
 			crashes.number_killed,
-			crashes.number_injured
+			crashes.number_injured,
+			crashes.crash_classification
 		FROM
 			(
 				SELECT
@@ -178,7 +182,13 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 			JOIN
 			(
 				SELECT
-					cnn, occured_at, collision_severity, collision_type, number_killed, number_injured
+					cnn, 
+					occured_at, 
+					collision_severity, 
+					collision_type, 
+					number_killed, 
+					number_injured,
+					metadata->>'dph_col_grp' as crash_classification
 				FROM sf_events_traffic_crashes
 				WHERE
 					occured_at BETWEEN %d AND %d
@@ -202,7 +212,15 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 		var occuredAtInt int64
 		var occuredAtTime time.Time
 
-		err := row.Scan(&crashEvent.CNN, &occuredAtInt, &crashEvent.CollisionSeverity, &crashEvent.CollisionType, &crashEvent.NumberKilled, &crashEvent.NumberInjured)
+		err := row.Scan(
+			&crashEvent.CNN,
+			&occuredAtInt,
+			&crashEvent.CollisionSeverity,
+			&crashEvent.CollisionType,
+			&crashEvent.NumberKilled,
+			&crashEvent.NumberInjured,
+			&crashEvent.CrashClassification,
+		)
 		if err != nil {
 			return nil, err
 		}
