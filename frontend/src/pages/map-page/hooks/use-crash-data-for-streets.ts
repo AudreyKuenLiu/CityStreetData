@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import {
   useActions,
@@ -112,7 +112,6 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
 
   useEffect(() => {
     if (result.isSuccess) {
-      console.log("setting graph data");
       setGraphData(groupCrashes);
     }
   }, [result.isSuccess, groupCrashes, setGraphData]);

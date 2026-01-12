@@ -1,5 +1,5 @@
 import React from "react";
-import { Flex, Select, Radio } from "antd";
+import { Flex, Radio } from "antd";
 import type { GraphType } from "../store/graph-data";
 import { useActions, useCurrentGraphType } from "../store/graph-data";
 import { CheckboxGroupProps } from "antd/es/checkbox";
@@ -34,7 +34,7 @@ export const GraphFilters = (): React.JSX.Element => {
         optionType="button"
         buttonStyle="solid"
       />
-      <Select
+      {/* <Select
         mode="multiple"
         placeholder="Street features"
         size="large"
@@ -50,7 +50,7 @@ export const GraphFilters = (): React.JSX.Element => {
             label: "Calming Devices",
           },
         ]}
-      />
+      /> */}
     </Flex>
   );
 };

@@ -69,24 +69,24 @@ const initializeVehicleCrashesData = (
 
     const tickValues = sortedGroupCrashes.map(([time, _]) => time);
     const combinedData = [
-      { id: "Other Crashes", data: otherCrashes, color: "#000000" },
+      { id: "Other", data: otherCrashes, color: "#000000" },
       {
-        id: "Bicycle Pedestrian Crashes",
+        id: "Bicycle-Pedestrian",
         data: bicyclePedestrianCrashes,
         color: "#A376A2",
       },
-      { id: "Bicycle Crashes", data: bicycleOnlyCrashes, color: "#8D5F8C" },
+      { id: "Bicycle Only", data: bicycleOnlyCrashes, color: "#8D5F8C" },
       {
-        id: "Vehicle Pedestrian Crashes",
+        id: "Vehicle-Pedestrian",
         data: vehiclePedestrianCrashes,
         color: "#2d4763ff",
       },
       {
-        id: "Vehicle Bicycle Crashes",
+        id: "Vehicle-Bicycle",
         data: vehicleBicycleCrashes,
         color: "#547792",
       },
-      { id: "Vehicle Crashes", data: vehicleOnlyCrashes, color: "#94B4C1" },
+      { id: "Vehicle Only", data: vehicleOnlyCrashes, color: "#94B4C1" },
     ] as const;
     return [id, tickValues, combinedData] as const;
   });

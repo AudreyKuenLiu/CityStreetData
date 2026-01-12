@@ -21,8 +21,8 @@ RUN npm run build
 FROM golang:1.25.4-trixie AS build-release-stage
 WORKDIR /backend
 COPY ./backend/. .
-RUN apt-get update
-RUN apt upgrade
+RUN apt-get update -y
+RUN apt upgrade -y
 RUN apt-get install -y build-essential
 RUN apt-get install -y pkg-config
 RUN apt-get install -y libgeos-dev

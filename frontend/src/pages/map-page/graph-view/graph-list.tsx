@@ -7,6 +7,7 @@ import { XFilled } from "@ant-design/icons";
 
 type sliceData = {
   id: string;
+  color: string;
   data: {
     x: Date;
     y: number;
