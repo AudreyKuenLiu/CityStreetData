@@ -115,6 +115,5 @@ type CrashStats struct {
 }
 
 type GetCrashDataForStreetsReturn struct {
-	Data     map[int64]CrashStats             `json:"data"`
-	Features map[int64][]rTypes.StreetFeature `json:"features"`
+	Data map[int64]CrashStats `json:"data"`
 }

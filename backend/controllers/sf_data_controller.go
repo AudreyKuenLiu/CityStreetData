@@ -51,9 +51,6 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		return crashes[i].OccuredAt.Unix() < crashes[j].OccuredAt.Unix()
 	})
 
-	speedLimitFeatures, err := sfc.sfDataRepository.GetSpeedLimitForStreets(ctx,
-		&rTypes.GetFeatureForStreetParams{CNNs: params.CNNs, StartTime: params.StartTime, EndTime: params.EndTime},
-	)
 	if err != nil {
 		return nil, err
 	}
@@ -124,15 +121,8 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		dateToCrashesGroupMap[closestTime] = crashStats
 	}
 
-	idx = 0
-	for _, speedData := range speedLimitFeatures {
-		closestTime, idx = findClosestTime(speedData.CompletedAt.Unix(), idx)
-		dateToStreetFeatures[closestTime] = append(dateToStreetFeatures[closestTime], speedData)
-	}
-
 	return &types.GetCrashDataForStreetsReturn{
-		Data:     dateToCrashesGroupMap,
-		Features: dateToStreetFeatures,
+		Data: dateToCrashesGroupMap,
 	}, nil
 }
 

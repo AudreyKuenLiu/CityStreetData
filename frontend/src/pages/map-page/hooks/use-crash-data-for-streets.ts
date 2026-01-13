@@ -43,7 +43,6 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
     gcTime: 0,
     queryFn: async (): Promise<{
       graphData: GraphGroupData;
-      featuresData: GraphGroupFeatures;
     }> => {
       const allResults = Array.from(streetGroups.values()).map(
         async (streetGroup) => {
@@ -72,23 +71,16 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
               return [date, crashStats] as const;
             }
           );
-          const featureData = Array.from(
-            Object.entries(response.data.features)
-          ).map(([unixTimestampSeconds, features]) => {
-            const date = new Date(+unixTimestampSeconds * 1000);
-            return [date, features] as const;
-          });
 
           return {
             id: streetGroup.id,
-            data: [crashData, featureData] as const,
+            data: [crashData] as const,
           } as const;
         }
       );
 
       const response = await Promise.all(allResults);
       const graphDataMap: GraphGroupData = new Map();
-      const featureDataMap: GraphGroupFeatures = new Map();
 
       for (const res of response) {
         const { id, data } = res;
@@ -96,7 +88,7 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
         graphDataMap.set(id, crashData ?? []);
       }
 
-      return { graphData: graphDataMap, featuresData: featureDataMap };
+      return { graphData: graphDataMap };
     },
   });
 

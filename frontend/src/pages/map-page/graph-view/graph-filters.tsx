@@ -34,23 +34,6 @@ export const GraphFilters = (): React.JSX.Element => {
         optionType="button"
         buttonStyle="solid"
       />
-      {/* <Select
-        mode="multiple"
-        placeholder="Street features"
-        size="large"
-        style={{ width: "300px" }}
-        options={[
-          {
-            label: "Speed Limits",
-          },
-          {
-            label: "Slow Streets",
-          },
-          {
-            label: "Calming Devices",
-          },
-        ]}
-      /> */}
     </Flex>
   );
 };
