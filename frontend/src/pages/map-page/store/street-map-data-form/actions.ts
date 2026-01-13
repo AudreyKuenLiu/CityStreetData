@@ -149,7 +149,6 @@ export const actions = ({
     return ret;
   },
   setCurrentGroup: ({ id }: { id: GroupId }): boolean => {
-    console.log("setting current group", id);
     let ret = true;
     setState((state) => {
       if (!state.streetGroups.has(id)) {

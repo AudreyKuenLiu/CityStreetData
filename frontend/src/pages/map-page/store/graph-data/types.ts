@@ -18,7 +18,7 @@ export type GraphDataActions = {
   selectCurrentGraph: (graphType: GraphType) => void;
 };
 
-export type GraphType = "Crashes" | "InjuriesAndFatalities";
+export type GraphType = "CrashGroups" | "InjuriesAndFatalities";
 
 export type GraphData = {
   graphGroupVehicleCrashes: GroupLineData<

@@ -21,7 +21,7 @@ export const useTrafficCrashesData = ():
   | GraphData["graphGroupTrafficInjuriesAndFatalities"] => {
   return useGraphData(
     useShallow((state) => {
-      if (state.currentGraphType === "Crashes") {
+      if (state.currentGraphType === "CrashGroups") {
         return state.graphGroupVehicleCrashes;
       }
       return state.graphGroupTrafficInjuriesAndFatalities;

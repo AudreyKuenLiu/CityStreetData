@@ -1,25 +1,36 @@
 import React from "react";
-// import type { StreetData } from "../hooks/use-crash-data-for-streets";
 
 import { GraphList } from "./graph-list";
 import { useTrafficCrashesData } from "../store/graph-data";
 import { GraphFilters } from "./graph-filters";
 import { Flex, Typography } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
+import { useStreetGroups } from "../store/street-map-data-form";
 
 interface GraphViewParams {
   isLoading: boolean;
 }
 
+const useHasNoData = (): boolean => {
+  const trafficCrashData = useTrafficCrashesData();
+  const streetGroups = useStreetGroups();
+  const trafficCrashGroupIds = trafficCrashData.map(([id]) => id);
+  for (const crashGroupId of trafficCrashGroupIds) {
+    if (streetGroups.has(crashGroupId)) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export const GraphView = ({
   isLoading,
 }: GraphViewParams): React.JSX.Element => {
-  const trafficCrashGroupData = useTrafficCrashesData();
-
+  const hasNoData = useHasNoData();
   if (isLoading) {
     return <div></div>;
   }
-  if (trafficCrashGroupData.length === 0) {
+  if (hasNoData) {
     return (
       <Flex
         style={{
