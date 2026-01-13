@@ -88,7 +88,12 @@ const initializeVehicleCrashesData = (
       },
       { id: "Vehicle Only", data: vehicleOnlyCrashes, color: "#94B4C1" },
     ] as const;
-    return [id, tickValues, combinedData] as const;
+    return {
+      id,
+      tickValues,
+      data: combinedData,
+      axisLegend: "Traffic Crashes",
+    } as const;
   });
   return groupIdGraphDataArray;
 };
@@ -126,7 +131,12 @@ const initializeTrafficInjuriesAndFatalitiesData = (
       { id: "Injuries", data: nonSevereInjuriesData, color: "#EDD296" },
     ] as const;
     //because there are objects in this array it will cause an infinite rerender
-    return [id, tickValues, combinedData] as const;
+    return {
+      id,
+      tickValues,
+      data: combinedData,
+      axisLegend: "Traffic Injuries and Fatalities",
+    } as const;
   });
   return groupIdGraphDataArray;
 };

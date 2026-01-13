@@ -6,7 +6,7 @@ import { CheckboxGroupProps } from "antd/es/checkbox";
 
 const options: CheckboxGroupProps<GraphType>["options"] = [
   { label: "Injuries and Deaths", value: "InjuriesAndFatalities" },
-  { label: "Traffic Crash Groups", value: "CrashGroups" },
+  { label: "Traffic Crashes", value: "CrashGroups" },
 ];
 
 export const GraphFilters = (): React.JSX.Element => {

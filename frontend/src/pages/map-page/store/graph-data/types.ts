@@ -38,14 +38,15 @@ export type GraphData = {
   actions: GraphDataActions;
 };
 
-export type GroupLineData<T extends string[]> = (readonly [
-  GroupId,
-  Date[],
-  readonly {
+export type GroupLineData<T extends string[]> = {
+  id: GroupId;
+  tickValues: Date[];
+  data: readonly {
     readonly id: T[number];
     readonly data: LineData[];
     readonly color: string;
-  }[],
-])[];
+  }[];
+  axisLegend: string;
+}[];
 
 export type GraphDataState = Omit<GraphData, "actions">;

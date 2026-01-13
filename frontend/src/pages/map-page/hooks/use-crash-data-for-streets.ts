@@ -13,7 +13,6 @@ import { CrashStats, StreetFeature } from "../../../models/api-models";
 import {
   useActions as useGraphDataActions,
   GraphGroupData,
-  GraphGroupFeatures,
 } from "../store/graph-data";
 
 interface useCrashDataForStreetsReturn {

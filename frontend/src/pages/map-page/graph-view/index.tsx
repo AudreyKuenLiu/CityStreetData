@@ -14,7 +14,7 @@ interface GraphViewParams {
 const useHasNoData = (): boolean => {
   const trafficCrashData = useTrafficCrashesData();
   const streetGroups = useStreetGroups();
-  const trafficCrashGroupIds = trafficCrashData.map(([id]) => id);
+  const trafficCrashGroupIds = trafficCrashData.map(({ id }) => id);
   for (const crashGroupId of trafficCrashGroupIds) {
     if (streetGroups.has(crashGroupId)) {
       return false;

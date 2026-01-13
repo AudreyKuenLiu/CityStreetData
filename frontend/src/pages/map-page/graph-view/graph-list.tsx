@@ -26,7 +26,8 @@ export const GraphList = (): React.JSX.Element => {
         gap: "20px",
       }}
     >
-      {trafficCrashGroupData.map(([id, tickValues, data]) => {
+      {trafficCrashGroupData.map(({ id, tickValues, data, axisLegend }) => {
+        console.log("this is the result", id, tickValues, data);
         const streetGroup = streetGroups.get(id);
         if (streetGroup == null) {
           return null;
@@ -109,7 +110,7 @@ export const GraphList = (): React.JSX.Element => {
                     }
                     return "";
                   },
-                  legend: "Traffic Injuries and Fatalities",
+                  legend: axisLegend,
                   legendOffset: -40,
                 }}
                 axisBottom={{
