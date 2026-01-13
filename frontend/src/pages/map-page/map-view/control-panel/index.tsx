@@ -4,12 +4,7 @@ import { RedoOutlined, SearchOutlined } from "@ant-design/icons";
 import { GroupSelector } from "./group-selector/group-selector";
 import { useRef } from "react";
 import type { RefSelectProps } from "antd";
-import {
-  StreetEventLabels,
-  StreetEventOptions,
-  TimeSegmentLabels,
-  TimeSegmentOptions,
-} from "./constants";
+import { TimeSegmentLabels, TimeSegmentOptions } from "./constants";
 import {
   useActions,
   useCurrentStreetGroup,
@@ -35,12 +30,10 @@ export const ControlPanel = memo(
       editGroup,
       setEndDate,
       setStartDate,
-      //setStreetEvent,
       setTimeSegment,
     } = useActions();
     const currentStreetGroup = useCurrentStreetGroup();
     const streetGroups = useStreetGroups();
-    //const streetEvent = useStreetEvent();
     const isDirty = useIsDirty();
     const [validRun, setValidRun] = useState(false);
     const timeSegment = useTimeSegment();
@@ -51,7 +44,6 @@ export const ControlPanel = memo(
         color: streetGroup.color,
       };
     });
-    //const eventSelectRef = useRef<RefSelectProps>(null);
     const timeSegmentSelectRef = useRef<RefSelectProps>(null);
 
     useEffect(() => {
@@ -132,26 +124,6 @@ export const ControlPanel = memo(
               return editGroup({ id: groupId, name });
             }}
           />
-          {/* <Select
-            size="large"
-            ref={eventSelectRef}
-            placeholder="Select an event"
-            onInputKeyDown={(e) => {
-              eventSelectRef.current?.blur();
-              e.stopPropagation();
-            }}
-            value={[
-              {
-                value: streetEvent,
-                label: StreetEventLabels[streetEvent],
-              },
-            ]}
-            options={StreetEventOptions}
-            onSelect={(_, option) => {
-              setStreetEvent(option.value);
-              eventSelectRef.current?.blur();
-            }}
-          /> */}
           <Select
             size="large"
             ref={timeSegmentSelectRef}

@@ -18,7 +18,6 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 2 * 60 * 1000, //2 minutes
-      //gcTime: 2 * 60 * 1000,
     },
   },
 });

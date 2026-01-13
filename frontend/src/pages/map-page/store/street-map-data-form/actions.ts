@@ -25,10 +25,6 @@ const isStreetMapFormReady = (
     newState.streetGroups !== undefined
       ? streetGroupHasCnn(newState.streetGroups)
       : streetGroupHasCnn(oldState.streetGroups);
-  // const hasStreetEvent =
-  //   newState.streetEvent !== undefined
-  //     ? newState.streetEvent != null
-  //     : oldState.streetEvent != null;
   const hasStartDate =
     newState.startDate !== undefined
       ? newState.startDate != null
