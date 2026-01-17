@@ -73,9 +73,9 @@ const initializeVehicleCrashesData = (
       {
         id: "Bicycle-Pedestrian",
         data: bicyclePedestrianCrashes,
-        color: "#A376A2",
+        color: "#8D5F8C",
       },
-      { id: "Bicycle Only", data: bicycleOnlyCrashes, color: "#8D5F8C" },
+      { id: "Bicycle Only", data: bicycleOnlyCrashes, color: "#A376A2" },
       {
         id: "Vehicle-Pedestrian",
         data: vehiclePedestrianCrashes,

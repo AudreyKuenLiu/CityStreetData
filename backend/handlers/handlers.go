@@ -10,6 +10,7 @@ import (
 
 	dc "citystreetdata/controllers"
 	cTypes "citystreetdata/controllers/types"
+	rTypes "citystreetdata/repositories/types"
 	"citystreetdata/types"
 
 	"github.com/go-playground/validator/v10"
@@ -51,6 +52,7 @@ func (h *handlers) InitHandlers() error {
 	h.echoInstance.GET("/api/segmentsForGrid", h.getSegmentsForGrid)
 	h.echoInstance.GET("/api/crashesForCnns", h.getCrashesForCnns)
 	h.echoInstance.GET("/api/crashDataForStreets", h.getCrashDataForStreets)
+	h.echoInstance.GET("/api/streetFeatures", h.getStreetFeatures)
 	return nil
 }
 
@@ -92,6 +94,43 @@ func (h *handlers) getCrashDataForStreets(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting traffic crashes for cnns: %v", err))
 	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
+func (h *handlers) getStreetFeatures(c echo.Context) error {
+	featureTypesStr := c.QueryParam("featureTypes")
+	startTimeStr := c.QueryParam("startTime")
+	endTimeStr := c.QueryParam("endTime")
+
+	featureTypes := []rTypes.FeatureType{}
+	if len(featureTypesStr) > 0 {
+		err := json.Unmarshal([]byte(featureTypesStr), &featureTypes)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing featureTypes: %v", err))
+		}
+	}
+	for _, feature := range featureTypes {
+		if !feature.IsValid() {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid feature type")
+		}
+	}
+	startTimeEpoch, err := strconv.ParseInt(startTimeStr, 10, 64)
+	startTime := time.Unix(startTimeEpoch, 0)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
+	}
+	endTimeEpoch, err := strconv.ParseInt(endTimeStr, 10, 64)
+	endTime := time.Unix(endTimeEpoch, 0)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
+	}
+
+	result, err := h.sfDataController.GetStreetFeatures(c.Request().Context(), &cTypes.GetStreetFeaturesParams{
+		FeatureTypes:    featureTypes,
+		CompletedAfter:  startTime,
+		CompletedBefore: endTime,
+	})
 
 	return c.JSON(http.StatusOK, result)
 }

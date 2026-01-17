@@ -5,6 +5,7 @@ import (
 	rTypes "citystreetdata/repositories/types"
 	dtypes "citystreetdata/types"
 	"math"
+	"slices"
 
 	repo "citystreetdata/repositories"
 	"context"
@@ -124,6 +125,21 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 	return &types.GetCrashDataForStreetsReturn{
 		Data: dateToCrashesGroupMap,
 	}, nil
+}
+
+func (sfc *SfDataController) GetStreetFeatures(ctx context.Context, params *types.GetStreetFeaturesParams) ([]rTypes.StreetFeatureSegment, error) {
+	ret := []rTypes.StreetFeatureSegment{}
+	if slices.Contains(params.FeatureTypes, rTypes.SlowStreet) {
+		vals, err := sfc.sfDataRepository.GetSlowStreets(ctx, &rTypes.GetSlowStreetParams{
+			CompletedAfter:  params.CompletedAfter,
+			CompletedBefore: params.CompletedBefore,
+		})
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, vals...)
+	}
+	return ret, nil
 }
 
 func (sfc *SfDataController) GetCrashesForStreets(ctx context.Context, params *types.GetCrashesForStreetsParams) ([]rTypes.CrashEvents, error) {

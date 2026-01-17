@@ -124,10 +124,11 @@ export const ControlPanel = memo(
               return editGroup({ id: groupId, name });
             }}
           />
+          <Select size="large" defaultValue="Traffic Crashes" />
           <Select
             size="large"
             ref={timeSegmentSelectRef}
-            placeholder="Crashes every 'X' Days"
+            placeholder="every 'X' Days"
             onInputKeyDown={(e) => {
               timeSegmentSelectRef.current?.blur();
               e.stopPropagation();
@@ -191,7 +192,7 @@ export const ControlPanel = memo(
         </Flex>
       </Flex>
     );
-  }
+  },
 );
 
 ControlPanel.displayName = "ControlPanel";

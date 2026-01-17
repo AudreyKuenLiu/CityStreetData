@@ -1,10 +1,6 @@
 import { Brand } from "../../../../types";
 import { StreetSegment } from "../../../../models/map-grid";
 
-export enum StreetEvent {
-  TrafficCrashes = "TRAFFIC_CRASHES",
-}
-
 export enum TimeSegments {
   OneMonth = "1M",
   ThreeMonths = "3M",
@@ -41,7 +37,6 @@ export type StreetMapFormActions = {
   addStreet: (StreetSegment: StreetSegment) => boolean;
   removeStreet: (cnn: number) => boolean;
   setTimeSegment: (timeSegment: TimeSegments) => void;
-  setStreetEvent: (streetEvent: StreetEvent) => void;
   setStartDate: (startDate: Date | null) => void;
   setEndDate: (endDate: Date | null) => void;
   resetIsDirty: () => void;
@@ -53,7 +48,6 @@ export type StreetMapForm = {
   streetGroups: Map<GroupId, StreetGroup>;
   _cnnToGroupId: Map<number, GroupId>;
   currentGroupId: GroupId;
-  streetEvent: StreetEvent;
   startDate: Date | null;
   endDate: Date | null;
   timeSegment: TimeSegments | null;

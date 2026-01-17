@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import {
-  StreetEvent,
   emptyGroupId,
   TimeSegments,
   StreetMapFormActions,
@@ -17,7 +16,6 @@ const useStreetMapDataForm = create<StreetMapForm>()(
     (set) => ({
       streetGroups: new Map<string, StreetGroup>(),
       currentGroupId: emptyGroupId,
-      streetEvent: StreetEvent.TrafficCrashes,
       timeSegment: null,
       startDate: null,
       endDate: null,
@@ -26,8 +24,8 @@ const useStreetMapDataForm = create<StreetMapForm>()(
       _cnnToGroupId: new Map<number, string>(), //more of an internal field to keep track of where cnns are do not use in selector
       actions: actions({ setState: set }),
     }),
-    { name: "StreetMapDataForm" }
-  )
+    { name: "StreetMapDataForm" },
+  ),
 );
 
 export const useTimeSegment = (): TimeSegments | null => {
@@ -38,9 +36,6 @@ export const useStartDate = (): Date | null => {
 };
 export const useEndDate = (): Date | null => {
   return useStreetMapDataForm((state) => state.endDate);
-};
-export const useStreetEvent = (): StreetEvent => {
-  return useStreetMapDataForm((state) => state.streetEvent);
 };
 export const useIsDirty = (): boolean => {
   return useStreetMapDataForm(useShallow((state) => state.isDirty));
@@ -56,21 +51,21 @@ export const useCnns = (): StreetSegment[] => {
         return [];
       }
       return Array.from(currentGroup.cnns.values());
-    })
+    }),
   );
 };
 export const useStreetGroups = (): Map<string, StreetGroup> => {
   return useStreetMapDataForm(
     useShallow((state) => {
       return state.streetGroups;
-    })
+    }),
   );
 };
 export const useCurrentStreetGroup = (): StreetGroup | null => {
   return useStreetMapDataForm(
     useShallow((state) => {
       return state.streetGroups.get(state.currentGroupId) ?? null;
-    })
+    }),
   );
 };
 export const useActions = (): StreetMapFormActions => {

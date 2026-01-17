@@ -54,11 +54,11 @@ INSERT INTO sf_street_feature_slow_street (
 SELECT
     dta.install_date as completed_at,
     dta.cnn as cnn,
-    dta.extents as value,
+    lower(dta.streetname) as value,
     json_object(
         'objectid', dta.objectid,
         'length', dta.length,
-        'shape', ST_AsText(dta.shape),
+        'shape', ST_AsText(ST_LineFromText(dta.shape, 4326)),
         'classcode', dta.classcode,
         'f_node_cnn', dta.f_node_cnn,
         'f_st', dta.f_st,
