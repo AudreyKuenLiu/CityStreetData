@@ -1,15 +1,14 @@
 import React from "react";
 
-import { GraphList } from "./graph-list";
+import { GraphList } from "./graph-list/graph-list";
+import { DataFilters } from "./graph-list/data-filters";
 import { useTrafficCrashesData } from "../store/graph-data";
-import { GraphFilters } from "./graph-filters";
 import { Flex, Typography } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
 import { useStreetGroups } from "../store/street-map-data-form";
-
-interface GraphViewParams {
-  isLoading: boolean;
-}
+import { useDataViewContext } from "../context/data-view";
+import { DataViewEnum } from "../context/data-view/types";
+import { HeatmapView } from "./heatmap-view";
 
 const useHasNoData = (): boolean => {
   const trafficCrashData = useTrafficCrashesData();
@@ -23,13 +22,8 @@ const useHasNoData = (): boolean => {
   return true;
 };
 
-export const GraphView = ({
-  isLoading,
-}: GraphViewParams): React.JSX.Element => {
+export const DataView = (): React.JSX.Element => {
   const hasNoData = useHasNoData();
-  if (isLoading) {
-    return <div></div>;
-  }
   if (hasNoData) {
     return (
       <Flex
@@ -52,14 +46,35 @@ export const GraphView = ({
       style={{
         overflow: "scroll",
         padding: "16px",
-        flexWrap: "wrap",
-        alignContent: "flex-start",
-        gap: "20px",
+        // flexWrap: "wrap",
+        // alignContent: "flex-start",
+        // gap: "20px",
         height: "100vh",
       }}
     >
-      <GraphFilters />
-      <GraphList />
+      <DataViewBody />
     </Flex>
   );
+};
+
+const DataViewBody = (): React.JSX.Element => {
+  const { currentDataView } = useDataViewContext();
+  if (currentDataView === DataViewEnum.GraphView) {
+    return (
+      <Flex
+        style={{
+          flexWrap: "wrap",
+          alignContent: "flex-start",
+          gap: "20px",
+        }}
+      >
+        <DataFilters />
+        <GraphList />
+      </Flex>
+    );
+  }
+  if (currentDataView === DataViewEnum.HeatmapView) {
+    return <HeatmapView />;
+  }
+  return <GraphList />;
 };

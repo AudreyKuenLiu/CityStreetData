@@ -9,14 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as MapAreaViewRouteImport } from './routes/map-area-view'
 import { Route as IndexRouteImport } from './routes/index'
 
-const MapAreaViewRoute = MapAreaViewRouteImport.update({
-  id: '/map-area-view',
-  path: '/map-area-view',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -25,39 +19,28 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/map-area-view': typeof MapAreaViewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/map-area-view': typeof MapAreaViewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/map-area-view': typeof MapAreaViewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/map-area-view'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/map-area-view'
-  id: '__root__' | '/' | '/map-area-view'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  MapAreaViewRoute: typeof MapAreaViewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/map-area-view': {
-      id: '/map-area-view'
-      path: '/map-area-view'
-      fullPath: '/map-area-view'
-      preLoaderRoute: typeof MapAreaViewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -70,7 +53,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  MapAreaViewRoute: MapAreaViewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

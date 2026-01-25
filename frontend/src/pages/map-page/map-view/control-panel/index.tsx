@@ -1,6 +1,5 @@
-import React, { memo, useEffect, useState } from "react";
-import { Select, Button, DatePicker, Flex } from "antd";
-import { RedoOutlined, SearchOutlined } from "@ant-design/icons";
+import React, { memo } from "react";
+import { Select, DatePicker, Flex } from "antd";
 import { GroupSelector } from "./group-selector/group-selector";
 import { useRef } from "react";
 import type { RefSelectProps } from "antd";
@@ -9,20 +8,13 @@ import {
   useActions,
   useCurrentStreetGroup,
   useStreetGroups,
-  useIsDirty,
   useTimeSegment,
   convertToGroupId,
-  //useStreetEvent,
 } from "../../store/street-map-data-form";
+import { RunQueryButton } from "./run-query-button";
 
 export const ControlPanel = memo(
-  ({
-    runQuery,
-    canRunQuery,
-  }: {
-    runQuery: () => Promise<void>;
-    canRunQuery: boolean;
-  }): React.JSX.Element => {
+  ({ onRunQuery }: { onRunQuery: () => void }): React.JSX.Element => {
     const {
       addGroup,
       setCurrentGroup,
@@ -34,8 +26,8 @@ export const ControlPanel = memo(
     } = useActions();
     const currentStreetGroup = useCurrentStreetGroup();
     const streetGroups = useStreetGroups();
-    const isDirty = useIsDirty();
-    const [validRun, setValidRun] = useState(false);
+    // const isDirty = useIsDirty();
+    // const [validRun, setValidRun] = useState(false);
     const timeSegment = useTimeSegment();
     const groups = Array.from(streetGroups.values()).map((streetGroup) => {
       return {
@@ -45,25 +37,6 @@ export const ControlPanel = memo(
       };
     });
     const timeSegmentSelectRef = useRef<RefSelectProps>(null);
-
-    useEffect(() => {
-      const handleKeyDown = async (e: KeyboardEvent): Promise<void> => {
-        if (e.key === "Enter" && canRunQuery && isDirty) {
-          await runQuery();
-          setValidRun(true);
-        }
-      };
-      window.addEventListener("keydown", handleKeyDown);
-      return (): void => {
-        window.removeEventListener("keydown", handleKeyDown);
-      };
-    }, [canRunQuery, runQuery, isDirty]);
-
-    useEffect(() => {
-      if (!canRunQuery) {
-        setValidRun(false);
-      }
-    }, [canRunQuery]);
 
     return (
       <Flex
@@ -124,7 +97,6 @@ export const ControlPanel = memo(
               return editGroup({ id: groupId, name });
             }}
           />
-          <Select size="large" defaultValue="Traffic Crashes" />
           <Select
             size="large"
             ref={timeSegmentSelectRef}
@@ -166,29 +138,7 @@ export const ControlPanel = memo(
               setEndDate(value[1].toDate());
             }}
           />
-          <Button
-            size="large"
-            type="primary"
-            icon={isDirty && validRun ? <RedoOutlined /> : <SearchOutlined />}
-            disabled={!canRunQuery}
-            onClick={async () => {
-              if (isDirty) {
-                await runQuery();
-              }
-              setValidRun(true);
-            }}
-            style={{
-              justifyContent: "center",
-              // for some reason this button is always transparent when disabled
-              backgroundColor: !canRunQuery
-                ? "#d9d9d9"
-                : isDirty && validRun
-                  ? "#ed8821"
-                  : undefined,
-            }}
-          >
-            Query
-          </Button>
+          <RunQueryButton onClick={onRunQuery} />
         </Flex>
       </Flex>
     );

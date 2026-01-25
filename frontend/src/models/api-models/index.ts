@@ -1,4 +1,4 @@
-import { LineString } from "geojson";
+import { FeatureCollection, LineString, Point } from "geojson";
 import { z } from "zod";
 
 export const classCodeSchema = z.object({
@@ -44,19 +44,11 @@ export type ViewportSegment = {
 export type ApiCrashEvents = {
   cnn: number;
   occured_at: string | null;
+  crash_classification: string;
   collision_severity: string | null;
   collision_type: string | null;
   number_killed: number;
   number_injured: number;
-};
-
-export type CrashEvents = {
-  cnn: number;
-  occuredAt: Date | null;
-  collisionSeverity: collisionSeverity | null;
-  collisionType: collisionType | null;
-  numberKilled: number;
-  numberInjured: number;
 };
 
 export type CrashStats = {
@@ -70,6 +62,11 @@ export type CrashStats = {
   numberOfVehiclePedestrianCrashes: number;
   numberOfBicyclePedestrianCrashes: number;
 };
+
+export type CrashEventFeatureCollection = FeatureCollection<
+  Point,
+  ApiCrashEvents
+>;
 
 export const streetFeatureTypeSchema = z.literal(["SpeedLimit"]);
 export type StreetFeatureType = z.infer<typeof streetFeatureTypeSchema>;

@@ -2,9 +2,11 @@ package types
 
 import (
 	"citystreetdata/types"
+	"encoding/json"
 
 	"time"
 
+	"github.com/twpayne/go-geos/geojson"
 	"github.com/twpayne/go-geos/geometry"
 )
 
@@ -70,4 +72,24 @@ type CrashEvents struct {
 	NumberKilled        int                      `json:"number_killed"`
 	NumberInjured       int                      `json:"number_injured"`
 	CrashClassification *types.DphGroup          `json:"crash_classification"`
+	Point               *geometry.Geometry       `json:"-"`
+}
+
+func (c CrashEvents) ToFeature() (*geojson.Feature, error) {
+	properties := map[string]any{}
+
+	encoding, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(encoding, &properties)
+	if err != nil {
+		return nil, err
+	}
+
+	return &geojson.Feature{
+		ID:         c.CNN,
+		Geometry:   *c.Point,
+		Properties: properties,
+	}, nil
 }

@@ -2,5 +2,5 @@ root = "." # Your project root
 tmp_dir = "tmp" # Directory for built binaries
 
 [build]
-cmd = "go build -tags=libsqlite3,linux,json1 -o ./tmp/main ." # Command to build your app
+cmd = "go mod download; go mod tidy; go build -tags=libsqlite3,linux,json1 -o ./tmp/main ." # Command to build your app
 bin = "tmp/main" # The generated binary path

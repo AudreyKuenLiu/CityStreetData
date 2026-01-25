@@ -7,8 +7,7 @@ import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 interface useMapControlsReturn {
   hoverInfo: { cnn: string } | null;
   onHover: (event: MapLayerMouseEvent) => void;
-  key: number;
-  setKey: (nextKey: number) => void;
+  onClick: (event: MapLayerMouseEvent) => void;
   viewState: ViewState;
   setViewState: (nextViewState: ViewState) => void;
 }
@@ -23,11 +22,11 @@ export const useMapControls = ({
   const [key, setKey] = useState(0);
   const [isXPressed, setIsXPressed] = useState(false);
 
-  const { addStreet, removeStreet } = useActions();
+  const { addStreet, removeStreet, toggleStreet } = useActions();
 
   const throttleFunc = (
     func: (e?: MapLayerMouseEvent) => void,
-    event?: MapLayerMouseEvent
+    event?: MapLayerMouseEvent,
   ): void => {
     const throttleTimeMs = 30;
     if (Date.now() - timeMs.current <= throttleTimeMs) {
@@ -94,12 +93,25 @@ export const useMapControls = ({
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
 
+  const onClick = (event: MapLayerMouseEvent): void => {
+    const features = event.features;
+    if (
+      features?.[0]?.properties?.cnn != null &&
+      features?.[0].geometry.type === "LineString"
+    ) {
+      toggleStreet({
+        cnn: features[0].properties.cnn,
+        line: JSON.parse(features[0].properties.line),
+      });
+      setKey(key + 1); //super-hack this line is responsibe for "rerendering" the map when clicked
+    }
+  };
+
   return {
     hoverInfo,
     onHover: throttledHover,
-    key,
-    setKey,
     viewState,
     setViewState,
+    onClick,
   };
 };

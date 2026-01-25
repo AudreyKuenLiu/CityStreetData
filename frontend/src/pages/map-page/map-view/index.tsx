@@ -1,6 +1,9 @@
 import React, { useRef, useMemo } from "react";
 import Map, { Layer, Source, MapRef } from "react-map-gl/maplibre";
-import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
+import {
+  SanFranciscoNEPoint,
+  SanFranciscoSWPoint,
+} from "../../../constants/map-dimensions";
 import {
   streetLayerId,
   streetLayerStyle,
@@ -9,7 +12,6 @@ import {
   hoveredLayerStyle,
   hoveredLayerId,
 } from "./constants";
-import { useActions } from "../store/street-map-data-form";
 import type { FeatureCollection, LineString } from "geojson";
 import { StreetSegment } from "../../../models/map-grid";
 import { useMapControls } from "./hooks/use-map-controls";
@@ -17,25 +19,22 @@ import { useSelectedStreets } from "./hooks/use-selected-streets";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 export const MapView = ({
-  initalNESWBounds,
   centerLatLon,
   getStreetSegmentsForZoomLevel,
 }: {
-  initalNESWBounds: [number, number, number, number];
   centerLatLon: [number, number];
   getStreetSegmentsForZoomLevel: (zoomLevel: number) => StreetSegment[];
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
-  const { hoverInfo, onHover, key, setKey, viewState, setViewState } =
+  const { hoverInfo, onHover, onClick, viewState, setViewState } =
     useMapControls({ centerLatLon });
-  const { toggleStreet } = useActions();
   const { configs } = useSelectedStreets();
   const layerIds = configs.map((config) => {
     return config.layerStyle.id;
   });
 
   const streetSegments = getStreetSegmentsForZoomLevel(
-    mapRef.current?.getZoom() ?? DEFAULT_ZOOM
+    mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
   );
 
   const geoJson: FeatureCollection<LineString, StreetSegment> = useMemo(() => {
@@ -57,7 +56,7 @@ export const MapView = ({
   const hoveredStreetSegment = (hoverInfo && hoverInfo.cnn) || "";
   const filter: ["in", string, string] = useMemo(
     () => ["in", "cnn", hoveredStreetSegment],
-    [hoveredStreetSegment]
+    [hoveredStreetSegment],
   );
 
   return (
@@ -69,24 +68,13 @@ export const MapView = ({
         onMouseMove={onHover}
         // [sw, ne]
         maxBounds={[
-          initalNESWBounds[3],
-          initalNESWBounds[2],
-          initalNESWBounds[1],
-          initalNESWBounds[0],
+          SanFranciscoSWPoint[1],
+          SanFranciscoSWPoint[0],
+          SanFranciscoNEPoint[1],
+          SanFranciscoNEPoint[0],
         ]}
-        onClick={(event: MapLayerMouseEvent) => {
-          const features = event.features;
-          if (
-            features?.[0]?.properties?.cnn != null &&
-            features?.[0].geometry.type === "LineString"
-          ) {
-            toggleStreet({
-              cnn: features[0].properties.cnn,
-              line: JSON.parse(features[0].properties.line),
-            });
-            setKey(key + 1); //super-hack this line is responsibe for "rerendering" the map when clicked
-          }
-        }}
+        reuseMaps
+        onClick={onClick}
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
         interactiveLayerIds={[streetLayerId, hoveredLayerId, ...layerIds]}

@@ -1,8 +1,8 @@
 import React from "react";
 import { ResponsiveLine, SliceTooltipProps } from "@nivo/line";
 import { Flex, Typography } from "antd";
-import { useStreetGroups } from "../store/street-map-data-form";
-import { useTrafficCrashesData } from "../store/graph-data";
+import { useStreetGroups } from "../../store/street-map-data-form";
+import { useTrafficCrashesData } from "../../store/graph-data";
 import { XFilled } from "@ant-design/icons";
 
 type sliceData = {

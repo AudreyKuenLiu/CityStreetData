@@ -4,29 +4,22 @@ import { useQuery } from "@tanstack/react-query";
 import {
   useActions,
   useEndDate,
-  useIsReady,
   useStartDate,
   useStreetGroups,
   useTimeSegment,
-} from "../store/street-map-data-form";
-import { CrashStats, StreetFeature } from "../../../models/api-models";
+} from "../../../../store/street-map-data-form";
+import { CrashStats, StreetFeature } from "../../../../../../models/api-models";
 import {
   useActions as useGraphDataActions,
   GraphGroupData,
-} from "../store/graph-data";
+} from "../../../../store/graph-data";
+import { UseDataViewControllerProps } from "./types";
 
-interface useCrashDataForStreetsReturn {
-  canGetCrashes: boolean;
-  getCrashes: () => Promise<void>;
-  isLoading: boolean;
-}
-
-export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
+export const useCrashDataForStreets = (): UseDataViewControllerProps => {
   const streetGroups = useStreetGroups();
   const startTime = useStartDate();
   const endTime = useEndDate();
   const timeSegment = useTimeSegment();
-  const isReady = useIsReady();
   const { resetIsDirty } = useActions();
   const { setGraphData } = useGraphDataActions();
 
@@ -68,20 +61,20 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
             ([unixTimestampSeconds, crashStats]) => {
               const date = new Date(+unixTimestampSeconds * 1000);
               return [date, crashStats] as const;
-            }
+            },
           );
 
           return {
             id: streetGroup.id,
             data: [crashData] as const,
           } as const;
-        }
+        },
       );
 
-      const response = await Promise.all(allResults);
+      const responses = await Promise.all(allResults);
       const graphDataMap: GraphGroupData = new Map();
 
-      for (const res of response) {
+      for (const res of responses) {
         const { id, data } = res;
         const [crashData] = data ?? [];
         graphDataMap.set(id, crashData ?? []);
@@ -108,8 +101,7 @@ export const useCrashDataForStreets = (): useCrashDataForStreetsReturn => {
   }, [result.isSuccess, groupCrashes, setGraphData]);
 
   return {
-    getCrashes,
-    canGetCrashes: isReady,
+    getData: getCrashes,
     isLoading: result.isLoading,
   };
 };
