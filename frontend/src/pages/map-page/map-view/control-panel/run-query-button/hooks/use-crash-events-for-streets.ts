@@ -11,12 +11,14 @@ import {
 } from "../../../../store/street-map-data-form";
 import { useEffect } from "react";
 import { CrashEventFeatureCollection } from "../../../../../../models/api-models";
+import { useActions as useHeatmapDataActions } from "../../../../store/heatmap-data";
 
 export const useCrashEventsForStreets = (): UseDataViewControllerProps => {
   const streetGroups = useStreetGroups();
   const startTime = useStartDate();
   const endTime = useEndDate();
   const { resetIsDirty } = useActions();
+  const { setHeatmapData } = useHeatmapDataActions();
 
   const result = useQuery({
     queryKey: ["crashEventsForStreets", startTime, endTime, streetGroups],
@@ -82,8 +84,9 @@ export const useCrashEventsForStreets = (): UseDataViewControllerProps => {
 
   useEffect(() => {
     if (result.isSuccess) {
+      setHeatmapData(groupCrashes);
     }
-  }, [result.isSuccess]);
+  }, [result.isSuccess, setHeatmapData, groupCrashes]);
 
   return {
     getData: getCrashEvents,

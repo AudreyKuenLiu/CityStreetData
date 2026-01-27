@@ -12,7 +12,7 @@ import { CrashStats, StreetFeature } from "../../../../../../models/api-models";
 import {
   useActions as useGraphDataActions,
   GraphGroupData,
-} from "../../../../store/graph-data";
+} from "../../../../store/graph-list-data";
 import { UseDataViewControllerProps } from "./types";
 
 export const useCrashDataForStreets = (): UseDataViewControllerProps => {

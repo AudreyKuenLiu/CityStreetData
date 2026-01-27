@@ -1,7 +1,7 @@
 import React from "react";
 import { Flex, Radio } from "antd";
-import type { GraphType } from "../../store/graph-data";
-import { useActions, useCurrentGraphType } from "../../store/graph-data";
+import type { GraphType } from "../../store/graph-list-data";
+import { useActions, useCurrentGraphType } from "../../store/graph-list-data";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 
 const TrafficCrashOptions: CheckboxGroupProps<GraphType>["options"] = [

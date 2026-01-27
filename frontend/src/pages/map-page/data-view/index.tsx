@@ -2,7 +2,7 @@ import React from "react";
 
 import { GraphList } from "./graph-list/graph-list";
 import { DataFilters } from "./graph-list/data-filters";
-import { useTrafficCrashesData } from "../store/graph-data";
+import { useTrafficCrashesData } from "../store/graph-list-data";
 import { Flex, Typography } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
 import { useStreetGroups } from "../store/street-map-data-form";
