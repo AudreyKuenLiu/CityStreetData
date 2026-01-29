@@ -66,7 +66,7 @@ type GetTrafficForStreetsParams struct {
 
 type CrashEvents struct {
 	CNN                 int                      `json:"cnn"`
-	OccuredAt           *time.Time               `json:"occured_at"`
+	OccuredAt           time.Time                `json:"occured_at"`
 	CollisionSeverity   *types.CollisionSeverity `json:"collision_severity"`
 	CollisionType       *types.CollisionType     `json:"collision_type"`
 	NumberKilled        int                      `json:"number_killed"`
@@ -77,8 +77,25 @@ type CrashEvents struct {
 
 func (c CrashEvents) ToFeature() (*geojson.Feature, error) {
 	properties := map[string]any{}
+	mappedCrashEvents := struct {
+		CNN                 int                      `json:"cnn"`
+		OccuredAt           int64                    `json:"occured_at"`
+		CollisionSeverity   *types.CollisionSeverity `json:"collision_severity"`
+		CollisionType       *types.CollisionType     `json:"collision_type"`
+		NumberKilled        int                      `json:"number_killed"`
+		NumberInjured       int                      `json:"number_injured"`
+		CrashClassification *types.DphGroup          `json:"crash_classification"`
+	}{
+		CNN:                 c.CNN,
+		OccuredAt:           c.OccuredAt.Unix(),
+		CollisionSeverity:   c.CollisionSeverity,
+		CollisionType:       c.CollisionType,
+		NumberKilled:        c.NumberKilled,
+		NumberInjured:       c.NumberInjured,
+		CrashClassification: c.CrashClassification,
+	}
 
-	encoding, err := json.Marshal(c)
+	encoding, err := json.Marshal(mappedCrashEvents)
 	if err != nil {
 		return nil, err
 	}

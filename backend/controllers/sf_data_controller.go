@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"citystreetdata/controllers/types"
+	cUtils "citystreetdata/controllers/utils"
 	rTypes "citystreetdata/repositories/types"
 	dtypes "citystreetdata/types"
-	"math"
 	"slices"
 
 	repo "citystreetdata/repositories"
@@ -12,7 +12,8 @@ import (
 	"fmt"
 	"log/slog"
 	"sort"
-	"time"
+
+	"github.com/twpayne/go-geos/geojson"
 )
 
 type SfDataController struct {
@@ -34,7 +35,7 @@ func NewSFDataController(logger *slog.Logger) (*SfDataController, error) {
 	}, nil
 }
 
-func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params *types.GetCrashDataForStreetsParams) (*types.GetCrashDataForStreetsReturn, error) {
+func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params *types.GetCrashDataForStreetsParams) (*types.CrashDataForStreets, error) {
 	if params == nil {
 		return nil, fmt.Errorf("no params passed to GetCrashDataForStreets")
 	}
@@ -52,43 +53,8 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		return crashes[i].OccuredAt.Unix() < crashes[j].OccuredAt.Unix()
 	})
 
-	if err != nil {
-		return nil, err
-	}
-
 	//initilize segments
-	dateToCrashesGroupMap := map[int64]types.CrashStats{}
-	dateToStreetFeatures := map[int64][]rTypes.StreetFeature{}
-	timeSlices := []int64{}
-	startTime := params.StartTime
-	endTime := params.EndTime
-	loc, _ := time.LoadLocation("America/Los_Angeles")
-	itTime := startTime.In(loc)
-
-	for itTime.Unix() < endTime.Unix() {
-		unixTime := itTime.Unix()
-		dateToCrashesGroupMap[unixTime] = types.CrashStats{}
-		dateToStreetFeatures[unixTime] = []rTypes.StreetFeature{}
-		timeSlices = append(timeSlices, unixTime)
-		years, months, days := params.SegmentSize.SegmentInYearMonthDays()
-		itTime = itTime.AddDate(years, months, days)
-	}
-
-	findClosestTime := func(occuredTime int64, curPos int) (int64, int) {
-		i := curPos
-		for i < len(timeSlices) {
-			curTime := timeSlices[i]
-			nextTime := int64(math.MaxInt64)
-			if i+1 < len(timeSlices) {
-				nextTime = timeSlices[i+1]
-			}
-			if curTime <= occuredTime && occuredTime < nextTime {
-				return curTime, i
-			}
-			i += 1
-		}
-		return timeSlices[len(timeSlices)-1], i
-	}
+	dateToCrashesGroupMap, findClosestTime := cUtils.BuildTimeSegmentMap[types.CrashStats](params.StartTime, params.EndTime, params.SegmentSize)
 
 	//map to time segment
 	var closestTime int64
@@ -122,9 +88,52 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		dateToCrashesGroupMap[closestTime] = crashStats
 	}
 
-	return &types.GetCrashDataForStreetsReturn{
+	return &types.CrashDataForStreets{
 		Data: dateToCrashesGroupMap,
 	}, nil
+}
+
+func (sfc *SfDataController) GetCrashesForStreets(ctx context.Context, params *types.GetCrashesForStreetsParams) (*types.CrashEventsForStreets, error) {
+	if params == nil {
+		return nil, fmt.Errorf("no params passed to GetCrashesForStreets")
+	}
+
+	crashEvents, err := sfc.sfDataRepository.GetTrafficCrashesForStreets(ctx, &rTypes.GetTrafficForStreetsParams{
+		CNNs:      params.CNNs,
+		StartTime: params.StartTime,
+		EndTime:   params.EndTime,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if params.SegmentSize == nil {
+		//todo implement a scenario where we just get all crashes in a timeframe
+		return nil, nil
+	}
+
+	sort.Slice(crashEvents, func(i, j int) bool {
+		return crashEvents[i].OccuredAt.Unix() < crashEvents[j].OccuredAt.Unix()
+	})
+
+	timeToCrashCollection, findClosestTime := cUtils.BuildTimeSegmentMap[geojson.FeatureCollection](params.StartTime, params.EndTime, *params.SegmentSize)
+	var closestTime int64
+	idx := 0
+	for _, crashData := range crashEvents {
+		closestTime, idx = findClosestTime(crashData.OccuredAt.Unix(), idx)
+		crashCollection := timeToCrashCollection[closestTime]
+		crashFeature, err := crashData.ToFeature()
+		if err != nil {
+			return nil, err
+		}
+		timeToCrashCollection[closestTime] = append(crashCollection, crashFeature)
+	}
+
+	return &types.CrashEventsForStreets{
+		Data: timeToCrashCollection,
+	}, err
+
 }
 
 func (sfc *SfDataController) GetStreetFeatures(ctx context.Context, params *types.GetStreetFeaturesParams) ([]rTypes.StreetFeatureSegment, error) {
@@ -140,19 +149,6 @@ func (sfc *SfDataController) GetStreetFeatures(ctx context.Context, params *type
 		ret = append(ret, vals...)
 	}
 	return ret, nil
-}
-
-func (sfc *SfDataController) GetCrashesForStreets(ctx context.Context, params *types.GetCrashesForStreetsParams) ([]rTypes.CrashEvents, error) {
-	if params == nil {
-		return nil, fmt.Errorf("no params passed to GetCrashesForStreets")
-	}
-
-	return sfc.sfDataRepository.GetTrafficCrashesForStreets(ctx, &rTypes.GetTrafficForStreetsParams{
-		CNNs:      params.CNNs,
-		StartTime: params.StartTime,
-		EndTime:   params.EndTime,
-	})
-
 }
 
 func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params *types.GetSegmentsForViewportParams) ([]rTypes.StreetSegment, error) {

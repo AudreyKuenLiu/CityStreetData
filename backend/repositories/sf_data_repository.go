@@ -224,7 +224,7 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 
 		if occuredAtInt > 0 {
 			occuredAtTime = time.Unix(occuredAtInt, 0)
-			crashEvent.OccuredAt = &occuredAtTime
+			crashEvent.OccuredAt = occuredAtTime
 
 		}
 

@@ -43,7 +43,7 @@ export type ViewportSegment = {
 
 export type ApiCrashEvents = {
   cnn: number;
-  occured_at: string | null;
+  occured_at: number;
   crash_classification: string;
   collision_severity: string | null;
   collision_type: string | null;

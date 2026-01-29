@@ -1,14 +1,28 @@
 import { GroupId } from "../street-map-data-form";
 import { CrashEventFeatureCollection } from "../../../../models/api-models";
 
-export type HeatmapGroupData = Map<GroupId, CrashEventFeatureCollection>;
+export type DateFeatureCollections = (readonly [
+  Date,
+  CrashEventFeatureCollection,
+])[];
+
+export type HeatmapGroupData = Map<GroupId, DateFeatureCollections>;
+
+export type HeatmapGroupTimeSegments = Map<
+  GroupId,
+  {
+    featureCollectionSegments: DateFeatureCollections;
+  }
+>;
 
 export type HeatmapDataActions = {
-  setHeatmapData: (data: HeatmapGroupData) => void;
+  setHeatmapData: ({ data }: { data: HeatmapGroupData }) => void;
+  setDateFeatureCollectionsIndex: ({ newIdx }: { newIdx: number }) => boolean;
 };
 
 export type HeatmapData = {
-  heatmapGroups: HeatmapGroupData;
+  heatmapGroupTimeSegments: HeatmapGroupTimeSegments;
+  dateFeatureCollectionsIndex: number;
   actions: HeatmapDataActions;
 };
 

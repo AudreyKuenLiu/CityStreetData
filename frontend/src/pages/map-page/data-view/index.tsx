@@ -2,24 +2,26 @@ import React from "react";
 
 import { GraphList } from "./graph-list/graph-list";
 import { DataFilters } from "./graph-list/data-filters";
-import { useTrafficCrashesData } from "../store/graph-list-data";
+//import { useTrafficCrashesData } from "../store/graph-list-data";
 import { Flex, Typography } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
 import { useStreetGroups } from "../store/street-map-data-form";
 import { useDataViewContext } from "../context/data-view";
 import { DataViewEnum } from "../context/data-view/types";
-import { HeatmapView } from "./heatmap-view";
+import { HeatmapView } from "./heatmap-view/heatmap-view";
 
 const useHasNoData = (): boolean => {
-  const trafficCrashData = useTrafficCrashesData();
+  // const trafficCrashData = useTrafficCrashesData();
+  // const streetGroups = useStreetGroups();
+  // const trafficCrashGroupIds = trafficCrashData.map(({ id }) => id);
+  // for (const crashGroupId of trafficCrashGroupIds) {
+  //   if (streetGroups.has(crashGroupId)) {
+  //     return false;
+  //   }
+  // }
+  // return true;
   const streetGroups = useStreetGroups();
-  const trafficCrashGroupIds = trafficCrashData.map(({ id }) => id);
-  for (const crashGroupId of trafficCrashGroupIds) {
-    if (streetGroups.has(crashGroupId)) {
-      return false;
-    }
-  }
-  return true;
+  return streetGroups.size === 0;
 };
 
 export const DataView = (): React.JSX.Element => {
@@ -59,6 +61,7 @@ export const DataView = (): React.JSX.Element => {
 
 const DataViewBody = (): React.JSX.Element => {
   const { currentDataView } = useDataViewContext();
+  console.log("this is the current data view", currentDataView);
   if (currentDataView === DataViewEnum.GraphView) {
     return (
       <Flex

@@ -94,6 +94,7 @@ export const RunQueryButton = ({
             const selectedDataView = DataViewKeys.parse(e.key);
             await runQuery(selectedDataView);
             setDataView(selectedDataView);
+            setValidRun(true);
             onClick();
           },
         }}

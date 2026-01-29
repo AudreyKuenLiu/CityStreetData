@@ -14,7 +14,6 @@ import (
 	"citystreetdata/types"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/twpayne/go-geos/geojson"
 
 	echo "github.com/labstack/echo/v4"
 )
@@ -49,11 +48,11 @@ func NewHandlers(p Params) (*handlers, error) {
 }
 
 func (h *handlers) InitHandlers() error {
-	h.echoInstance.GET("/api/segmentsForViewport", h.getSegmentsForViewport)
+	h.echoInstance.GET("/api/viewport/streets", h.getSegmentsForViewport)
+	h.echoInstance.GET("/api/streets/crashevents", h.crashEventsForStreets)
+	h.echoInstance.GET("/api/streets/crashdata", h.getCrashDataForStreets)
+	h.echoInstance.GET("/api/streets/features", h.getStreetFeatures)
 	h.echoInstance.GET("/api/segmentsForGrid", h.getSegmentsForGrid)
-	h.echoInstance.GET("/api/crashEventsForStreets", h.crashEventsForStreets)
-	h.echoInstance.GET("/api/crashDataForStreets", h.getCrashDataForStreets)
-	h.echoInstance.GET("/api/streetFeatures", h.getStreetFeatures)
 	return nil
 }
 
@@ -86,6 +85,53 @@ func (h *handlers) getCrashDataForStreets(c echo.Context) error {
 	}
 
 	result, err := h.sfDataController.GetCrashDataForStreets(c.Request().Context(), &cTypes.GetCrashDataForStreetsParams{
+		CNNs:        cnns,
+		SegmentSize: segmentSize,
+		StartTime:   startTime,
+		EndTime:     endTime,
+	})
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting traffic crashes for cnns: %v", err))
+	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
+func (h *handlers) crashEventsForStreets(c echo.Context) error {
+	cnnsStr := c.QueryParam("cnns")
+	startTimeStr := c.QueryParam("startTime")
+	endTimeStr := c.QueryParam("endTime")
+	timeSegment := c.QueryParam("timeSegment")
+
+	cnns := []int{}
+	if len(cnnsStr) > 0 {
+		err := json.Unmarshal([]byte(cnnsStr), &cnns)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
+		}
+	}
+	startTimeEpoch, err := strconv.ParseInt(startTimeStr, 10, 64)
+	startTime := time.Unix(startTimeEpoch, 0)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
+	}
+	endTimeEpoch, err := strconv.ParseInt(endTimeStr, 10, 64)
+	endTime := time.Unix(endTimeEpoch, 0)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
+	}
+
+	var segmentSize *cTypes.TimeSegmentSize = nil
+	if len(timeSegment) > 0 {
+		parsedSegment, err := cTypes.StrToSegment(timeSegment)
+		segmentSize = &parsedSegment
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing timeSegment: %v", err))
+		}
+	}
+
+	result, err := h.sfDataController.GetCrashesForStreets(c.Request().Context(), &cTypes.GetCrashesForStreetsParams{
 		CNNs:        cnns,
 		SegmentSize: segmentSize,
 		StartTime:   startTime,
@@ -134,50 +180,6 @@ func (h *handlers) getStreetFeatures(c echo.Context) error {
 	})
 
 	return c.JSON(http.StatusOK, result)
-}
-
-func (h *handlers) crashEventsForStreets(c echo.Context) error {
-	cnnsStr := c.QueryParam("cnns")
-	startTimeStr := c.QueryParam("startTime")
-	endTimeStr := c.QueryParam("endTime")
-
-	cnns := []int{}
-	if len(cnnsStr) > 0 {
-		err := json.Unmarshal([]byte(cnnsStr), &cnns)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
-		}
-	}
-	startTimeEpoch, err := strconv.ParseInt(startTimeStr, 10, 64)
-	startTime := time.Unix(startTimeEpoch, 0)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
-	}
-	endTimeEpoch, err := strconv.ParseInt(endTimeStr, 10, 64)
-	endTime := time.Unix(endTimeEpoch, 0)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
-	}
-
-	result, err := h.sfDataController.GetCrashesForStreets(c.Request().Context(), &cTypes.GetCrashesForStreetsParams{
-		CNNs:      cnns,
-		StartTime: startTime,
-		EndTime:   endTime,
-	})
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting traffic crashes for cnns: %v", err))
-	}
-	featureCollection := geojson.FeatureCollection{}
-	for _, crashEvent := range result {
-		feature, err := crashEvent.ToFeature()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error parsing crash event: %v", err))
-		}
-		featureCollection = append(featureCollection, feature)
-	}
-
-	return c.JSON(http.StatusOK, featureCollection)
 }
 
 func (h *handlers) getSegmentsForViewport(c echo.Context) error {

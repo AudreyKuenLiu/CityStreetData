@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/twpayne/go-geos"
+	"github.com/twpayne/go-geos/geojson"
 	"github.com/twpayne/go-geos/geometry"
 )
 
@@ -43,9 +44,10 @@ type GetSegmentsForGridReturn struct {
 }
 
 type GetCrashesForStreetsParams struct {
-	CNNs      []int
-	StartTime time.Time
-	EndTime   time.Time
+	CNNs        []int
+	SegmentSize *TimeSegmentSize
+	StartTime   time.Time
+	EndTime     time.Time
 }
 
 type GetStreetFeaturesParams struct {
@@ -120,6 +122,10 @@ type CrashStats struct {
 	NumberOfBicyclePedestrianCrashes int `json:"numberOfBicyclePedestrianCrashes"`
 }
 
-type GetCrashDataForStreetsReturn struct {
+type CrashDataForStreets struct {
 	Data map[int64]CrashStats `json:"data"`
+}
+
+type CrashEventsForStreets struct {
+	Data map[int64]geojson.FeatureCollection `json:"data"`
 }

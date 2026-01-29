@@ -38,18 +38,15 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
         queryKey: ["segmentsForViewport", ...classCodes] as const,
         staleTime: Infinity,
         queryFn: async (): Promise<AxiosResponse<ViewportSegment[]>> => {
-          return await axios.get<ViewportSegment[]>(
-            `/api/segmentsForViewport`,
-            {
-              params: {
-                nePoint: JSON.stringify(SanFranciscoNEPoint),
-                swPoint: JSON.stringify(SanFranciscoSWPoint),
-                filters: JSON.stringify({
-                  classCodes,
-                }),
-              },
-            }
-          );
+          return await axios.get<ViewportSegment[]>(`/api/viewport/streets`, {
+            params: {
+              nePoint: JSON.stringify(SanFranciscoNEPoint),
+              swPoint: JSON.stringify(SanFranciscoSWPoint),
+              filters: JSON.stringify({
+                classCodes,
+              }),
+            },
+          });
         },
       };
     }),
@@ -65,7 +62,7 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       [ZoomLevelInView.TWO]: medZoomData,
       [ZoomLevelInView.THREE]: maxZoomData,
     }),
-    [minZoomData, medZoomData, maxZoomData]
+    [minZoomData, medZoomData, maxZoomData],
   );
 
   const getStreetSegmentsForZoomLevel = useCallback(
@@ -76,7 +73,7 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       }
       return config[zoomLevelInView];
     },
-    [config]
+    [config],
   );
   return {
     getStreetSegmentsForZoomLevel,

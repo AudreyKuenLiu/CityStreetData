@@ -11,10 +11,10 @@ import { StoreApi } from "zustand";
 
 const isStreetMapFormReady = (
   oldState: StreetMapFormState,
-  newState: Partial<StreetMapFormState>
+  newState: Partial<StreetMapFormState>,
 ): boolean => {
   const streetGroupHasCnn = (
-    streetGroup: Map<GroupId, StreetGroup>
+    streetGroup: Map<GroupId, StreetGroup>,
   ): boolean => {
     const streetGroups = Array.from(streetGroup.entries());
     return streetGroups.some(([_, streetGroup]) => {
@@ -47,7 +47,7 @@ const isStreetMapFormReady = (
   );
 };
 const getCurrentStreetGroup = (
-  curState: StreetMapFormState
+  curState: StreetMapFormState,
 ): [StreetGroup, true] | [undefined, false] => {
   const streetGroup = curState.streetGroups.get(curState.currentGroupId);
   if (streetGroup == null) {
@@ -57,7 +57,7 @@ const getCurrentStreetGroup = (
 };
 const removeCnnFromGroup = (
   curState: StreetMapFormState,
-  cnn: number
+  cnn: number,
 ): boolean => {
   const _cnnToGroupId = curState._cnnToGroupId;
   const groupId = _cnnToGroupId.get(cnn);
@@ -74,7 +74,7 @@ const removeCnnFromGroup = (
 const addStreetToGroup = (
   curState: StreetMapForm,
   curStreetGroup: StreetGroup,
-  streetSegment: StreetSegment
+  streetSegment: StreetSegment,
 ): void => {
   const cnnMap = curStreetGroup.cnns;
   removeCnnFromGroup(curState, streetSegment.cnn);
@@ -216,15 +216,6 @@ export const actions = ({
       };
     });
     return ret;
-  },
-  setStreetEvent: (streetEvent): void => {
-    setState((state) => {
-      return {
-        streetEvent,
-        isReady: isStreetMapFormReady(state, { streetEvent }),
-        isDirty: true,
-      };
-    });
   },
   setTimeSegment: (timeSegment): void => {
     setState((state) => {

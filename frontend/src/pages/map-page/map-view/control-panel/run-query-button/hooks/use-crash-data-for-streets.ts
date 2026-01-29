@@ -48,7 +48,7 @@ export const useCrashDataForStreets = (): UseDataViewControllerProps => {
           const response = await axios.get<{
             data: { [key: number]: CrashStats };
             features: { [key: number]: StreetFeature[] };
-          }>(`/api/crashDataForStreets`, {
+          }>(`/api/streets/crashdata`, {
             params: {
               cnns: JSON.stringify(cnns),
               startTime: startTime.getTime() / 1000,

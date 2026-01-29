@@ -1,20 +1,30 @@
 import React, { useRef } from "react";
 import Map, { Layer, MapRef } from "react-map-gl/maplibre";
-import { MAX_ZOOM } from "../map-view/constants";
+import { MAX_ZOOM } from "../../map-view/constants";
 import type { LayerProps } from "react-map-gl/maplibre";
+import { Flex } from "antd";
 import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
-} from "../../../constants/map-dimensions";
-import { useHeatmapGroupData } from "../store/heatmap-data";
+} from "../../../../constants/map-dimensions";
+import { useCurrentHeatmapFeatureCollections } from "../../store/heatmap-data";
 import { Source } from "react-map-gl/maplibre";
+import { HeatmapControls } from "./heatmap-controls";
 
 export const HeatmapView = (): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
-  const heatmapGroupData = useHeatmapGroupData();
+  const currentFeatureCollections = useCurrentHeatmapFeatureCollections();
 
   return (
-    <>
+    <Flex
+      style={{
+        flexWrap: "wrap",
+        width: "100%",
+        alignContent: "flex-start",
+        gap: "20px",
+      }}
+    >
+      <HeatmapControls />
       <Map
         ref={mapRef}
         // [sw, ne]
@@ -30,8 +40,7 @@ export const HeatmapView = (): React.JSX.Element => {
         mapStyle="https://tiles.openfreemap.org/styles/positron"
         doubleClickZoom={false}
       >
-        {heatmapGroupData.entries().map(([groupId, crashEventsGeoJson]) => {
-          console.log(crashEventsGeoJson);
+        {currentFeatureCollections.map(([groupId, geoJson]) => {
           const heatmapLayerStyle: LayerProps = {
             id: `heatmap-${groupId}`,
             maxzoom: MAX_ZOOM,
@@ -101,12 +110,12 @@ export const HeatmapView = (): React.JSX.Element => {
             },
           };
           return (
-            <Source key={groupId} type="geojson" data={crashEventsGeoJson}>
+            <Source key={groupId} type="geojson" data={geoJson}>
               <Layer {...heatmapLayerStyle} />
             </Source>
           );
         })}
       </Map>
-    </>
+    </Flex>
   );
 };
