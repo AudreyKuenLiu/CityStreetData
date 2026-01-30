@@ -1,4 +1,4 @@
-import { GroupId } from "../street-map-data-form";
+import { GroupId, TimeSegments } from "../street-map-data-form";
 import { CrashEventFeatureCollection } from "../../../../models/api-models";
 
 export type DateFeatureCollections = (readonly [
@@ -17,12 +17,14 @@ export type HeatmapGroupTimeSegments = Map<
 
 export type HeatmapDataActions = {
   setHeatmapData: ({ data }: { data: HeatmapGroupData }) => void;
-  setDateFeatureCollectionsIndex: ({ newIdx }: { newIdx: number }) => boolean;
+  setFeatureCollectionsIndex: ({ newIdx }: { newIdx: number }) => boolean;
+  toggleFullTimePeriodDisplay: () => void;
 };
 
 export type HeatmapData = {
   heatmapGroupTimeSegments: HeatmapGroupTimeSegments;
-  dateFeatureCollectionsIndex: number;
+  featureCollectionsIndex: number;
+  fullTimePeriodDisplay: boolean;
   actions: HeatmapDataActions;
 };
 

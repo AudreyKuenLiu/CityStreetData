@@ -43,20 +43,7 @@ export const DataView = (): React.JSX.Element => {
       </Flex>
     );
   }
-  return (
-    <Flex
-      style={{
-        overflow: "scroll",
-        padding: "16px",
-        // flexWrap: "wrap",
-        // alignContent: "flex-start",
-        // gap: "20px",
-        height: "100vh",
-      }}
-    >
-      <DataViewBody />
-    </Flex>
-  );
+  return <DataViewBody />;
 };
 
 const DataViewBody = (): React.JSX.Element => {
@@ -66,7 +53,10 @@ const DataViewBody = (): React.JSX.Element => {
     return (
       <Flex
         style={{
+          overflow: "scroll",
           flexWrap: "wrap",
+          padding: "16px",
+          height: "100vh",
           alignContent: "flex-start",
           gap: "20px",
         }}
@@ -77,7 +67,17 @@ const DataViewBody = (): React.JSX.Element => {
     );
   }
   if (currentDataView === DataViewEnum.HeatmapView) {
-    return <HeatmapView />;
+    return (
+      <Flex
+        style={{
+          overflow: "hidden",
+          height: "100vh",
+          alignContent: "flex-start",
+        }}
+      >
+        <HeatmapView />
+      </Flex>
+    );
   }
-  return <GraphList />;
+  return <div></div>;
 };

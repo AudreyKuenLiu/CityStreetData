@@ -104,6 +104,13 @@ func (c CrashEvents) ToFeature() (*geojson.Feature, error) {
 		return nil, err
 	}
 
+	if c.Point == nil {
+		return &geojson.Feature{
+			ID:         c.CNN,
+			Properties: properties,
+		}, nil
+	}
+
 	return &geojson.Feature{
 		ID:         c.CNN,
 		Geometry:   *c.Point,

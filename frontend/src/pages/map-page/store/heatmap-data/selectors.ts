@@ -14,14 +14,15 @@ const useHeatmapData = create<HeatmapData>()(
   devtools(
     (set) => ({
       heatmapGroupTimeSegments: new Map(),
-      dateFeatureCollectionsIndex: 0,
+      featureCollectionsIndex: 0,
+      fullTimePeriodDisplay: false,
       actions: actions({ setState: set }),
     }),
     { name: "HeatmapData" },
   ),
 );
 
-export const useCurrentHeatmapFeatureCollections = (): (readonly [
+export const useHeatmapFeatureCollectionsByTimeSegment = (): (readonly [
   GroupId,
   CrashEventFeatureCollection,
 ])[] => {
@@ -29,9 +30,53 @@ export const useCurrentHeatmapFeatureCollections = (): (readonly [
     useShallow((state) => state.heatmapGroupTimeSegments),
   );
   const currentSegmentIdx = useHeatmapData(
-    (state) => state.dateFeatureCollectionsIndex,
+    (state) => state.featureCollectionsIndex,
   );
 
+  return Array.from(
+    heatmapGroupTimeSegments.entries().map(([groupId, collections]) => {
+      return [
+        groupId,
+        collections.featureCollectionSegments[currentSegmentIdx][1],
+      ] as const;
+    }),
+  );
+};
+
+export const useHeatmapFeatureCollections = (): (readonly [
+  GroupId,
+  CrashEventFeatureCollection,
+])[] => {
+  const heatmapGroupTimeSegments = useHeatmapData(
+    useShallow((state) => state.heatmapGroupTimeSegments),
+  );
+  const currentSegmentIdx = useHeatmapData(
+    (state) => state.featureCollectionsIndex,
+  );
+  const fullTimePeriodDisplay = useHeatmapData(
+    (state) => state.fullTimePeriodDisplay,
+  );
+
+  if (fullTimePeriodDisplay) {
+    return Array.from(
+      heatmapGroupTimeSegments.entries().map(([groupId, collections]) => {
+        const mergedFeatureCollection: CrashEventFeatureCollection = {
+          type: "FeatureCollection",
+          features: [],
+        };
+        for (const [
+          ,
+          featureCollection,
+        ] of collections.featureCollectionSegments) {
+          mergedFeatureCollection.features = [
+            ...mergedFeatureCollection.features,
+            ...featureCollection.features,
+          ];
+        }
+        return [groupId, mergedFeatureCollection] as const;
+      }),
+    );
+  }
   return Array.from(
     heatmapGroupTimeSegments.entries().map(([groupId, collections]) => {
       return [
@@ -46,8 +91,12 @@ export const useHeatmapTimeSegments = (): HeatmapGroupTimeSegments => {
   return useHeatmapData(useShallow((state) => state.heatmapGroupTimeSegments));
 };
 
-export const useDateFeatureCollectionsIndex = (): number => {
-  return useHeatmapData((state) => state.dateFeatureCollectionsIndex);
+export const useFeatureCollectionsIndex = (): number => {
+  return useHeatmapData((state) => state.featureCollectionsIndex);
+};
+
+export const useFullTimePeriodDisply = (): boolean => {
+  return useHeatmapData((state) => state.fullTimePeriodDisplay);
 };
 
 export const useHeatmapTimeSegmentDates = (): Date[] => {

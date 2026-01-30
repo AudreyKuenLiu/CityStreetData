@@ -146,3 +146,5 @@ export const ControlPanel = memo(
 );
 
 ControlPanel.displayName = "ControlPanel";
+
+export { TimeSegmentLabels } from "./constants";

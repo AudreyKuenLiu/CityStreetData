@@ -29,11 +29,11 @@ export const actions = ({
         heatmapGroupTimeSegments: initHeatmapGroupTimeSegments({
           data,
         }),
-        dateFeatureCollectionsIndex: 0, //todo we need to reset this index better
+        featureCollectionsIndex: 0, //todo we need to reset this index better
       };
     });
   },
-  setDateFeatureCollectionsIndex: ({ newIdx }): boolean => {
+  setFeatureCollectionsIndex: ({ newIdx }): boolean => {
     let ret = true;
     setState((curState) => {
       const maxLength =
@@ -44,9 +44,16 @@ export const actions = ({
         return {};
       }
       return {
-        dateFeatureCollectionsIndex: newIdx,
+        featureCollectionsIndex: newIdx,
       };
     });
     return ret;
+  },
+  toggleFullTimePeriodDisplay: (): void => {
+    setState((curState) => {
+      return {
+        fullTimePeriodDisplay: !curState.fullTimePeriodDisplay,
+      };
+    });
   },
 });

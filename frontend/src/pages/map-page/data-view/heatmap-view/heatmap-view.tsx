@@ -7,13 +7,13 @@ import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
 } from "../../../../constants/map-dimensions";
-import { useCurrentHeatmapFeatureCollections } from "../../store/heatmap-data";
+import { useHeatmapFeatureCollections } from "../../store/heatmap-data";
 import { Source } from "react-map-gl/maplibre";
 import { HeatmapControls } from "./heatmap-controls";
 
 export const HeatmapView = (): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
-  const currentFeatureCollections = useCurrentHeatmapFeatureCollections();
+  const currentFeatureCollections = useHeatmapFeatureCollections();
 
   return (
     <Flex
@@ -65,7 +65,7 @@ export const HeatmapView = (): React.JSX.Element => {
                 0,
                 1,
                 MAX_ZOOM,
-                3,
+                1,
               ],
               // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
               // Begin color ramp at 0-stop with a 0-transparancy color

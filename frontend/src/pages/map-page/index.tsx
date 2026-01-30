@@ -26,7 +26,6 @@ export const MapPage: React.FC = () => {
           <Splitter
             lazy={true}
             onResizeEnd={(sizes) => {
-              console.log("setting sizes", sizes);
               setSizes(sizes);
             }}
           >

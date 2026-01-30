@@ -1,15 +1,18 @@
-import { Flex, Slider, SliderSingleProps } from "antd";
+import { Flex, Slider, SliderSingleProps, Switch, Typography } from "antd";
 import React from "react";
 import {
   useHeatmapTimeSegmentDates,
-  useDateFeatureCollectionsIndex,
+  useFeatureCollectionsIndex,
   useActions,
+  useFullTimePeriodDisply,
 } from "../../store/heatmap-data";
 
 export const HeatmapControls = (): React.JSX.Element => {
   const dates = useHeatmapTimeSegmentDates();
-  const { setDateFeatureCollectionsIndex } = useActions();
-  const currentIdx = useDateFeatureCollectionsIndex();
+  const { setFeatureCollectionsIndex, toggleFullTimePeriodDisplay } =
+    useActions();
+  const currentIdx = useFeatureCollectionsIndex();
+  const shouldDisplayFullTimePeriod = useFullTimePeriodDisply();
 
   const marks: SliderSingleProps["marks"] = {
     0: dates[0]?.toLocaleDateString(),
@@ -28,20 +31,42 @@ export const HeatmapControls = (): React.JSX.Element => {
       <Flex
         style={{
           width: "300px",
+          flexDirection: "column",
           background: "white",
+          gap: "8px",
           borderRadius: "5px",
+          alignItems: "center",
+          justifyContent: "center",
           border: "1px solid #6d8196",
-          paddingLeft: "30px",
-          paddingRight: "30px",
+          padding: "16px 40px 10px 40px",
         }}
       >
+        <Flex
+          style={{
+            width: "100%",
+            alignSelf: "flex-start",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography.Text strong style={{ margin: 0 }}>
+            View by whole period
+          </Typography.Text>
+          <Switch
+            defaultChecked={shouldDisplayFullTimePeriod}
+            onChange={() => {
+              toggleFullTimePeriodDisplay();
+            }}
+          />
+        </Flex>
         <Slider
+          disabled={shouldDisplayFullTimePeriod}
           style={{ width: "100%" }}
           min={0}
           max={dates.length - 1}
           value={currentIdx}
           onChange={(val) => {
-            setDateFeatureCollectionsIndex({ newIdx: val });
+            setFeatureCollectionsIndex({ newIdx: val });
           }}
           tooltip={{
             formatter: (value) => {
