@@ -22,25 +22,25 @@ const initializeVehicleCrashesData = (
       return {
         x: time,
         y:
-          crashStats.numberOfCrashes -
-          crashStats.numberOfVehicleOnlyCrashes -
-          crashStats.numberOfVehicleBicycleCrashes -
-          crashStats.numberOfVehiclePedestrianCrashes -
-          crashStats.numberOfBicycleOnlyCrashes -
-          crashStats.numberOfBicyclePedestrianCrashes,
+          crashStats.number_of_crashes -
+          crashStats.number_of_vehicle_only_crashes -
+          crashStats.number_of_vehicle_bicycle_crashes -
+          crashStats.number_of_vehicle_pedestrian_crashes -
+          crashStats.number_of_bicycle_only_crashes -
+          crashStats.number_of_bicycle_pedestrian_crashes,
       };
     });
     const vehicleOnlyCrashes = sortedGroupCrashes.map(([time, crashStats]) => {
       return {
         x: time,
-        y: crashStats.numberOfVehicleOnlyCrashes,
+        y: crashStats.number_of_vehicle_only_crashes,
       };
     });
     const vehicleBicycleCrashes = sortedGroupCrashes.map(
       ([time, crashStats]) => {
         return {
           x: time,
-          y: crashStats.numberOfVehicleBicycleCrashes,
+          y: crashStats.number_of_vehicle_bicycle_crashes,
         };
       },
     );
@@ -48,21 +48,21 @@ const initializeVehicleCrashesData = (
       ([time, crashStats]) => {
         return {
           x: time,
-          y: crashStats.numberOfVehiclePedestrianCrashes,
+          y: crashStats.number_of_vehicle_pedestrian_crashes,
         };
       },
     );
     const bicycleOnlyCrashes = sortedGroupCrashes.map(([time, crashStats]) => {
       return {
         x: time,
-        y: crashStats.numberOfBicycleOnlyCrashes,
+        y: crashStats.number_of_bicycle_only_crashes,
       };
     });
     const bicyclePedestrianCrashes = sortedGroupCrashes.map(
       ([time, crashStats]) => {
         return {
           x: time,
-          y: crashStats.numberOfBicyclePedestrianCrashes,
+          y: crashStats.number_of_bicycle_pedestrian_crashes,
         };
       },
     );
@@ -107,20 +107,20 @@ const initializeTrafficInjuriesAndFatalitiesData = (
     const fatalitiesData = sortedGroupCrashes.map(([time, crashStats]) => {
       return {
         x: time,
-        y: crashStats.numberKilled,
+        y: crashStats.number_killed,
       };
     });
     const severeInjuriesData = sortedGroupCrashes.map(([time, crashStats]) => {
       return {
         x: time,
-        y: crashStats.numberSeverelyInjured,
+        y: crashStats.number_severely_injured,
       };
     });
     const nonSevereInjuriesData = sortedGroupCrashes.map(
       ([time, crashStats]) => {
         return {
           x: time,
-          y: crashStats.numberInjured - crashStats.numberSeverelyInjured,
+          y: crashStats.number_injured - crashStats.number_severely_injured,
         };
       },
     );

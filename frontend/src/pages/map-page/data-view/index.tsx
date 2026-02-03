@@ -48,7 +48,6 @@ export const DataView = (): React.JSX.Element => {
 
 const DataViewBody = (): React.JSX.Element => {
   const { currentDataView } = useDataViewContext();
-  console.log("this is the current data view", currentDataView);
   if (currentDataView === DataViewEnum.GraphView) {
     return (
       <Flex
@@ -72,6 +71,7 @@ const DataViewBody = (): React.JSX.Element => {
         style={{
           overflow: "hidden",
           height: "100vh",
+          position: "relative",
           alignContent: "flex-start",
         }}
       >

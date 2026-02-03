@@ -13,14 +13,15 @@ export const classCodeSchema = z.object({
 export const classCode = classCodeSchema.shape;
 export type classCode = (typeof classCode)[keyof typeof classCode];
 
-export const collisionSeveritySchema = z.literal([
-  "fatal",
-  "other_visible",
-  "complaint_of_pain",
-  "medical",
-  "severe",
-]);
-export type collisionSeverity = z.infer<typeof collisionSeveritySchema>;
+export const CollisionSeveritySchema = z.object({
+  Fatal: "fatal",
+  OtherVisible: "other_visible",
+  ComplaintOfPain: "complaint_of_pain",
+  Medical: "medical",
+  Severe: "severe",
+} as const);
+export const CollisionSeverityEnum = CollisionSeveritySchema.shape;
+export type CollisionSeverity = z.infer<typeof CollisionSeveritySchema>;
 
 export const collisionTypeSchema = z.literal([
   "other",
@@ -35,6 +36,22 @@ export const collisionTypeSchema = z.literal([
 ]);
 export type collisionType = z.infer<typeof collisionTypeSchema>;
 
+export const crashClassificationSchema = z.object({
+  BicycleOnly: "FF",
+  VehiclesOnly: "AA",
+  VehicleBicycle: "CC",
+  VehiclePedestrian: "BB",
+  Unknown: "II",
+  BicycleParkedCar: "EE",
+  BicyclePedestrian: "DD",
+  PedestrianOnly: "GG",
+  VehicleBicyclePedestrian: "BB CC",
+  BicycleUnknown: "HH",
+} as const);
+export const CrashClassificationEnum = crashClassificationSchema.shape;
+export type CrashClassification =
+  (typeof CrashClassificationEnum)[keyof typeof CrashClassificationEnum];
+
 export type ViewportSegment = {
   cnn: number;
   street: string;
@@ -44,7 +61,7 @@ export type ViewportSegment = {
 export type ApiCrashEvents = {
   cnn: number;
   occured_at: number;
-  crash_classification: string;
+  crash_classification: CrashClassification;
   collision_severity: string | null;
   collision_type: string | null;
   number_killed: number;
@@ -52,15 +69,15 @@ export type ApiCrashEvents = {
 };
 
 export type CrashStats = {
-  numberKilled: number;
-  numberInjured: number;
-  numberSeverelyInjured: number;
-  numberOfCrashes: number;
-  numberOfVehicleOnlyCrashes: number;
-  numberOfBicycleOnlyCrashes: number;
-  numberOfVehicleBicycleCrashes: number;
-  numberOfVehiclePedestrianCrashes: number;
-  numberOfBicyclePedestrianCrashes: number;
+  number_killed: number;
+  number_injured: number;
+  number_severely_injured: number;
+  number_of_crashes: number;
+  number_of_vehicle_only_crashes: number;
+  number_of_bicycle_only_crashes: number;
+  number_of_vehicle_bicycle_crashes: number;
+  number_of_vehicle_pedestrian_crashes: number;
+  number_of_bicycle_pedestrian_crashes: number;
 };
 
 export type CrashEventFeatureCollection = FeatureCollection<

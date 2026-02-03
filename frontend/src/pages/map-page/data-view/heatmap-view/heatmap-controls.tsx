@@ -1,36 +1,114 @@
-import { Flex, Slider, SliderSingleProps, Switch, Typography } from "antd";
+import {
+  Flex,
+  Slider,
+  SliderSingleProps,
+  Switch,
+  Typography,
+  Select,
+} from "antd";
 import React from "react";
 import {
   useHeatmapTimeSegmentDates,
   useFeatureCollectionsIndex,
   useActions,
   useFullTimePeriodDisply,
+  useHeatmapFilter,
 } from "../../store/heatmap-data";
+import { HeatmapFilterEnum } from "../../store/heatmap-data/types";
+
+const heatmapOptions = [
+  {
+    label: <span>Traffic Injuries</span>,
+    title: "Traffic Injuries",
+    options: [
+      {
+        label: <span>All Injuries</span>,
+        value: HeatmapFilterEnum.AllInjuries,
+      },
+      {
+        label: <span>Severe Injuries</span>,
+        value: HeatmapFilterEnum.SevereInjuries,
+      },
+    ],
+  },
+  {
+    label: <span>Traffic Crashes</span>,
+    title: "Traffic Crashes",
+    options: [
+      {
+        label: <span>Vehicle Involved</span>,
+        value: HeatmapFilterEnum.VehicleInvolvedCrashes,
+      },
+      {
+        label: <span>Bicycle Involved </span>,
+        value: HeatmapFilterEnum.BicycleInvolvedCrashes,
+      },
+      {
+        label: <span>Pedestrian Involved</span>,
+        value: HeatmapFilterEnum.PedestrianInvolvedCrashes,
+      },
+    ],
+  },
+];
 
 export const HeatmapControls = (): React.JSX.Element => {
   const dates = useHeatmapTimeSegmentDates();
-  const { setFeatureCollectionsIndex, toggleFullTimePeriodDisplay } =
-    useActions();
+  const {
+    setFeatureCollectionsIndex,
+    toggleFullTimePeriodDisplay,
+    setHeatmapFilter,
+  } = useActions();
   const currentIdx = useFeatureCollectionsIndex();
   const shouldDisplayFullTimePeriod = useFullTimePeriodDisply();
+  const heatmapFilter = useHeatmapFilter();
+  // const [selectedDataType, setSelectedDataType] =
+  //   useState<DataTypeOption | null>(null);
 
   const marks: SliderSingleProps["marks"] = {
     0: dates[0]?.toLocaleDateString(),
     [dates.length - 1]: dates[dates.length - 1]?.toLocaleDateString(),
   };
-
   return (
     <Flex
+      id="heatmapControls"
       style={{
         position: "absolute",
-        margin: "16px",
+        padding: "16px",
+        gap: "8px",
+        right: 0,
+        left: 0,
+        justifyContent: "space-between",
         zIndex: "2",
-        width: "100%",
       }}
     >
+      <Select
+        style={{ height: "fit-content" }}
+        placeholder="Select data type"
+        value={heatmapFilter}
+        onChange={(newOpt) => {
+          setHeatmapFilter({ heatmapFilter: newOpt });
+        }}
+        options={heatmapOptions}
+        size="large"
+      />
+      {/* <Select.OptGroup label="Traffic Injuries">
+          <Select.Option value="all-injuries">All Injuries</Select.Option>
+          <Select.Option value="severe-injuries">Severe Injuries</Select.Option>
+        </Select.OptGroup>
+        <Select.OptGroup label="Traffic Crashes">
+          <Select.Option value="vehicle-crashes">
+            Vehicle-Involved Crashes
+          </Select.Option>
+          <Select.Option value="bicycle-crashes">
+            Bicycle-Involved Crashes
+          </Select.Option>
+          <Select.Option value="pedestrian-crashes">
+            Pedestrian-Involved Crashes
+          </Select.Option>
+        </Select.OptGroup> */}
       <Flex
         style={{
-          width: "300px",
+          minWidth: "300px",
           flexDirection: "column",
           background: "white",
           gap: "8px",

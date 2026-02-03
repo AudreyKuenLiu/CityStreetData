@@ -111,15 +111,15 @@ type GetCrashDataForStreetsParams struct {
 }
 
 type CrashStats struct {
-	NumberKilled                     int `json:"numberKilled"`
-	NumberInjured                    int `json:"numberInjured"`
-	NumberSeverelyInjured            int `json:"numberSeverelyInjured"`
-	NumberOfCrashes                  int `json:"numberOfCrashes"`
-	NumberOfVehicleOnlyCrashes       int `json:"numberOfVehicleOnlyCrashes"`
-	NumberOfBicycleOnlyCrashes       int `json:"numberOfBicycleOnlyCrashes"`
-	NumberOfVehicleBicycleCrashes    int `json:"numberOfVehicleBicycleCrashes"`
-	NumberOfVehiclePedestrianCrashes int `json:"numberOfVehiclePedestrianCrashes"`
-	NumberOfBicyclePedestrianCrashes int `json:"numberOfBicyclePedestrianCrashes"`
+	NumberKilled                     int `json:"number_killed"`
+	NumberInjured                    int `json:"number_injured"`
+	NumberSeverelyInjured            int `json:"number_severely_injured"`
+	NumberOfCrashes                  int `json:"number_of_crashes"`
+	NumberOfVehicleOnlyCrashes       int `json:"number_of_vehicle_only_crashes"`
+	NumberOfBicycleOnlyCrashes       int `json:"number_of_bicycle_only_crashes"`
+	NumberOfVehicleBicycleCrashes    int `json:"number_of_vehicle_bicycle_crashes"`
+	NumberOfVehiclePedestrianCrashes int `json:"number_of_vehicle_pedestrian_crashes"`
+	NumberOfBicyclePedestrianCrashes int `json:"number_of_bicycle_pedestrian_crashes"`
 }
 
 type CrashDataForStreets struct {

@@ -3,6 +3,9 @@ import type { LineLayerSpecification } from "react-map-gl/maplibre";
 export const MAX_ZOOM = 20;
 export const DEFAULT_ZOOM = 5;
 
+export const LeftPanelClassName = "left-panel";
+export const RightPanelClassName = "right-panel";
+
 export const streetLayerId = "streetSegmentLayer";
 export const streetLayerStyle: LineLayerSpecification = {
   id: streetLayerId,

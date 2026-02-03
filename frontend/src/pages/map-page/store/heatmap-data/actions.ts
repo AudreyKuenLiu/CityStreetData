@@ -2,6 +2,7 @@ import { StoreApi } from "zustand";
 import type {
   HeatmapData,
   HeatmapDataActions,
+  HeatmapFilter,
   HeatmapGroupData,
   HeatmapGroupTimeSegments,
 } from "./types";
@@ -55,5 +56,17 @@ export const actions = ({
         fullTimePeriodDisplay: !curState.fullTimePeriodDisplay,
       };
     });
+  },
+  setHeatmapFilter: ({
+    heatmapFilter,
+  }: {
+    heatmapFilter: HeatmapFilter;
+  }): boolean => {
+    setState(() => {
+      return {
+        heatmapFilter,
+      };
+    });
+    return true;
   },
 });
