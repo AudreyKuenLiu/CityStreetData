@@ -61,8 +61,6 @@ export const HeatmapControls = (): React.JSX.Element => {
   const currentIdx = useFeatureCollectionsIndex();
   const shouldDisplayFullTimePeriod = useFullTimePeriodDisply();
   const heatmapFilter = useHeatmapFilter();
-  // const [selectedDataType, setSelectedDataType] =
-  //   useState<DataTypeOption | null>(null);
 
   const marks: SliderSingleProps["marks"] = {
     0: dates[0]?.toLocaleDateString(),
@@ -91,21 +89,6 @@ export const HeatmapControls = (): React.JSX.Element => {
         options={heatmapOptions}
         size="large"
       />
-      {/* <Select.OptGroup label="Traffic Injuries">
-          <Select.Option value="all-injuries">All Injuries</Select.Option>
-          <Select.Option value="severe-injuries">Severe Injuries</Select.Option>
-        </Select.OptGroup>
-        <Select.OptGroup label="Traffic Crashes">
-          <Select.Option value="vehicle-crashes">
-            Vehicle-Involved Crashes
-          </Select.Option>
-          <Select.Option value="bicycle-crashes">
-            Bicycle-Involved Crashes
-          </Select.Option>
-          <Select.Option value="pedestrian-crashes">
-            Pedestrian-Involved Crashes
-          </Select.Option>
-        </Select.OptGroup> */}
       <Flex
         style={{
           minWidth: "300px",

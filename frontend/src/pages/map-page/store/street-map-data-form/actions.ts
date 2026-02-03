@@ -69,6 +69,7 @@ const removeCnnFromGroup = (
     return false;
   }
   oldStreetSegmentGroup.cnns.delete(cnn);
+  curState._cnnToGroupId.delete(cnn);
   return true;
 };
 const addStreetToGroup = (
