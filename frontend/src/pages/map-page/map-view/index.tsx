@@ -3,6 +3,7 @@ import Map, { Layer, Source, MapRef } from "react-map-gl/maplibre";
 import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
+  SanFranciscoCenterLatLon,
 } from "../../../constants/map-dimensions";
 import {
   streetLayerId,
@@ -12,49 +13,25 @@ import {
   hoveredLayerStyle,
   hoveredLayerId,
 } from "./constants";
-import type { FeatureCollection, LineString } from "geojson";
-import { StreetSegment } from "../../../models/map-grid";
+import { useStreetsForMapView } from "../hooks/use-streets-for-map-view";
 import { useMapControls } from "./hooks/use-map-controls";
 import { useSelectedStreets } from "./hooks/use-selected-streets";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-export const MapView = ({
-  centerLatLon,
-  getStreetSegmentsForZoomLevel,
-}: {
-  centerLatLon: [number, number];
-  getStreetSegmentsForZoomLevel: (zoomLevel: number) => StreetSegment[];
-}): React.JSX.Element => {
+export const MapView = (): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
   const { hoverInfo, onHover, onClick, viewState, setViewState } =
-    useMapControls({ centerLatLon });
+    useMapControls({ centerLatLon: SanFranciscoCenterLatLon });
   const { configs } = useSelectedStreets();
   const layerIds = configs.map((config) => {
     return config.layerStyle.id;
   });
-
-  const streetSegments = getStreetSegmentsForZoomLevel(
+  const { geoJson, getFilterForZoomLevel } = useStreetsForMapView();
+  const zoomLevelFilter = getFilterForZoomLevel(
     mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
   );
-
-  const geoJson: FeatureCollection<LineString, StreetSegment> = useMemo(() => {
-    return {
-      type: "FeatureCollection",
-      features: streetSegments.map((streetSegment) => {
-        return {
-          type: "Feature" as const,
-          geometry: streetSegment.line,
-          properties: {
-            cnn: streetSegment.cnn,
-            line: streetSegment.line,
-          },
-        };
-      }),
-    };
-  }, [streetSegments]);
-
   const hoveredStreetSegment = (hoverInfo && hoverInfo.cnn) || "";
-  const filter: ["in", string, string] = useMemo(
+  const hoveredSegmentFilter: ["in", string, string] = useMemo(
     () => ["in", "cnn", hoveredStreetSegment],
     [hoveredStreetSegment],
   );
@@ -82,8 +59,8 @@ export const MapView = ({
         doubleClickZoom={false}
       >
         <Source id="streets" type="geojson" data={geoJson}>
-          <Layer {...streetLayerStyle} />
-          <Layer {...hoveredLayerStyle} filter={filter} />
+          <Layer {...streetLayerStyle} filter={zoomLevelFilter} />
+          <Layer {...hoveredLayerStyle} filter={hoveredSegmentFilter} />
         </Source>
         {configs.map((config) => {
           return (

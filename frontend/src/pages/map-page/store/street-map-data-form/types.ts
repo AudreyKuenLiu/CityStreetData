@@ -1,5 +1,5 @@
 import { Brand } from "../../../../types";
-import { StreetSegment } from "../../../../models/map-grid";
+import { StreetSegment } from "../../../../models/api-models";
 
 export enum TimeSegments {
   OneMonth = "1M",

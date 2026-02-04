@@ -15,7 +15,7 @@ interface useMapControlsReturn {
 export const useMapControls = ({
   centerLatLon,
 }: {
-  centerLatLon: [number, number];
+  centerLatLon: readonly [number, number];
 }): useMapControlsReturn => {
   const timeMs = useRef<number>(0);
   const [hoverInfo, setHoverInfo] = useState<{ cnn: string } | null>(null);

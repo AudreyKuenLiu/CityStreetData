@@ -1,5 +1,5 @@
 import type { FeatureCollection, LineString } from "geojson";
-import { StreetSegment } from "../../../../models/map-grid";
+import { StreetSegment } from "../../../../models/api-models";
 import { LineLayerSpecification } from "maplibre-gl";
 import { useStreetGroups } from "../../store/street-map-data-form";
 
@@ -30,7 +30,7 @@ export const useSelectedStreets = (): useSelectedStreetsReturnType => {
                   cnn: cnn,
                 },
               };
-            }
+            },
           ),
         },
         layerStyle: {
@@ -47,7 +47,7 @@ export const useSelectedStreets = (): useSelectedStreetsReturnType => {
           },
         },
       };
-    }
+    },
   );
   return {
     configs,

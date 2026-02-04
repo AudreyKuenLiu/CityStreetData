@@ -1,36 +1,38 @@
 import { useSuspenseQueries } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
-import { ViewportSegment } from "../../../models/api-models";
+import type { StreetSegment } from "../../../models/api-models";
 import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
 } from "../../../constants/map-dimensions";
-import { classCode } from "../../../models/api-models";
-import { ZoomLevelInView, getZoomLevelInView } from "../../../models/map-grid";
+import { ClassCodeEnum } from "../../../models/api-models";
 import { useCallback, useMemo } from "react";
+import { FilterSpecification } from "maplibre-gl";
+import type { FeatureCollection, LineString } from "geojson";
+
+enum ZoomLevelInView {
+  ONE, //least zoomed in
+  TWO,
+  THREE, //most zoomed in
+}
 
 type useStreetsForMapViewReturn = {
-  getStreetSegmentsForZoomLevel: (zoomLevel: number) => ViewportSegment[];
+  geoJson: FeatureCollection<
+    LineString,
+    StreetSegment & { zoomLevel: ZoomLevelInView }
+  >;
+  getFilterForZoomLevel: (zoomLevel: number) => FilterSpecification;
 };
 
 export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
   const classCodesForViews = [
-    [classCode.Freeways, classCode.HighwayOrMajorStreet, classCode.FreewayRamp],
     [
-      classCode.Freeways,
-      classCode.HighwayOrMajorStreet,
-      classCode.FreewayRamp,
-      classCode.Arterial,
-      classCode.Collector,
+      ClassCodeEnum.Freeways,
+      ClassCodeEnum.HighwayOrMajorStreet,
+      ClassCodeEnum.FreewayRamp,
     ],
-    [
-      classCode.Freeways,
-      classCode.HighwayOrMajorStreet,
-      classCode.FreewayRamp,
-      classCode.Arterial,
-      classCode.Collector,
-      classCode.Residential,
-    ],
+    [ClassCodeEnum.Arterial, ClassCodeEnum.Collector],
+    [ClassCodeEnum.Residential],
   ];
   const combinedQueries = useSuspenseQueries({
     queries: classCodesForViews.map((classCodes) => {
@@ -56,26 +58,66 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
   const medZoomData = combinedQueries[1].data.data;
   const maxZoomData = combinedQueries[2].data.data;
 
-  const config = useMemo(
-    () => ({
-      [ZoomLevelInView.ONE]: minZoomData,
-      [ZoomLevelInView.TWO]: medZoomData,
-      [ZoomLevelInView.THREE]: maxZoomData,
-    }),
-    [minZoomData, medZoomData, maxZoomData],
+  const geoJson = useMemo(() => {
+    const minZoomFeatures = minZoomData.map((segment) => ({
+      type: "Feature" as const,
+      geometry: segment.line,
+      properties: {
+        cnn: segment.cnn,
+        line: segment.line,
+        zoomLevel: ZoomLevelInView.ONE,
+      },
+    }));
+    const medZoomFeatures = medZoomData.map((segment) => ({
+      type: "Feature" as const,
+      geometry: segment.line,
+      properties: {
+        cnn: segment.cnn,
+        line: segment.line,
+        zoomLevel: ZoomLevelInView.TWO,
+      },
+    }));
+    const maxZoomFeatures = maxZoomData.map((segment) => ({
+      type: "Feature" as const,
+      geometry: segment.line,
+      properties: {
+        cnn: segment.cnn,
+        line: segment.line,
+        zoomLevel: ZoomLevelInView.THREE,
+      },
+    }));
+
+    return {
+      type: "FeatureCollection" as const,
+      features: [...minZoomFeatures, ...medZoomFeatures, ...maxZoomFeatures],
+    };
+  }, [minZoomData, medZoomData, maxZoomData]);
+
+  const getFilterForZoomLevel = useCallback(
+    (zoomLevel: number): FilterSpecification => {
+      if (zoomLevel >= 15.5) {
+        return [
+          "in",
+          ["get", "zoomLevel"],
+          [
+            "literal",
+            [ZoomLevelInView.ONE, ZoomLevelInView.TWO, ZoomLevelInView.THREE],
+          ],
+        ];
+      } else if (zoomLevel < 15.5 && zoomLevel >= 13.5) {
+        return [
+          "in",
+          ["get", "zoomLevel"],
+          ["literal", [ZoomLevelInView.TWO, ZoomLevelInView.ONE]],
+        ];
+      }
+      return ["in", ["get", "zoomLevel"], ["literal", [ZoomLevelInView.ONE]]];
+    },
+    [],
   );
 
-  const getStreetSegmentsForZoomLevel = useCallback(
-    (zoomLevel: number) => {
-      const zoomLevelInView = getZoomLevelInView(zoomLevel);
-      if (!(zoomLevelInView in config)) {
-        return [];
-      }
-      return config[zoomLevelInView];
-    },
-    [config],
-  );
   return {
-    getStreetSegmentsForZoomLevel,
+    geoJson,
+    getFilterForZoomLevel,
   };
 };

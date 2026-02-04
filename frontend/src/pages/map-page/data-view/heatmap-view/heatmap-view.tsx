@@ -37,7 +37,7 @@ export const HeatmapView = (): React.JSX.Element => {
           SanFranciscoNEPoint[1],
           SanFranciscoNEPoint[0],
         ]}
-        //reuseMaps
+        reuseMaps
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
         mapStyle="https://tiles.openfreemap.org/styles/bright"

@@ -10,8 +10,8 @@ export const classCodeSchema = z.object({
   Residential: 5,
   FreewayRamp: 6,
 } as const);
-export const classCode = classCodeSchema.shape;
-export type classCode = (typeof classCode)[keyof typeof classCode];
+export const ClassCodeEnum = classCodeSchema.shape;
+export type ClassCode = (typeof ClassCodeEnum)[keyof typeof ClassCodeEnum];
 
 export const CollisionSeveritySchema = z.object({
   Fatal: "fatal",
@@ -52,7 +52,7 @@ export const CrashClassificationEnum = crashClassificationSchema.shape;
 export type CrashClassification =
   (typeof CrashClassificationEnum)[keyof typeof CrashClassificationEnum];
 
-export type ViewportSegment = {
+export type StreetSegment = {
   cnn: number;
   street: string;
   line: LineString;
