@@ -39,8 +39,8 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       return {
         queryKey: ["segmentsForViewport", ...classCodes] as const,
         staleTime: Infinity,
-        queryFn: async (): Promise<AxiosResponse<ViewportSegment[]>> => {
-          return await axios.get<ViewportSegment[]>(`/api/viewport/streets`, {
+        queryFn: async (): Promise<AxiosResponse<StreetSegment[]>> => {
+          return await axios.get<StreetSegment[]>(`/api/viewport/streets`, {
             params: {
               nePoint: JSON.stringify(SanFranciscoNEPoint),
               swPoint: JSON.stringify(SanFranciscoSWPoint),
