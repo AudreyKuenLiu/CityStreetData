@@ -1,6 +1,7 @@
 import { useSuspenseQueries } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
-import type { StreetSegment } from "../../../models/api-models";
+import type { ViewportStreetSegment } from "../../../models/api-models";
+import { StreetSegment } from "../../../models/map-models";
 import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
@@ -39,16 +40,19 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       return {
         queryKey: ["segmentsForViewport", ...classCodes] as const,
         staleTime: Infinity,
-        queryFn: async (): Promise<AxiosResponse<StreetSegment[]>> => {
-          return await axios.get<StreetSegment[]>(`/api/viewport/streets`, {
-            params: {
-              nePoint: JSON.stringify(SanFranciscoNEPoint),
-              swPoint: JSON.stringify(SanFranciscoSWPoint),
-              filters: JSON.stringify({
-                classCodes,
-              }),
+        queryFn: async (): Promise<AxiosResponse<ViewportStreetSegment[]>> => {
+          return await axios.get<ViewportStreetSegment[]>(
+            `/api/viewport/streets`,
+            {
+              params: {
+                nePoint: JSON.stringify(SanFranciscoNEPoint),
+                swPoint: JSON.stringify(SanFranciscoSWPoint),
+                filters: JSON.stringify({
+                  classCodes,
+                }),
+              },
             },
-          });
+          );
         },
       };
     }),
@@ -64,7 +68,6 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       geometry: segment.line,
       properties: {
         cnn: segment.cnn,
-        street: segment.street,
         line: segment.line,
         zoomLevel: ZoomLevelInView.ONE,
       },
@@ -74,7 +77,6 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       geometry: segment.line,
       properties: {
         cnn: segment.cnn,
-        street: segment.street,
         line: segment.line,
         zoomLevel: ZoomLevelInView.TWO,
       },
@@ -84,7 +86,6 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       geometry: segment.line,
       properties: {
         cnn: segment.cnn,
-        street: segment.street,
         line: segment.line,
         zoomLevel: ZoomLevelInView.THREE,
       },

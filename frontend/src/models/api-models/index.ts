@@ -52,7 +52,7 @@ export const CrashClassificationEnum = crashClassificationSchema.shape;
 export type CrashClassification =
   (typeof CrashClassificationEnum)[keyof typeof CrashClassificationEnum];
 
-export type StreetSegment = {
+export type ViewportStreetSegment = {
   cnn: number;
   street: string;
   line: LineString;

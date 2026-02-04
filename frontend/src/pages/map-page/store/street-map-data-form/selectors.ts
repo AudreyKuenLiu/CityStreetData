@@ -6,7 +6,7 @@ import {
   StreetMapForm,
   StreetGroup,
 } from "./types";
-import { StreetSegment } from "../../../../models/api-models";
+import { StreetSegment } from "../../../../models/map-models";
 import { devtools } from "zustand/middleware";
 import { actions } from "./actions";
 import { useShallow } from "zustand/shallow";

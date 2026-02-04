@@ -5,7 +5,7 @@ import {
   StreetMapFormState,
   StreetGroup,
 } from "./types";
-import { StreetSegment } from "../../../../models/api-models";
+import { StreetSegment } from "../../../../models/map-models";
 import { getRandomColor } from "../../../../utils";
 import { StoreApi } from "zustand";
 

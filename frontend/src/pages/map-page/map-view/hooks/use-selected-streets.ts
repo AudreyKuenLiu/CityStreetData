@@ -1,5 +1,5 @@
 import type { FeatureCollection, LineString } from "geojson";
-import { StreetSegment } from "../../../../models/api-models";
+import { StreetSegment } from "../../../../models/map-models";
 import { LineLayerSpecification } from "maplibre-gl";
 import { useStreetGroups } from "../../store/street-map-data-form";
 
