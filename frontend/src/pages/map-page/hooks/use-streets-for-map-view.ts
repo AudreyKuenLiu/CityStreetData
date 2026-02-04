@@ -64,6 +64,7 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       geometry: segment.line,
       properties: {
         cnn: segment.cnn,
+        street: segment.street,
         line: segment.line,
         zoomLevel: ZoomLevelInView.ONE,
       },
@@ -73,6 +74,7 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       geometry: segment.line,
       properties: {
         cnn: segment.cnn,
+        street: segment.street,
         line: segment.line,
         zoomLevel: ZoomLevelInView.TWO,
       },
@@ -82,6 +84,7 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       geometry: segment.line,
       properties: {
         cnn: segment.cnn,
+        street: segment.street,
         line: segment.line,
         zoomLevel: ZoomLevelInView.THREE,
       },
