@@ -1,7 +1,7 @@
 import React from "react";
 
 import { GraphList } from "./graph-list/graph-list";
-import { DataFilters } from "./graph-list/data-filters";
+import { ControlPanel } from "./graph-list/control-panel";
 //import { useTrafficCrashesData } from "../store/graph-list-data";
 import { Flex, Typography } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
@@ -60,7 +60,7 @@ const DataViewBody = (): React.JSX.Element => {
           gap: "20px",
         }}
       >
-        <DataFilters />
+        <ControlPanel />
         <GraphList />
       </Flex>
     );

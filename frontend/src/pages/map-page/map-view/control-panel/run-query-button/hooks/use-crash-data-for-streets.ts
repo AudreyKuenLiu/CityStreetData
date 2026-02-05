@@ -14,6 +14,29 @@ import {
   GraphGroupData,
 } from "../../../../store/graph-list-data";
 import { UseDataViewControllerProps } from "./types";
+import {
+  GroupId,
+  StreetGroup,
+} from "../../../../store/street-map-data-form/types";
+import { length } from "@turf/turf";
+
+const getTotalMiles = (
+  streetGroups: Map<GroupId, StreetGroup>,
+): Map<GroupId, number> => {
+  return new Map(
+    streetGroups.entries().map(([groupId, streetGroup]) => {
+      let totalMiles = 0;
+      for (const cnn of streetGroup.cnns) {
+        const [, streetSegment] = cnn;
+        totalMiles += length(
+          { type: "Feature", geometry: streetSegment.line, properties: {} },
+          { units: "miles" },
+        );
+      }
+      return [groupId, totalMiles];
+    }),
+  );
+};
 
 export const useCrashDataForStreets = (): UseDataViewControllerProps => {
   const streetGroups = useStreetGroups();
@@ -73,11 +96,15 @@ export const useCrashDataForStreets = (): UseDataViewControllerProps => {
 
       const responses = await Promise.all(allResults);
       const graphDataMap: GraphGroupData = new Map();
+      const groupsToTotalMiles = getTotalMiles(streetGroups);
 
       for (const res of responses) {
         const { id, data } = res;
         const [crashData] = data ?? [];
-        graphDataMap.set(id, crashData ?? []);
+        graphDataMap.set(id, {
+          totalMiles: groupsToTotalMiles.get(id) ?? 0,
+          dateCrashStats: crashData ?? [],
+        });
       }
 
       return { graphData: graphDataMap };

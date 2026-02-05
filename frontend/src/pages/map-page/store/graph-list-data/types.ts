@@ -2,7 +2,10 @@ import { GroupId } from "../street-map-data-form";
 import { CrashStats, StreetFeature } from "../../../../models/api-models";
 
 export type DateCrashStats = readonly [Date, CrashStats];
-export type GraphGroupData = Map<GroupId, DateCrashStats[]>;
+export type GraphGroupData = Map<
+  GroupId,
+  { totalMiles: number; dateCrashStats: DateCrashStats[] }
+>;
 export type GraphGroupFeatures = Map<
   GroupId,
   readonly [Date, Map<StreetFeature, string>][]
@@ -15,25 +18,15 @@ export type LineData = {
 
 export type GraphDataActions = {
   setGraphData: (data: GraphGroupData) => void;
+  toggleNormalize: () => void;
   selectCurrentGraph: (graphType: GraphType) => void;
 };
 
 export type GraphType = "CrashGroups" | "InjuriesAndFatalities";
 
 export type GraphData = {
-  graphGroupVehicleCrashes: GroupLineData<
-    [
-      "Other",
-      "Vehicle Only",
-      "Vehicle-Bicycle",
-      "Vehicle-Pedestrian",
-      "Bicycle Only",
-      "Bicycle-Pedestrian",
-    ]
-  >;
-  graphGroupTrafficInjuriesAndFatalities: GroupLineData<
-    ["Fatalities", "Severe Injuries", "Injuries"]
-  >;
+  graphGroupData: GraphGroupData;
+  shouldNormalize: boolean;
   currentGraphType: GraphType;
   actions: GraphDataActions;
 };

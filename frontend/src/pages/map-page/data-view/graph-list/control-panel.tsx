@@ -1,7 +1,11 @@
 import React from "react";
-import { Flex, Radio } from "antd";
+import { Divider, Flex, Radio, Space, Switch, Typography } from "antd";
 import type { GraphType } from "../../store/graph-list-data";
-import { useActions, useCurrentGraphType } from "../../store/graph-list-data";
+import {
+  useActions,
+  useCurrentGraphType,
+  useShouldNormalizeGraphData,
+} from "../../store/graph-list-data";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 
 const TrafficCrashOptions: CheckboxGroupProps<GraphType>["options"] = [
@@ -9,9 +13,10 @@ const TrafficCrashOptions: CheckboxGroupProps<GraphType>["options"] = [
   { label: "Crashes", value: "CrashGroups" },
 ];
 
-export const DataFilters = (): React.JSX.Element => {
+export const ControlPanel = (): React.JSX.Element => {
   const currentOption = useCurrentGraphType();
-  const { selectCurrentGraph } = useActions();
+  const { selectCurrentGraph, toggleNormalize } = useActions();
+  const shouldNormalizeGraphData = useShouldNormalizeGraphData();
 
   return (
     <Flex
@@ -35,6 +40,18 @@ export const DataFilters = (): React.JSX.Element => {
         optionType="button"
         buttonStyle="solid"
       />
+      <Divider orientation="vertical" size="large" style={{ height: "85%" }} />
+      <Space style={{ alignItems: "center" }}>
+        <Typography.Title level={5} style={{ margin: 0 }}>
+          Normalize
+        </Typography.Title>
+        <Switch
+          defaultChecked={shouldNormalizeGraphData}
+          onChange={() => {
+            toggleNormalize();
+          }}
+        />
+      </Space>
     </Flex>
   );
 };

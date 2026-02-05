@@ -5,6 +5,7 @@ import {
   StreetMapFormActions,
   StreetMapForm,
   StreetGroup,
+  GroupId,
 } from "./types";
 import { StreetSegment } from "../../../../models/map-models";
 import { devtools } from "zustand/middleware";
@@ -54,7 +55,7 @@ export const useCnns = (): StreetSegment[] => {
     }),
   );
 };
-export const useStreetGroups = (): Map<string, StreetGroup> => {
+export const useStreetGroups = (): Map<GroupId, StreetGroup> => {
   return useStreetMapDataForm(
     useShallow((state) => {
       return state.streetGroups;
