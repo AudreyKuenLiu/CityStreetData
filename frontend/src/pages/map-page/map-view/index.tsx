@@ -51,6 +51,7 @@ export const MapView = (): React.JSX.Element => {
           SanFranciscoNEPoint[0],
         ]}
         reuseMaps
+        pitchWithRotate={false}
         onClick={onClick}
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
@@ -60,7 +61,6 @@ export const MapView = (): React.JSX.Element => {
       >
         <Source id="streets" type="geojson" data={geoJson}>
           <Layer {...streetLayerStyle} filter={zoomLevelFilter} />
-          <Layer {...hoveredLayerStyle} filter={hoveredSegmentFilter} />
         </Source>
         {configs.map((config) => {
           return (
@@ -74,6 +74,9 @@ export const MapView = (): React.JSX.Element => {
             </Source>
           );
         })}
+        <Source id="hovered-streets" type="geojson" data={geoJson}>
+          <Layer {...hoveredLayerStyle} filter={hoveredSegmentFilter} />
+        </Source>
       </Map>
     </>
   );
