@@ -20,7 +20,7 @@ export const useMapControls = ({
   const timeMs = useRef<number>(0);
   const [hoverInfo, setHoverInfo] = useState<{ cnn: string } | null>(null);
   const [key, setKey] = useState(0);
-  const [deleteSegments, setDeleteSegments] = useState(false);
+  const [deleteSegmentsEvent, setDeleteSegmentsEvent] = useState(false);
 
   const { addStreet, removeStreet, toggleStreet } = useActions();
 
@@ -42,11 +42,11 @@ export const useMapControls = ({
       return;
     }
     const street = event.features?.[0];
-    if (deleteSegments && street != null) {
+    if (deleteSegmentsEvent && street != null) {
       removeStreet(street.properties.cnn);
     }
     if (
-      !deleteSegments &&
+      !deleteSegmentsEvent &&
       event.originalEvent.ctrlKey === true &&
       street != null
     ) {
@@ -68,12 +68,12 @@ export const useMapControls = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === "x") {
-        setDeleteSegments(true);
+        setDeleteSegmentsEvent(true);
       }
     };
     const handleKeyUp = (e: KeyboardEvent): void => {
       if (e.key === "x") {
-        setDeleteSegments(false);
+        setDeleteSegmentsEvent(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -82,7 +82,7 @@ export const useMapControls = ({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [setDeleteSegments]);
+  }, [setDeleteSegmentsEvent]);
 
   const [viewState, setViewState] = useState<ViewState>({
     longitude: centerLatLon[1],
