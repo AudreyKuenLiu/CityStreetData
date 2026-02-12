@@ -6,7 +6,7 @@ import {
   useActions,
   useEndDate,
   useStartDate,
-  useStreetGroups,
+  useStreetGroupsRef,
   useTimeSegment,
 } from "../../../../store/street-map-data-form";
 import { useEffect } from "react";
@@ -15,7 +15,7 @@ import { useActions as useHeatmapDataActions } from "../../../../store/heatmap-d
 import type { HeatmapGroupData } from "../../../../store/heatmap-data";
 
 export const useCrashEventsForStreets = (): UseDataViewControllerProps => {
-  const streetGroups = useStreetGroups();
+  const streetGroups = useStreetGroupsRef();
   const startTime = useStartDate();
   const endTime = useEndDate();
   const timeSegment = useTimeSegment();

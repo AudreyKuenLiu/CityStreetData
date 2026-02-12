@@ -1,7 +1,7 @@
 import React from "react";
 import { ResponsiveLine, SliceTooltipProps } from "@nivo/line";
 import { Flex, Typography } from "antd";
-import { useStreetGroups } from "../../store/street-map-data-form";
+import { useStreetGroupsRef } from "../../store/street-map-data-form";
 import { useTrafficCrashesData } from "../../store/graph-list-data";
 import { XFilled } from "@ant-design/icons";
 
@@ -15,7 +15,7 @@ type sliceData = {
 };
 
 export const GraphList = (): React.JSX.Element => {
-  const streetGroups = useStreetGroups();
+  const streetGroups = useStreetGroupsRef();
   const trafficCrashGroupData = useTrafficCrashesData();
 
   return (

@@ -175,6 +175,8 @@ export const actions = ({
       }
 
       return {
+        streetGroups: new Map(state.streetGroups),
+        _cnnToGroupId: new Map(state._cnnToGroupId),
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),
@@ -193,6 +195,8 @@ export const actions = ({
       }
       addStreetToGroup(state, streetGroup, streetSegment);
       return {
+        streetGroups: new Map(state.streetGroups),
+        _cnnToGroupId: new Map(state._cnnToGroupId),
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),
@@ -210,6 +214,8 @@ export const actions = ({
       }
 
       return {
+        streetGroups: new Map(state.streetGroups),
+        _cnnToGroupId: new Map(state._cnnToGroupId),
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),

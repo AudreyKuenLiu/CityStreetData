@@ -5,14 +5,14 @@ import { ControlPanel } from "./graph-list/control-panel";
 //import { useTrafficCrashesData } from "../store/graph-list-data";
 import { Flex, Typography } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
-import { useStreetGroups } from "../store/street-map-data-form";
+import { useStreetGroupsRef } from "../store/street-map-data-form";
 import { useDataViewContext } from "../context/data-view";
 import { DataViewEnum } from "../context/data-view/types";
 import { HeatmapView } from "./heatmap-view/heatmap-view";
 
 const useHasNoData = (): boolean => {
   // const trafficCrashData = useTrafficCrashesData();
-  // const streetGroups = useStreetGroups();
+  // const streetGroups = useStreetGroupsRef();
   // const trafficCrashGroupIds = trafficCrashData.map(({ id }) => id);
   // for (const crashGroupId of trafficCrashGroupIds) {
   //   if (streetGroups.has(crashGroupId)) {
@@ -20,7 +20,7 @@ const useHasNoData = (): boolean => {
   //   }
   // }
   // return true;
-  const streetGroups = useStreetGroups();
+  const streetGroups = useStreetGroupsRef();
   return streetGroups.size === 0;
 };
 

@@ -7,7 +7,7 @@ import { TimeSegmentLabels, TimeSegmentOptions } from "./constants";
 import {
   useActions,
   useCurrentStreetGroup,
-  useStreetGroups,
+  useStreetGroupsRef,
   useTimeSegment,
   convertToGroupId,
 } from "../../store/street-map-data-form";
@@ -25,7 +25,7 @@ export const ControlPanel = memo(
       setTimeSegment,
     } = useActions();
     const currentStreetGroup = useCurrentStreetGroup();
-    const streetGroups = useStreetGroups();
+    const streetGroups = useStreetGroupsRef();
     // const isDirty = useIsDirty();
     // const [validRun, setValidRun] = useState(false);
     const timeSegment = useTimeSegment();
@@ -41,105 +41,94 @@ export const ControlPanel = memo(
     return (
       <Flex
         style={{
-          position: "absolute",
-          zIndex: 2,
-          alignItems: "center",
-          marginTop: "16px",
-          marginLeft: "16px",
-          marginRight: "16px",
-          right: "0px",
-          gap: "4px",
+          gap: "8px",
+          height: "fit-content",
+          pointerEvents: "all",
         }}
       >
-        <Flex
-          style={{
-            gap: "8px",
+        <GroupSelector
+          currentOption={
+            currentStreetGroup != null
+              ? {
+                  id: currentStreetGroup.id,
+                  name: currentStreetGroup.name,
+                  color: currentStreetGroup.color,
+                }
+              : null
+          }
+          groups={groups}
+          onAddItem={(name) => {
+            const group = addGroup({ name });
+            return {
+              id: group.id,
+              name,
+              color: group.color,
+            };
           }}
-        >
-          <GroupSelector
-            currentOption={
-              currentStreetGroup != null
-                ? {
-                    id: currentStreetGroup.id,
-                    name: currentStreetGroup.name,
-                    color: currentStreetGroup.color,
-                  }
-                : null
+          onSelectItem={(id) => {
+            const groupId = convertToGroupId(id);
+            if (groupId == null) {
+              return;
             }
-            groups={groups}
-            onAddItem={(name) => {
-              const group = addGroup({ name });
-              return {
-                id: group.id,
-                name,
-                color: group.color,
-              };
-            }}
-            onSelectItem={(id) => {
-              const groupId = convertToGroupId(id);
-              if (groupId == null) {
-                return;
-              }
-              return setCurrentGroup({ id: groupId });
-            }}
-            onDeleteItem={(option) => {
-              const groupId = convertToGroupId(option.id);
-              if (groupId == null) {
-                return;
-              }
-              return removeGroup({ id: groupId });
-            }}
-            onEditItem={(option, name) => {
-              const groupId = convertToGroupId(option.id);
-              if (groupId == null) {
-                return;
-              }
-              return editGroup({ id: groupId, name });
-            }}
-          />
-          <Select
-            size="large"
-            ref={timeSegmentSelectRef}
-            placeholder="every 'X' Days"
-            onInputKeyDown={(e) => {
-              timeSegmentSelectRef.current?.blur();
-              e.stopPropagation();
-            }}
-            options={TimeSegmentOptions}
-            value={
-              timeSegment != null
-                ? [
-                    {
-                      value: timeSegment,
-                      label: TimeSegmentLabels[timeSegment],
-                    },
-                  ]
-                : null
+            return setCurrentGroup({ id: groupId });
+          }}
+          onDeleteItem={(option) => {
+            const groupId = convertToGroupId(option.id);
+            if (groupId == null) {
+              return;
             }
-            onSelect={(_, option) => {
-              setTimeSegment(option.value);
-              timeSegmentSelectRef.current?.blur();
-            }}
-          />
-          <DatePicker.RangePicker
-            size="large"
-            placeholder={["From Start Date", "To End Date"]}
-            onChange={(value) => {
-              if (
-                value == null ||
-                value[0]?.date == null ||
-                value[1]?.date == null
-              ) {
-                setStartDate(null);
-                setEndDate(null);
-                return;
-              }
-              setStartDate(value[0].toDate());
-              setEndDate(value[1].toDate());
-            }}
-          />
-          <RunQueryButton onClick={onRunQuery} />
-        </Flex>
+            return removeGroup({ id: groupId });
+          }}
+          onEditItem={(option, name) => {
+            const groupId = convertToGroupId(option.id);
+            if (groupId == null) {
+              return;
+            }
+            return editGroup({ id: groupId, name });
+          }}
+        />
+        <Select
+          size="large"
+          ref={timeSegmentSelectRef}
+          placeholder="every 'X' Days"
+          onInputKeyDown={(e) => {
+            timeSegmentSelectRef.current?.blur();
+            e.stopPropagation();
+          }}
+          options={TimeSegmentOptions}
+          value={
+            timeSegment != null
+              ? [
+                  {
+                    value: timeSegment,
+                    label: TimeSegmentLabels[timeSegment],
+                  },
+                ]
+              : null
+          }
+          onSelect={(_, option) => {
+            setTimeSegment(option.value);
+            timeSegmentSelectRef.current?.blur();
+          }}
+        />
+        <DatePicker.RangePicker
+          size="large"
+          placeholder={["From Start Date", "To End Date"]}
+          onChange={(value) => {
+            if (
+              value == null ||
+              value[0]?.date == null ||
+              value[1]?.date == null
+            ) {
+              setStartDate(null);
+              setEndDate(null);
+              return;
+            }
+            setStartDate(value[0].toDate());
+            setEndDate(value[1].toDate());
+          }}
+        />
+        <RunQueryButton onClick={onRunQuery} />
       </Flex>
     );
   },

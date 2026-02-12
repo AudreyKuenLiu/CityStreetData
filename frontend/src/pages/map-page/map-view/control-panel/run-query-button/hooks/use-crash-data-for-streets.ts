@@ -5,7 +5,7 @@ import {
   useActions,
   useEndDate,
   useStartDate,
-  useStreetGroups,
+  useStreetGroupsRef,
   useTimeSegment,
 } from "../../../../store/street-map-data-form";
 import { CrashStats, StreetFeature } from "../../../../../../models/api-models";
@@ -39,7 +39,7 @@ const getTotalMiles = (
 };
 
 export const useCrashDataForStreets = (): UseDataViewControllerProps => {
-  const streetGroups = useStreetGroups();
+  const streetGroups = useStreetGroupsRef();
   const startTime = useStartDate();
   const endTime = useEndDate();
   const timeSegment = useTimeSegment();

@@ -16,12 +16,31 @@ import {
 import { useStreetsForMapView } from "../hooks/use-streets-for-map-view";
 import { useMapControls } from "./hooks/use-map-controls";
 import { useSelectedStreets } from "./hooks/use-selected-streets";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { ControlPanel } from "./control-panel";
+import { Flex } from "antd";
+import { SelectControlPanel } from "./select-control-panel";
+import { useMapControlPanel } from "./hooks/use-map-control-panel";
 
-export const MapView = (): React.JSX.Element => {
+export const MapView = ({
+  onRunQuery,
+}: {
+  onRunQuery: () => void;
+}): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
-  const { hoverInfo, onHover, onClick, viewState, setViewState } =
-    useMapControls({ centerLatLon: SanFranciscoCenterLatLon });
+  // const { hoverInfo, onHover, onClick, viewState, setViewState } =
+  //   useMapControls({ centerLatLon: SanFranciscoCenterLatLon });
+  const {
+    hoverInfo,
+    onHover,
+    onClick,
+    viewState,
+    setViewState,
+    setMapControl,
+    currentMapControl,
+  } = useMapControlPanel({
+    mapRef: mapRef.current,
+    centerLatLon: SanFranciscoCenterLatLon,
+  });
   const { configs } = useSelectedStreets();
   const layerIds = configs.map((config) => {
     return config.layerStyle.id;
@@ -37,7 +56,27 @@ export const MapView = (): React.JSX.Element => {
   );
 
   return (
-    <>
+    <Flex style={{ position: "relative", width: "100%", height: "100%" }}>
+      <Flex
+        style={{
+          position: "absolute",
+          zIndex: 2,
+          justifyContent: "space-between",
+          marginTop: "16px",
+          marginLeft: "16px",
+          marginRight: "16px",
+          right: "0px",
+          left: "0",
+          pointerEvents: "none",
+          gap: "4px",
+        }}
+      >
+        <SelectControlPanel
+          currentMapControl={currentMapControl}
+          setMapControl={setMapControl}
+        />
+        <ControlPanel onRunQuery={onRunQuery} />
+      </Flex>
       <Map
         ref={mapRef}
         {...viewState}
@@ -61,6 +100,7 @@ export const MapView = (): React.JSX.Element => {
       >
         <Source id="streets" type="geojson" data={geoJson}>
           <Layer {...streetLayerStyle} filter={zoomLevelFilter} />
+          <Layer {...hoveredLayerStyle} filter={hoveredSegmentFilter} />
         </Source>
         {configs.map((config) => {
           return (
@@ -74,10 +114,7 @@ export const MapView = (): React.JSX.Element => {
             </Source>
           );
         })}
-        <Source id="hovered-streets" type="geojson" data={geoJson}>
-          <Layer {...hoveredLayerStyle} filter={hoveredSegmentFilter} />
-        </Source>
       </Map>
-    </>
+    </Flex>
   );
 };

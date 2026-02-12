@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { MapView } from "./map-view";
 import { ConfigProvider, Splitter } from "antd";
 import { Layout } from "antd";
-import { ControlPanel } from "./map-view/control-panel";
 import { DataView } from "./data-view";
 import { DataViewProvider } from "./context/data-view";
 import { LeftPanelClassName, RightPanelClassName } from "./map-view/constants";
@@ -37,17 +36,15 @@ const MapPageBody = (): React.JSX.Element => {
       >
         <Splitter.Panel
           className={LeftPanelClassName}
-          style={{ position: "relative" }}
           resizable={true}
           collapsible={true}
           size={sizes[0]}
         >
-          <ControlPanel
+          <MapView
             onRunQuery={() => {
               if (sizes[1] === 0) setSizes(["80%", "20%"]);
             }}
           />
-          <MapView />
         </Splitter.Panel>
         <Splitter.Panel
           className={RightPanelClassName}

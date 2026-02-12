@@ -56,6 +56,12 @@ export const useCnns = (): StreetSegment[] => {
   );
 };
 export const useStreetGroups = (): Map<GroupId, StreetGroup> => {
+  return useStreetMapDataForm((state) => {
+    return state.streetGroups;
+  });
+};
+
+export const useStreetGroupsRef = (): Map<GroupId, StreetGroup> => {
   return useStreetMapDataForm(
     useShallow((state) => {
       return state.streetGroups;

@@ -113,7 +113,7 @@ export const GroupSelector = ({
                   name: option.data.label,
                   color: option.data.color,
                 },
-                newName
+                newName,
               );
             }}
           />
@@ -190,7 +190,7 @@ const OptionRender = ({
         )}
       </Flex>
       <Flex style={{ marginLeft: "auto", gap: "2px" }}>
-        <Tooltip title="Edit name">
+        <Tooltip title="Edit">
           <Button
             size="small"
             shape="circle"
@@ -201,7 +201,7 @@ const OptionRender = ({
             }}
           />
         </Tooltip>
-        <Tooltip title="Delete group">
+        <Tooltip title="Delete">
           <Button
             onClick={(e) => {
               e.stopPropagation();
@@ -230,7 +230,7 @@ const PopupRender = forwardRef(
       onNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
       addItem: () => void;
     },
-    ref: React.Ref<InputRef>
+    ref: React.Ref<InputRef>,
   ): React.ReactNode => {
     return (
       <>
@@ -251,5 +251,5 @@ const PopupRender = forwardRef(
         </Space>
       </>
     );
-  }
+  },
 );
