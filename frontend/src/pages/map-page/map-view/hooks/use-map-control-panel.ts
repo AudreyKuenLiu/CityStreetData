@@ -69,9 +69,11 @@ const controllerOptions = {
 
 export const useMapControlPanel = ({
   mapRef,
+  panelRef,
   centerLatLon,
 }: {
   mapRef: MapRef | null;
+  panelRef: HTMLElement | null;
   centerLatLon: readonly [number, number];
 }): UseMapControlPanelReturn => {
   const [mapControl, setMapControl] = useState(MapControl.PointerSelect);
@@ -143,14 +145,13 @@ export const useMapControlPanel = ({
         setHoverInfo(null);
       }
     };
-    const canvas = mapRef?.getMap()._canvas;
-    canvas?.addEventListener("keydown", handleKeyDown);
-    canvas?.addEventListener("keyup", handleKeyUp);
+    panelRef?.addEventListener("keydown", handleKeyDown);
+    panelRef?.addEventListener("keyup", handleKeyUp);
     return (): void => {
-      canvas?.removeEventListener("keydown", handleKeyDown);
-      canvas?.removeEventListener("keyup", handleKeyUp);
+      panelRef?.removeEventListener("keydown", handleKeyDown);
+      panelRef?.removeEventListener("keyup", handleKeyUp);
     };
-  }, [setMapControl, mapRef]);
+  }, [setMapControl, panelRef]);
 
   useEffect(() => {
     if (mapRef == null) {

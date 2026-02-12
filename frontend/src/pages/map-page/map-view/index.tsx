@@ -27,6 +27,7 @@ export const MapView = ({
   onRunQuery: () => void;
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
   // const { hoverInfo, onHover, onClick, viewState, setViewState } =
   //   useMapControls({ centerLatLon: SanFranciscoCenterLatLon });
   const {
@@ -39,6 +40,7 @@ export const MapView = ({
     currentMapControl,
   } = useMapControlPanel({
     mapRef: mapRef.current,
+    panelRef: panelRef.current,
     centerLatLon: SanFranciscoCenterLatLon,
   });
   const { configs } = useSelectedStreets();
@@ -56,7 +58,10 @@ export const MapView = ({
   );
 
   return (
-    <Flex style={{ position: "relative", width: "100%", height: "100%" }}>
+    <Flex
+      ref={panelRef}
+      style={{ position: "relative", width: "100%", height: "100%" }}
+    >
       <Flex
         style={{
           position: "absolute",
