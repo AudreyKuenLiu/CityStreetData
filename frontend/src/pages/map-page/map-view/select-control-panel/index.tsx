@@ -118,6 +118,9 @@ const ControlButton = ({
   return (
     <Button
       variant="solid"
+      onKeyDown={(e) => {
+        e.preventDefault();
+      }}
       onClick={onClick}
       style={{
         ...style,
