@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { MapRef } from "react-map-gl/maplibre";
-import { TerraDraw, TerraDrawPolygonMode } from "terra-draw";
+import {
+  TerraDraw,
+  TerraDrawMouseEvent,
+  TerraDrawPolygonMode,
+  ValidateNotSelfIntersecting,
+} from "terra-draw";
 import { ViewState } from "react-map-gl/maplibre";
 import { DEFAULT_ZOOM } from "../constants";
 import { TerraDrawMapLibreGLAdapter } from "terra-draw-maplibre-gl-adapter";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import { useActions } from "../../store/street-map-data-form";
+import { polygon } from "@turf/turf";
+import type { Position } from "geojson";
 
 export enum MapControl {
   PointerSelect,
@@ -88,6 +95,7 @@ export const useMapControlPanel = ({
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
 
+  //event handlers for the for the map
   useEffect(() => {
     pointerSelectOptions.onClick = (event: MapLayerMouseEvent): void => {
       const features = event.features;
@@ -128,6 +136,7 @@ export const useMapControlPanel = ({
     };
   }, [addStreet, removeStreet, toggleStreet, hoverInfo]);
 
+  //event listeners for the map panel
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === "x") {
@@ -153,20 +162,62 @@ export const useMapControlPanel = ({
     };
   }, [setMapControl, panelRef]);
 
+  //event handlers for terradraw and mapref
   useEffect(() => {
     if (mapRef == null) {
       return;
     }
+
     const terraDrawAdapter = new TerraDrawMapLibreGLAdapter({
       map: mapRef?.getMap(),
     });
+    let polygonLine: Position[] = [];
+
+    const polygonDrawMode = new TerraDrawPolygonMode({
+      pointerEvents: {
+        leftClick: (event: TerraDrawMouseEvent): boolean => {
+          const { lat, lng } = event;
+          const newPos: Position = [lng, lat];
+          const startPos = polygonLine[0];
+          const polygonArr =
+            startPos != null ? [...polygonLine, newPos] : [newPos];
+
+          let valid = true;
+          if (polygonArr.length >= 3) {
+            const { valid: isValid } = ValidateNotSelfIntersecting(
+              polygon([[...polygonArr, polygonArr[0]]]),
+            );
+            valid = isValid;
+          }
+          if (valid) {
+            polygonLine = polygonArr;
+          }
+          return valid;
+        },
+        rightClick: true,
+        contextMenu: true,
+        onDragStart: true,
+        onDrag: true,
+        onDragEnd: true,
+      },
+    });
     terraDraw = new TerraDraw({
       adapter: terraDrawAdapter,
-      modes: [new TerraDrawPolygonMode()],
+      modes: [polygonDrawMode],
     });
+
     if (mapControl === MapControl.PolygonSelect) {
       terraDraw.start();
       terraDraw.setMode("polygon");
+      terraDraw.on("finish", () => {
+        console.log("on complete handler");
+        terraDraw?.clear();
+      });
+      terraDraw.on("change", (_, type) => {
+        if (type === "delete") {
+          polygonLine = [];
+        }
+      });
     }
     return (): void => {
       if (mapControl === MapControl.PolygonSelect && terraDraw) {

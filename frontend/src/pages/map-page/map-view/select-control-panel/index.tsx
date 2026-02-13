@@ -2,7 +2,6 @@ import { Button, Flex, Modal, Space, Tooltip, Typography } from "antd";
 import React, { useState } from "react";
 import { MapControl } from "../hooks/use-map-control-panel";
 import { InfoCircleFilled } from "@ant-design/icons";
-import { center } from "@turf/turf";
 
 const IconMapping = {
   [MapControl.PointerSelect]: <span className="fg-arrow-o fg-lg" />,
