@@ -23,7 +23,7 @@ func main() {
 	//Starting fileserver for webapp
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Skipper: nil,
-		Root: "/frontend/dist",
+		Root:    "/frontend/dist",
 		// Index file for serving a directory.
 		Index: "index.html",
 		// Enable HTML5 mode by forwarding all not-found requests to root so that

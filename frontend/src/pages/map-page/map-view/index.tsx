@@ -14,7 +14,6 @@ import {
   hoveredLayerId,
 } from "./constants";
 import { useStreetsForMapView } from "../hooks/use-streets-for-map-view";
-import { useMapControls } from "./hooks/use-map-controls";
 import { useSelectedStreets } from "./hooks/use-selected-streets";
 import { ControlPanel } from "./control-panel";
 import { Flex } from "antd";
@@ -28,8 +27,8 @@ export const MapView = ({
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
-  // const { hoverInfo, onHover, onClick, viewState, setViewState } =
-  //   useMapControls({ centerLatLon: SanFranciscoCenterLatLon });
+  const { geoJson, getFilterForZoomLevel, streetSearchTrees } =
+    useStreetsForMapView();
   const {
     hoverInfo,
     onHover,
@@ -42,12 +41,12 @@ export const MapView = ({
     mapRef: mapRef.current,
     panelRef: panelRef.current,
     centerLatLon: SanFranciscoCenterLatLon,
+    streetSearchTrees,
   });
   const { configs } = useSelectedStreets();
   const layerIds = configs.map((config) => {
     return config.layerStyle.id;
   });
-  const { geoJson, getFilterForZoomLevel } = useStreetsForMapView();
   const zoomLevelFilter = getFilterForZoomLevel(
     mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
   );
@@ -60,6 +59,7 @@ export const MapView = ({
   return (
     <Flex
       ref={panelRef}
+      tabIndex={0}
       style={{ position: "relative", width: "100%", height: "100%" }}
     >
       <Flex

@@ -120,6 +120,7 @@ export const RunQueryButton = ({
             if (currentDataView === DataViewEnum.NoView) {
               setDataView(DataViewKeys.parse(DataViewEnum.GraphView));
             }
+            console.log("done running query");
             onClick();
           }}
           style={{

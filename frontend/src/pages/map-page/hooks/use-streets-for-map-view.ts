@@ -1,7 +1,7 @@
 import { useSuspenseQueries } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import type { ViewportStreetSegment } from "../../../models/api-models";
-import { StreetSegment } from "../../../models/map-models";
+import { StreetSegment, ViewableZoomLevels } from "../../../models/map-models";
 import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
@@ -10,18 +10,18 @@ import { ClassCodeEnum } from "../../../models/api-models";
 import { useCallback, useMemo } from "react";
 import { FilterSpecification } from "maplibre-gl";
 import type { FeatureCollection, LineString } from "geojson";
-
-enum ZoomLevelInView {
-  ONE, //least zoomed in
-  TWO,
-  THREE, //most zoomed in
-}
+import { ZoomLevelInView } from "../../../models/map-models";
+import {
+  StreetSearchTrees,
+  StreetSegmentRBush,
+} from "../../../models/map-models/street-search-tree";
 
 type useStreetsForMapViewReturn = {
   geoJson: FeatureCollection<
     LineString,
     StreetSegment & { zoomLevel: ZoomLevelInView }
   >;
+  streetSearchTrees: StreetSearchTrees;
   getFilterForZoomLevel: (zoomLevel: number) => FilterSpecification;
 };
 
@@ -62,6 +62,23 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
   const medZoomData = combinedQueries[1].data.data;
   const maxZoomData = combinedQueries[2].data.data;
 
+  const streetSearchTrees = useMemo(() => {
+    const [minZoomTree, medZoomTree, maxZoomTree] = [
+      new StreetSegmentRBush(),
+      new StreetSegmentRBush(),
+      new StreetSegmentRBush(),
+    ];
+    minZoomTree.load(minZoomData);
+    medZoomTree.load(medZoomData);
+    maxZoomTree.load(maxZoomData);
+
+    return {
+      [ZoomLevelInView.ONE]: minZoomTree,
+      [ZoomLevelInView.TWO]: medZoomTree,
+      [ZoomLevelInView.THREE]: maxZoomTree,
+    };
+  }, [minZoomData, medZoomData, maxZoomData]);
+
   const geoJson = useMemo(() => {
     const minZoomFeatures = minZoomData.map((segment) => ({
       type: "Feature" as const,
@@ -99,23 +116,11 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
 
   const getFilterForZoomLevel = useCallback(
     (zoomLevel: number): FilterSpecification => {
-      if (zoomLevel >= 15.5) {
-        return [
-          "in",
-          ["get", "zoomLevel"],
-          [
-            "literal",
-            [ZoomLevelInView.ONE, ZoomLevelInView.TWO, ZoomLevelInView.THREE],
-          ],
-        ];
-      } else if (zoomLevel < 15.5 && zoomLevel >= 13.5) {
-        return [
-          "in",
-          ["get", "zoomLevel"],
-          ["literal", [ZoomLevelInView.TWO, ZoomLevelInView.ONE]],
-        ];
-      }
-      return ["in", ["get", "zoomLevel"], ["literal", [ZoomLevelInView.ONE]]];
+      return [
+        "in",
+        ["get", "zoomLevel"],
+        ["literal", ViewableZoomLevels(zoomLevel)],
+      ];
     },
     [],
   );
@@ -123,5 +128,6 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
   return {
     geoJson,
     getFilterForZoomLevel,
+    streetSearchTrees,
   };
 };

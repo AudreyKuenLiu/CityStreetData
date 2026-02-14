@@ -4,6 +4,8 @@ import { DataViewEnum, type DataView } from "./types";
 type DataViewFields = {
   currentDataView: DataView;
   setDataView: (dataView: DataView) => void;
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
 };
 
 const DataViewContext = createContext<DataViewFields | null>(null);
@@ -16,12 +18,15 @@ export const DataViewProvider = ({
   const [currentDataView, setDataView] = useState<DataView>(
     DataViewEnum.NoView,
   );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   return (
     <DataViewContext.Provider
       value={{
         currentDataView,
         setDataView,
+        isLoading,
+        setIsLoading,
       }}
     >
       {children}

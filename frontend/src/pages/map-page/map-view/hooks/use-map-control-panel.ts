@@ -1,18 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapRef } from "react-map-gl/maplibre";
 import {
   TerraDraw,
   TerraDrawMouseEvent,
   TerraDrawPolygonMode,
-  ValidateNotSelfIntersecting,
 } from "terra-draw";
 import { ViewState } from "react-map-gl/maplibre";
 import { DEFAULT_ZOOM } from "../constants";
 import { TerraDrawMapLibreGLAdapter } from "terra-draw-maplibre-gl-adapter";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import { useActions } from "../../store/street-map-data-form";
-import { polygon } from "@turf/turf";
-import type { Position } from "geojson";
+import { PolygonSelectHandler } from "../../../../models/map-models/polygon-select-handler";
+import { StreetSearchTrees } from "../../../../models/map-models/street-search-tree";
 
 export enum MapControl {
   PointerSelect,
@@ -47,41 +46,16 @@ const throttleFunc = (
   return;
 };
 
-const pointerSelectOptions = {
-  onClick: (_: MapLayerMouseEvent): void => {},
-  onHover: (_: MapLayerMouseEvent): void => {},
-};
-
-const hoverDeleteOptions = {
-  onClick: (_: MapLayerMouseEvent): void => {},
-  onHover: (_: MapLayerMouseEvent): void => {},
-};
-
-const hoverSelectOptions = {
-  onClick: (_: MapLayerMouseEvent): void => {},
-  onHover: (_: MapLayerMouseEvent): void => {},
-};
-
-const polygonSelectOptions = {
-  onClick: (_: MapLayerMouseEvent): void => {},
-  onHover: (_: MapLayerMouseEvent): void => {},
-};
-
-const controllerOptions = {
-  [MapControl.PointerSelect]: pointerSelectOptions,
-  [MapControl.HoverDelete]: hoverDeleteOptions,
-  [MapControl.HoverSelect]: hoverSelectOptions,
-  [MapControl.PolygonSelect]: polygonSelectOptions,
-};
-
 export const useMapControlPanel = ({
   mapRef,
   panelRef,
   centerLatLon,
+  streetSearchTrees,
 }: {
   mapRef: MapRef | null;
   panelRef: HTMLElement | null;
   centerLatLon: readonly [number, number];
+  streetSearchTrees: StreetSearchTrees;
 }): UseMapControlPanelReturn => {
   const [mapControl, setMapControl] = useState(MapControl.PointerSelect);
   const [hoverInfo, setHoverInfo] = useState<{ cnn: string } | null>(null);
@@ -94,10 +68,11 @@ export const useMapControlPanel = ({
     pitch: 0,
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
+  const zoom = useRef<number>(DEFAULT_ZOOM);
+  zoom.current = viewState.zoom;
 
-  //event handlers for the for the map
-  useEffect(() => {
-    pointerSelectOptions.onClick = (event: MapLayerMouseEvent): void => {
+  const pointerSelectOptions = {
+    onClick: (event: MapLayerMouseEvent): void => {
       const features = event.features;
       if (
         features?.[0]?.properties?.cnn != null &&
@@ -108,24 +83,30 @@ export const useMapControlPanel = ({
           line: JSON.parse(features[0].properties.line),
         });
       }
-    };
-    pointerSelectOptions.onHover = (event: MapLayerMouseEvent): void => {
+    },
+    onHover: (event: MapLayerMouseEvent): void => {
       const street = event.features?.[0];
       if (hoverInfo?.cnn !== street?.properties.cnn) {
         setHoverInfo({
           cnn: street?.properties.cnn,
         });
       }
-    };
+    },
+  };
 
-    hoverDeleteOptions.onHover = (event: MapLayerMouseEvent): void => {
+  const hoverDeleteOptions = {
+    onClick: (_: MapLayerMouseEvent): void => {},
+    onHover: (event: MapLayerMouseEvent): void => {
       const street = event.features?.[0];
       if (street != null) {
         removeStreet(street.properties.cnn);
       }
-    };
+    },
+  };
 
-    hoverSelectOptions.onHover = (event: MapLayerMouseEvent): void => {
+  const hoverSelectOptions = {
+    onClick: (_: MapLayerMouseEvent): void => {},
+    onHover: (event: MapLayerMouseEvent): void => {
       const street = event.features?.[0];
       if (street != null) {
         addStreet({
@@ -133,11 +114,27 @@ export const useMapControlPanel = ({
           line: JSON.parse(street.properties.line),
         });
       }
-    };
-  }, [addStreet, removeStreet, toggleStreet, hoverInfo]);
+    },
+  };
+
+  const polygonSelectOptions = {
+    onClick: (_: MapLayerMouseEvent): void => {},
+    onHover: (_: MapLayerMouseEvent): void => {},
+  };
+
+  const controllerOptions = {
+    [MapControl.PointerSelect]: pointerSelectOptions,
+    [MapControl.HoverDelete]: hoverDeleteOptions,
+    [MapControl.HoverSelect]: hoverSelectOptions,
+    [MapControl.PolygonSelect]: polygonSelectOptions,
+  };
 
   //event listeners for the map panel
   useEffect(() => {
+    if (panelRef == null) {
+      return;
+    }
+    panelRef.focus(); //initially focus to the panel on load
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === "x") {
         setMapControl(MapControl.HoverDelete);
@@ -154,45 +151,31 @@ export const useMapControlPanel = ({
         setHoverInfo(null);
       }
     };
-    panelRef?.addEventListener("keydown", handleKeyDown);
-    panelRef?.addEventListener("keyup", handleKeyUp);
+    panelRef.addEventListener("keydown", handleKeyDown);
+    panelRef.addEventListener("keyup", handleKeyUp);
     return (): void => {
-      panelRef?.removeEventListener("keydown", handleKeyDown);
-      panelRef?.removeEventListener("keyup", handleKeyUp);
+      panelRef.removeEventListener("keydown", handleKeyDown);
+      panelRef.removeEventListener("keyup", handleKeyUp);
     };
   }, [setMapControl, panelRef]);
 
   //event handlers for terradraw and mapref
   useEffect(() => {
-    if (mapRef == null) {
+    if (mapRef == null || mapControl !== MapControl.PolygonSelect) {
       return;
     }
 
     const terraDrawAdapter = new TerraDrawMapLibreGLAdapter({
       map: mapRef?.getMap(),
     });
-    let polygonLine: Position[] = [];
+    const polygonSelectHandler = new PolygonSelectHandler({
+      streetSearchTrees,
+    });
 
     const polygonDrawMode = new TerraDrawPolygonMode({
       pointerEvents: {
         leftClick: (event: TerraDrawMouseEvent): boolean => {
-          const { lat, lng } = event;
-          const newPos: Position = [lng, lat];
-          const startPos = polygonLine[0];
-          const polygonArr =
-            startPos != null ? [...polygonLine, newPos] : [newPos];
-
-          let valid = true;
-          if (polygonArr.length >= 3) {
-            const { valid: isValid } = ValidateNotSelfIntersecting(
-              polygon([[...polygonArr, polygonArr[0]]]),
-            );
-            valid = isValid;
-          }
-          if (valid) {
-            polygonLine = polygonArr;
-          }
-          return valid;
+          return polygonSelectHandler.onClickValidator(event);
         },
         rightClick: true,
         contextMenu: true,
@@ -206,26 +189,31 @@ export const useMapControlPanel = ({
       modes: [polygonDrawMode],
     });
 
-    if (mapControl === MapControl.PolygonSelect) {
-      terraDraw.start();
-      terraDraw.setMode("polygon");
-      terraDraw.on("finish", () => {
-        console.log("on complete handler");
-        terraDraw?.clear();
+    terraDraw.start();
+    terraDraw.setMode("polygon");
+    terraDraw.on("finish", (_, context) => {
+      console.log("this is the event", context, zoom.current);
+      const selectedStreets = polygonSelectHandler.onFinish({
+        zoomLevel: zoom.current,
       });
-      terraDraw.on("change", (_, type) => {
-        if (type === "delete") {
-          polygonLine = [];
-        }
-      });
-    }
+      for (const street of selectedStreets) {
+        addStreet(street);
+      }
+      terraDraw?.clear();
+    });
+    terraDraw.on("change", (ids, type, context) => {
+      // if (type === "delete") {
+      //   console.log("calling on delete");
+      //   polygonSelectHandler.onClear();
+      // }
+    });
     return (): void => {
-      if (mapControl === MapControl.PolygonSelect && terraDraw) {
+      if (terraDraw) {
         terraDraw?.setMode("static");
         terraDraw?.stop();
       }
     };
-  }, [mapControl, mapRef]);
+  }, [mapControl, mapRef, streetSearchTrees, addStreet]);
 
   return {
     onClick: (event: MapLayerMouseEvent): void => {
