@@ -13,21 +13,29 @@ export _AIRFLOW_WWW_USER_PASSWORD=${_AIRFLOW_WWW_USER_PASSWORD}
 export AIRFLOW__CORE__EXECUTION_API_SERVER_URL=${AIRFLOW__CORE__EXECUTION_API_SERVER_URL}
 
 apt-get install -y locales;
-apt-get install -y python3 python3-pip python3-venv;
+# apt-get install -y python3.11 python3.11-pip python3.11-venv;
+# sudo wget https://www.python.org/ftp/python/3.12.6/Python-3.12.6.tgz && \
+#     sudo tar xzf Python-3.12.6.tgz && \
+#     cd Python-3.12.6.tgz && \
+#     sudo ./configure --enable-optimizations && \
+#     sudo make altinstall && \
+#     cd ~
+apt-get install -y python3.13-venv;
 python3 -m venv /opt/airflow_venv;
 #airflow dependencies
 pip install --upgrade pip;
 pip install 'connexion==2.14.2';
 pip install lxml;
 pip install beautifulsoup4;
-pip install flask_session;
+pip install 'flask_session==0.8.0';
 pip install "flask-appbuilder<5.0.0";
+pip install 'apache-airflow-providers-fab==3.1.2';
 pip install 'apache-airflow==3.1.2';
-pip install apache-airflow-providers-fab;
 pip install graphviz;
 #python dependencies
 pip install pandas;
 pip install python-dateutil;
+pip install 'PyJWT==2.10.0';
 
 # Initialize Airflow database
 airflow fab-db migrate;

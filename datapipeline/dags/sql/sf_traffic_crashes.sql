@@ -86,7 +86,7 @@ SELECT
     text_to_collision_type(dta.type_of_collision) as collision_type,
     COALESCE(dta.number_killed, 0) as number_killed,
     COALESCE(dta.number_injured, 0) as number_injured,
-    unique_id as sf_data_id,
+    case_id_pkey as sf_data_id,
     json_object(
         'sf_data_id', unique_id,
         'case_id_pkey', case_id_pkey,
@@ -135,7 +135,7 @@ SELECT
 FROM
     data_to_add as dta
     LEFT JOIN 
-    sf_events_traffic_crashes ON dta.unique_id = sf_events_traffic_crashes.sf_data_id
+    sf_events_traffic_crashes ON dta.case_id_pkey = sf_events_traffic_crashes.sf_data_id
 WHERE
     sf_events_traffic_crashes.sf_data_id IS NULL
 ;

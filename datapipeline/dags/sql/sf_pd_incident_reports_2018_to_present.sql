@@ -47,7 +47,7 @@ SELECT
     dta.cnn as cnn,
     dta.point as point,
     text_to_arrest_category(incident_category) as arrest_category,
-    dta.row_id as sf_data_id,
+    dta.incident_id as sf_data_id,
     json_object(
         'report_datetime', dta.report_datetime,
         'incident_id', dta.incident_id,
@@ -74,6 +74,6 @@ SELECT
 FROM
     data_to_add as dta
     LEFT JOIN 
-    sf_events_traffic_arrests as sfe ON sfe.sf_data_id = dta.row_id
+    sf_events_traffic_arrests as sfe ON sfe.sf_data_id = dta.incident_id
 WHERE
     sfe.sf_data_id IS NULL;
