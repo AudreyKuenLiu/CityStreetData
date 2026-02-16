@@ -27,7 +27,6 @@ export const GraphList = (): React.JSX.Element => {
       }}
     >
       {trafficCrashGroupData.map(({ id, tickValues, data, axisLegend }) => {
-        console.log("this is the result", id, tickValues, data);
         const streetGroup = streetGroups.get(id);
         if (streetGroup == null) {
           return null;
@@ -111,7 +110,7 @@ export const GraphList = (): React.JSX.Element => {
                     return "";
                   },
                   legend: axisLegend,
-                  legendOffset: -40,
+                  legendOffset: -50,
                 }}
                 axisBottom={{
                   format: "%Y-%b-%d",

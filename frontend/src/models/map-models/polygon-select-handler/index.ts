@@ -29,16 +29,12 @@ export class PolygonSelectHandler {
       valid = isValid;
     }
     if (valid) {
-      console.log("setting polygon line", polygonArr);
       this.polygonLine = polygonArr;
     }
     return valid;
   };
 
   onFinish = ({ zoomLevel }: { zoomLevel: number }): StreetSegment[] => {
-    console.log("this is the polygon line", [
-      [...this.polygonLine, this.polygonLine[0]],
-    ]);
     const polygonObj = polygon([[...this.polygonLine, this.polygonLine[0]]]);
     const zoomLevelsInView = ViewableZoomLevels(zoomLevel);
     const [minX, minY, maxX, maxY] = bbox(polygonObj);
@@ -60,11 +56,11 @@ export class PolygonSelectHandler {
         streetSegments.push(streetSegment);
       }
     }
+    this.onClear();
     return streetSegments;
   };
 
   onClear = (): void => {
-    console.log("calling onclear");
     this.polygonLine = [];
   };
 }

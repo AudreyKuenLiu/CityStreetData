@@ -25,6 +25,7 @@ export const MapView = ({
 }: {
   onRunQuery: () => void;
 }): React.JSX.Element => {
+  console.log("rerendering mapView");
   const mapRef = useRef<MapRef | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const { geoJson, getFilterForZoomLevel, streetSearchTrees } =

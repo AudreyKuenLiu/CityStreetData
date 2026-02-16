@@ -1,4 +1,13 @@
-import { Button, Flex, Modal, Space, Tooltip, Typography } from "antd";
+import {
+  Button,
+  Col,
+  Flex,
+  Modal,
+  Row,
+  Space,
+  Tooltip,
+  Typography,
+} from "antd";
 import React, { useState } from "react";
 import { MapControl } from "../hooks/use-map-control-panel";
 import { InfoCircleFilled } from "@ant-design/icons";
@@ -74,8 +83,11 @@ export const SelectControlPanel = ({
       </Tooltip>
       <Modal
         title={
-          <Typography.Title level={4} style={{ margin: 0 }}>
-            Short Cuts
+          <Typography.Title
+            level={4}
+            style={{ marginTop: 0, marginBottom: "24px" }}
+          >
+            Controls
           </Typography.Title>
         }
         open={infoEnabled}
@@ -83,20 +95,60 @@ export const SelectControlPanel = ({
         footer={[<Button onClick={() => setInfoEnabled(false)}>Ok</Button>]}
       >
         <Space vertical size={"middle"}>
-          <Space style={{ alignItems: "center" }}>
-            <span className="fg-arrow fg-lg" />
-            <Typography.Text strong>Ctrl + Hover</Typography.Text>
-            <Typography.Text>
-              selects multiple streets when hovering over
-            </Typography.Text>
-          </Space>
-          <Space style={{ alignItems: "center" }}>
-            <span className="fg-split fg-lg" />
-            <Typography.Text strong>X + Hover</Typography.Text>
-            <Typography.Text>
-              de-selects multiple streets when hovering over
-            </Typography.Text>
-          </Space>
+          <Row>
+            <Col className="gutter-row" span={2}>
+              <span className="fg-arrow-o fg-lg" />
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <Typography.Text strong>Click</Typography.Text>
+            </Col>
+            <Col className="gutter-row" span={16}>
+              <Typography.Text>
+                Selects a single street segment.
+              </Typography.Text>
+            </Col>
+          </Row>
+          <Row>
+            <Col className="gutter-row" span={2}>
+              <span className="fg-arrow fg-lg" />
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <Typography.Text strong>Ctrl + Hover</Typography.Text>
+            </Col>
+            <Col className="gutter-row" span={16}>
+              <Typography.Text>
+                Selects multiple street segments when hovering.
+              </Typography.Text>
+            </Col>
+          </Row>
+          <Row>
+            <Col className="gutter-row" span={2}>
+              <span className="fg-split fg-lg" />
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <Typography.Text strong>X + Hover</Typography.Text>
+            </Col>
+            <Col className="gutter-row" span={16}>
+              <Typography.Text>
+                Deselects multiple street segments when hovering.
+              </Typography.Text>
+            </Col>
+          </Row>
+          <Row>
+            <Col className="gutter-row" span={2}>
+              <span className="fg-polygon-pt fg-lg" />
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <Typography.Text strong>P</Typography.Text>
+            </Col>
+            <Col className="gutter-row" span={16}>
+              <Typography.Text>
+                Selects multiple street segments strictly within a polygon.
+              </Typography.Text>
+              <Typography.Text strong> Press "Enter"</Typography.Text> to
+              confirm selection.
+            </Col>
+          </Row>
         </Space>
       </Modal>
     </Flex>

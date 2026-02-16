@@ -138,12 +138,14 @@ export const useMapControlPanel = ({
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === "x") {
         setMapControl(MapControl.HoverDelete);
-        setHoverInfo(null);
       }
       if (e.key === "Control") {
         setMapControl(MapControl.HoverSelect);
-        setHoverInfo(null);
       }
+      if (e.key === "p") {
+        setMapControl(MapControl.PolygonSelect);
+      }
+      setHoverInfo(null);
     };
     const handleKeyUp = (e: KeyboardEvent): void => {
       if (e.key === "x" || e.key === "Control") {
@@ -161,7 +163,11 @@ export const useMapControlPanel = ({
 
   //event handlers for terradraw and mapref
   useEffect(() => {
-    if (mapRef == null || mapControl !== MapControl.PolygonSelect) {
+    if (
+      mapRef == null ||
+      mapControl !== MapControl.PolygonSelect ||
+      panelRef == null
+    ) {
       return;
     }
 
@@ -191,8 +197,7 @@ export const useMapControlPanel = ({
 
     terraDraw.start();
     terraDraw.setMode("polygon");
-    terraDraw.on("finish", (_, context) => {
-      console.log("this is the event", context, zoom.current);
+    terraDraw.on("finish", () => {
       const selectedStreets = polygonSelectHandler.onFinish({
         zoomLevel: zoom.current,
       });
@@ -201,19 +206,21 @@ export const useMapControlPanel = ({
       }
       terraDraw?.clear();
     });
-    terraDraw.on("change", (ids, type, context) => {
-      // if (type === "delete") {
-      //   console.log("calling on delete");
-      //   polygonSelectHandler.onClear();
-      // }
-    });
+
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") {
+        polygonSelectHandler.onClear();
+      }
+    };
+    panelRef.addEventListener("keydown", handleKeyDown);
     return (): void => {
+      panelRef.removeEventListener("keydown", handleKeyDown);
       if (terraDraw) {
         terraDraw?.setMode("static");
         terraDraw?.stop();
       }
     };
-  }, [mapControl, mapRef, streetSearchTrees, addStreet]);
+  }, [mapControl, panelRef, mapRef, streetSearchTrees, addStreet]);
 
   return {
     onClick: (event: MapLayerMouseEvent): void => {

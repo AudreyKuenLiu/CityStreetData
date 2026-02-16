@@ -3,7 +3,8 @@ import React from "react";
 import { GraphList } from "./graph-list/graph-list";
 import { ControlPanel } from "./graph-list/control-panel";
 //import { useTrafficCrashesData } from "../store/graph-list-data";
-import { Flex, Typography } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Flex, Typography, Spin } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
 import { useStreetGroupsRef } from "../store/street-map-data-form";
 import { useDataViewContext } from "../context/data-view";
@@ -26,6 +27,23 @@ const useHasNoData = (): boolean => {
 
 export const DataView = (): React.JSX.Element => {
   const hasNoData = useHasNoData();
+  const { isLoading } = useDataViewContext();
+  console.log("rerendering data view");
+  if (isLoading) {
+    return (
+      <Flex
+        style={{
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
+      </Flex>
+    );
+  }
+
   if (hasNoData) {
     return (
       <Flex

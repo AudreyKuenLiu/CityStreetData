@@ -5,13 +5,13 @@ import { useCrashDataForStreets } from "./use-crash-data-for-streets";
 import { useCrashEventsForStreets } from "./use-crash-events-for-streets";
 import { useIsReady } from "../../../../store/street-map-data-form";
 import { useDataViewContext } from "../../../../context/data-view";
-// import { useEffect } from "react";
 
 export const useDataViewQuery = (): UseDataViewQueryProps => {
   const {
     currentDataView,
     setDataView: setCurrentDataView,
-    // setIsLoading,
+    isLoading: isCurrentApiLoading,
+    setIsLoading,
   } = useDataViewContext();
   const isReady = useIsReady();
   const { getData: getCrashes, isLoading: isGetCrashesLoading } =
@@ -37,9 +37,9 @@ export const useDataViewQuery = (): UseDataViewQueryProps => {
   if (currentDataView === DataViewEnum.HeatmapView) {
     isLoading = isCrashEventsLoading;
   }
-  // useEffect(() => {
-  //   setIsLoading(isLoading);
-  // }, [isLoading, setIsLoading]);
+  if (isLoading !== isCurrentApiLoading) {
+    setIsLoading(isLoading);
+  }
 
   return {
     currentDataView,
