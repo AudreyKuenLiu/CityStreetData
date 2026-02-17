@@ -14,6 +14,13 @@ export const MapPage: React.FC = () => {
         token: {
           colorFill: "#6d8196",
         },
+        components: {
+          Segmented: {
+            itemSelectedBg: "#1677ff",
+            itemSelectedColor: "white",
+            itemColor: "black",
+          },
+        },
       }}
     >
       <DataViewProvider>

@@ -1,17 +1,25 @@
 import React from "react";
-import { Divider, Flex, Radio, Space, Switch, Typography } from "antd";
+import {
+  Divider,
+  Flex,
+  Radio,
+  Segmented,
+  SegmentedProps,
+  Space,
+  Switch,
+  Typography,
+} from "antd";
 import type { GraphType } from "../../store/graph-list-data";
 import {
   useActions,
   useCurrentGraphType,
   useShouldNormalizeGraphData,
 } from "../../store/graph-list-data";
-import { CheckboxGroupProps } from "antd/es/checkbox";
 
-const TrafficCrashOptions: CheckboxGroupProps<GraphType>["options"] = [
+const TrafficCrashOptions: SegmentedProps<GraphType>["options"] = [
   { label: "Injuries and Deaths", value: "InjuriesAndFatalities" },
   { label: "Crashes", value: "CrashGroups" },
-];
+] as const;
 
 export const ControlPanel = (): React.JSX.Element => {
   const currentOption = useCurrentGraphType();
@@ -30,15 +38,21 @@ export const ControlPanel = (): React.JSX.Element => {
         width: "100%",
       }}
     >
-      <Radio.Group
+      <Segmented
         size="large"
+        style={{ background: "white" }}
+        // styles={{
+        //   root: {
+        //     border: "1px solid #77BEF0",
+        //   },
+        // }}
         options={TrafficCrashOptions}
         value={currentOption}
         onChange={(e) => {
-          selectCurrentGraph(e.target.value);
+          selectCurrentGraph(e);
         }}
-        optionType="button"
-        buttonStyle="solid"
+        //optionType="button"
+        //buttonStyle="solid"
       />
       <Divider orientation="vertical" size="large" style={{ height: "85%" }} />
       <Space style={{ alignItems: "center" }}>
