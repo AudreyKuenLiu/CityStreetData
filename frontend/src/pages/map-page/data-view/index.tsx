@@ -2,7 +2,6 @@ import React from "react";
 
 import { GraphList } from "./graph-list/graph-list";
 import { ControlPanel } from "./graph-list/control-panel";
-//import { useTrafficCrashesData } from "../store/graph-list-data";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Flex, Typography, Spin } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
@@ -61,7 +60,11 @@ export const DataView = (): React.JSX.Element => {
       </Flex>
     );
   }
-  return <DataViewBody />;
+  return (
+    <Flex style={{ position: "relative" }}>
+      <DataViewBody />
+    </Flex>
+  );
 };
 
 const DataViewBody = (): React.JSX.Element => {
@@ -84,18 +87,7 @@ const DataViewBody = (): React.JSX.Element => {
     );
   }
   if (currentDataView === DataViewEnum.HeatmapView) {
-    return (
-      <Flex
-        style={{
-          overflow: "hidden",
-          height: "100vh",
-          position: "relative",
-          alignContent: "flex-start",
-        }}
-      >
-        <HeatmapView />
-      </Flex>
-    );
+    return <HeatmapView />;
   }
   return <div></div>;
 };

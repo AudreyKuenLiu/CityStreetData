@@ -1,9 +1,0 @@
-{
-  "devDependencies": {
-    "@welldone-software/why-did-you-render": "^10.0.1"
-  },
-  "dependencies": {
-    "@types/rtree": "^1.4.30",
-    "zod": "^4.1.12"
-  }
-}

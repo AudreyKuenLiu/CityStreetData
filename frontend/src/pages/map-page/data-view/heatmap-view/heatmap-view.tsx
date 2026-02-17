@@ -21,6 +21,8 @@ export const HeatmapView = (): React.JSX.Element => {
   return (
     <Flex
       style={{
+        overflow: "hidden",
+        height: "100vh",
         flexWrap: "wrap",
         width: "100%",
         alignContent: "flex-start",

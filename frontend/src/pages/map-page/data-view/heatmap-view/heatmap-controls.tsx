@@ -71,8 +71,8 @@ export const HeatmapControls = (): React.JSX.Element => {
       id="heatmapControls"
       style={{
         position: "absolute",
-        padding: "16px",
         gap: "8px",
+        padding: "16px",
         right: 0,
         left: 0,
         justifyContent: "space-between",

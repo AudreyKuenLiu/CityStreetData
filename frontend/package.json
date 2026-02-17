@@ -25,6 +25,7 @@
     "date-fns-tz": "^3.2.0",
     "font-gis": "^1.0.6",
     "lodash": "^4.17.21",
+    "lz-string": "^1.5.0",
     "maplibre-gl": "^5.7.0",
     "rbush": "^4.0.1",
     "react": "^19.1.1",
