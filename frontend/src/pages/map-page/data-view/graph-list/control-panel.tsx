@@ -2,7 +2,6 @@ import React from "react";
 import {
   Divider,
   Flex,
-  Radio,
   Segmented,
   SegmentedProps,
   Space,
@@ -41,18 +40,16 @@ export const ControlPanel = (): React.JSX.Element => {
       <Segmented
         size="large"
         style={{ background: "white" }}
-        // styles={{
-        //   root: {
-        //     border: "1px solid #77BEF0",
-        //   },
-        // }}
+        styles={{
+          root: {
+            border: "1px solid #d3d3d3",
+          },
+        }}
         options={TrafficCrashOptions}
         value={currentOption}
         onChange={(e) => {
           selectCurrentGraph(e);
         }}
-        //optionType="button"
-        //buttonStyle="solid"
       />
       <Divider orientation="vertical" size="large" style={{ height: "85%" }} />
       <Space style={{ alignItems: "center" }}>
