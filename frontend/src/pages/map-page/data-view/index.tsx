@@ -1,7 +1,7 @@
 import React from "react";
 
-import { GraphList } from "./graph-list/graph-list";
-import { ControlPanel } from "./graph-list/control-panel";
+import { AreaChartList } from "./area-chart-list/area-chart-list";
+import { ControlPanel } from "./area-chart-list/control-panel";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Flex, Typography, Spin } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
@@ -9,6 +9,7 @@ import { useStreetGroupsRef } from "../store/street-map-data-form";
 import { useDataViewContext } from "../context/data-view";
 import { DataViewEnum } from "../context/data-view/types";
 import { HeatmapView } from "./heatmap-view/heatmap-view";
+import { TrendChartList } from "./trend-chart-list";
 
 const useHasNoData = (): boolean => {
   // const trafficCrashData = useTrafficCrashesData();
@@ -69,7 +70,7 @@ export const DataView = (): React.JSX.Element => {
 
 const DataViewBody = (): React.JSX.Element => {
   const { currentDataView } = useDataViewContext();
-  if (currentDataView === DataViewEnum.GraphView) {
+  if (currentDataView === DataViewEnum.AreaChartView) {
     return (
       <Flex
         style={{
@@ -82,12 +83,15 @@ const DataViewBody = (): React.JSX.Element => {
         }}
       >
         <ControlPanel />
-        <GraphList />
+        <AreaChartList />
       </Flex>
     );
   }
   if (currentDataView === DataViewEnum.HeatmapView) {
     return <HeatmapView />;
+  }
+  if (currentDataView === DataViewEnum.TrendView) {
+    return <TrendChartList />;
   }
   return <div></div>;
 };

@@ -2,8 +2,9 @@ import { z } from "zod";
 
 const DataViewSchema = z.object({
   NoView: "NoView",
-  GraphView: "GraphView",
+  AreaChartView: "AreaChartView",
   HeatmapView: "HeatmapView",
+  TrendView: "TrendView",
 } as const);
 export const DataViewKeys = DataViewSchema.keyof();
 export const DataViewEnum = DataViewSchema.shape;

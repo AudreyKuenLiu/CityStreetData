@@ -8,9 +8,6 @@ export const actions = ({
     setState(() => {
       return {
         graphGroupData: data,
-        // graphGroupVehicleCrashes: initializeVehicleCrashesData(data),
-        // graphGroupTrafficInjuriesAndFatalities:
-        //   initializeTrafficInjuriesAndFatalitiesData(data),
       };
     });
   },

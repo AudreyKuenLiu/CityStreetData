@@ -22,7 +22,7 @@ export const useDataViewQuery = (): UseDataViewQueryProps => {
   const getData = async (selectedDataView?: DataView): Promise<void> => {
     const dataView = selectedDataView ?? currentDataView;
     if (
-      dataView === DataViewEnum.GraphView ||
+      dataView === DataViewEnum.AreaChartView ||
       dataView === DataViewEnum.NoView
     ) {
       getCrashes();

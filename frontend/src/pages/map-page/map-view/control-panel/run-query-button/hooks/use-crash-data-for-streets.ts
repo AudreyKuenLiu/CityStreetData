@@ -12,7 +12,7 @@ import { CrashStats, StreetFeature } from "../../../../../../models/api-models";
 import {
   useActions as useGraphDataActions,
   GraphGroupData,
-} from "../../../../store/graph-list-data";
+} from "../../../../store/area-chart-list-data";
 import { UseDataViewControllerProps } from "./types";
 import {
   GroupId,

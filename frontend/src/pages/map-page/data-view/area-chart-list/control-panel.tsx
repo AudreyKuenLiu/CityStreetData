@@ -8,12 +8,12 @@ import {
   Switch,
   Typography,
 } from "antd";
-import type { GraphType } from "../../store/graph-list-data";
+import type { GraphType } from "../../store/area-chart-list-data";
 import {
   useActions,
   useCurrentGraphType,
   useShouldNormalizeGraphData,
-} from "../../store/graph-list-data";
+} from "../../store/area-chart-list-data";
 
 const TrafficCrashOptions: SegmentedProps<GraphType>["options"] = [
   { label: "Injuries and Deaths", value: "InjuriesAndFatalities" },

@@ -4,6 +4,7 @@ import {
   AreaChartOutlined,
   BuildFilled,
   HeatMapOutlined,
+  LineChartOutlined,
   RedoOutlined,
 } from "@ant-design/icons";
 import { useDataViewQuery } from "./hooks";
@@ -15,13 +16,17 @@ const DataViewConfig = {
     icon: <BuildFilled />,
     label: "Generate View",
   },
-  [DataViewEnum.GraphView]: {
+  [DataViewEnum.AreaChartView]: {
     icon: <AreaChartOutlined />,
-    label: "Graph",
+    label: "Area Chart",
   },
   [DataViewEnum.HeatmapView]: {
     icon: <HeatMapOutlined />,
     label: "Heatmap",
+  },
+  [DataViewEnum.TrendView]: {
+    icon: <LineChartOutlined />,
+    label: "Trend Chart",
   },
 } as const;
 
@@ -29,10 +34,10 @@ const viewOptions = [
   {
     label: (
       <Space size="small">
-        <AreaChartOutlined /> Graph
+        <AreaChartOutlined /> Area chart
       </Space>
     ),
-    key: DataViewEnum.GraphView,
+    key: DataViewEnum.AreaChartView,
   },
   {
     label: (
@@ -42,6 +47,15 @@ const viewOptions = [
       </Space>
     ),
     key: DataViewEnum.HeatmapView,
+  },
+  {
+    label: (
+      <Space size="small">
+        <LineChartOutlined />
+        Trend Chart
+      </Space>
+    ),
+    key: DataViewEnum.TrendView,
   },
 ];
 
@@ -67,7 +81,7 @@ export const RunQueryButton = ({
         await runQuery();
         setValidRun(true);
         if (currentDataView === DataViewEnum.NoView) {
-          setDataView(DataViewKeys.parse(DataViewEnum.GraphView));
+          setDataView(DataViewKeys.parse(DataViewEnum.AreaChartView));
         }
         onClick();
       }
@@ -118,7 +132,7 @@ export const RunQueryButton = ({
             }
             setValidRun(true);
             if (currentDataView === DataViewEnum.NoView) {
-              setDataView(DataViewKeys.parse(DataViewEnum.GraphView));
+              setDataView(DataViewKeys.parse(DataViewEnum.AreaChartView));
             }
             onClick();
           }}
