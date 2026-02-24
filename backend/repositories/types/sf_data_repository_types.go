@@ -56,6 +56,21 @@ type StreetFeature struct {
 	Value       string      `json:"value"`
 }
 
+type GetTrafficStatsForStreetsParams struct {
+	CNNs         []int
+	TimeSegments []time.Time
+}
+
+type TimeSegmentCrashStats struct {
+	TimeSegment       time.Time
+	CollisionSeverity types.CollisionSeverity `json:"collision_severity"`
+	CollisionType     types.CollisionType     `json:"collision_type"`
+	DphGroup          *types.DphGroup         `json:"crash_classification"`
+	NumberInjured     int                     `json:"number_injured"`
+	NumberKilled      int                     `json:"number_killed"`
+	NumberOfCrashes   int                     `json:"number_of_crashes"`
+}
+
 type GetTrafficForStreetsParams struct {
 	CNNs                []int
 	CollisionSeverities *[]types.CollisionSeverity

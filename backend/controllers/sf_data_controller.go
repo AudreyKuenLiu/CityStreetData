@@ -4,7 +4,7 @@ import (
 	"citystreetdata/controllers/types"
 	cUtils "citystreetdata/controllers/utils"
 	rTypes "citystreetdata/repositories/types"
-	dtypes "citystreetdata/types"
+	dTypes "citystreetdata/types"
 	"slices"
 
 	repo "citystreetdata/repositories"
@@ -40,54 +40,48 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		return nil, fmt.Errorf("no params passed to GetCrashDataForStreets")
 	}
 
-	//pull data from Repos
-	crashes, err := sfc.sfDataRepository.GetTrafficCrashesForStreets(ctx, &rTypes.GetTrafficForStreetsParams{
-		CNNs:      params.CNNs,
-		StartTime: params.StartTime,
-		EndTime:   params.EndTime,
+	timeSegments := cUtils.BuildTimeSegmentArr(params.StartTime, params.EndTime, params.SegmentSize)
+
+	stats, err := sfc.sfDataRepository.GetTrafficStatsForStreets(ctx, &rTypes.GetTrafficStatsForStreetsParams{
+		CNNs:         params.CNNs,
+		TimeSegments: timeSegments,
 	})
 	if err != nil {
 		return nil, err
 	}
-	sort.Slice(crashes, func(i, j int) bool {
-		return crashes[i].OccuredAt.Unix() < crashes[j].OccuredAt.Unix()
-	})
 
-	//initilize segments
-	dateToCrashesGroupMap, findClosestTime := cUtils.BuildTimeSegmentMap[types.CrashStats](params.StartTime, params.EndTime, params.SegmentSize)
+	dateToCrashesGroupMap := map[int64]types.CrashStats{}
+	for _, segments := range timeSegments {
+		dateToCrashesGroupMap[segments.Unix()] = *new(types.CrashStats)
+	}
 
-	//map to time segment
-	var closestTime int64
-	idx := 0
-	for _, crashData := range crashes {
-		closestTime, idx = findClosestTime(crashData.OccuredAt.Unix(), idx)
-		crashStats := dateToCrashesGroupMap[closestTime]
-		if crashData.CollisionSeverity != nil && *crashData.CollisionSeverity == dtypes.Severe {
+	for _, crashData := range stats {
+		crashStats := dateToCrashesGroupMap[crashData.TimeSegment.Unix()]
+		if crashData.CollisionSeverity == dTypes.Severe {
 			crashStats.NumberSeverelyInjured += crashData.NumberInjured
 		}
 		crashStats.NumberInjured += crashData.NumberInjured
 		crashStats.NumberKilled += crashData.NumberKilled
-		if crashData.CrashClassification != nil {
-			if *crashData.CrashClassification == dtypes.VehiclesOnly {
-				crashStats.NumberOfVehicleOnlyCrashes += 1
+		if crashData.DphGroup != nil {
+			if *crashData.DphGroup == dTypes.VehiclesOnly {
+				crashStats.NumberOfVehicleOnlyCrashes += crashData.NumberOfCrashes
 			}
-			if *crashData.CrashClassification == dtypes.VehicleBicycle {
-				crashStats.NumberOfVehicleBicycleCrashes += 1
+			if *crashData.DphGroup == dTypes.VehicleBicycle {
+				crashStats.NumberOfVehicleBicycleCrashes += crashData.NumberOfCrashes
 			}
-			if *crashData.CrashClassification == dtypes.VehiclePedestrian {
-				crashStats.NumberOfVehiclePedestrianCrashes += 1
+			if *crashData.DphGroup == dTypes.VehiclePedestrian {
+				crashStats.NumberOfVehiclePedestrianCrashes += crashData.NumberOfCrashes
 			}
-			if *crashData.CrashClassification == dtypes.BicyclePedestrian {
-				crashStats.NumberOfBicyclePedestrianCrashes += 1
+			if *crashData.DphGroup == dTypes.BicyclePedestrian {
+				crashStats.NumberOfBicyclePedestrianCrashes += crashData.NumberOfCrashes
 			}
-			if *crashData.CrashClassification == dtypes.BicycleOnly {
-				crashStats.NumberOfBicycleOnlyCrashes += 1
+			if *crashData.DphGroup == dTypes.BicycleOnly {
+				crashStats.NumberOfBicycleOnlyCrashes += crashData.NumberOfCrashes
 			}
 		}
-		crashStats.NumberOfCrashes += 1
-		dateToCrashesGroupMap[closestTime] = crashStats
+		crashStats.NumberOfCrashes += crashData.NumberOfCrashes
+		dateToCrashesGroupMap[crashData.TimeSegment.Unix()] = crashStats
 	}
-
 	return &types.CrashDataForStreets{
 		Data: dateToCrashesGroupMap,
 	}, nil

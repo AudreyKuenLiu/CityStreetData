@@ -7,7 +7,21 @@ import (
 	"time"
 )
 
-func BuildTimeSegmentMap[T any](startTime time.Time, endTime time.Time, timesegment types.TimeSegmentSize) (map[int64]T, func(occuredTime int64, curPos int) (int64, int)) {
+func BuildTimeSegmentArr(startTime time.Time, endTime time.Time, timeSegment types.TimeSegmentSize) []time.Time {
+	timeSlices := []time.Time{}
+	loc, _ := time.LoadLocation("America/Los_Angeles")
+	itTime := startTime.In(loc)
+
+	for itTime.Unix() < endTime.Unix() {
+		timeSlices = append(timeSlices, itTime)
+		years, months, days := timeSegment.SegmentInYearMonthDays()
+		itTime = itTime.AddDate(years, months, days)
+	}
+
+	return timeSlices
+}
+
+func BuildTimeSegmentMap[T any](startTime time.Time, endTime time.Time, timeSegment types.TimeSegmentSize) (map[int64]T, func(occuredTime int64, curPos int) (int64, int)) {
 	dateToCrashesGroupMap := map[int64]T{}
 	timeSlices := []int64{}
 	loc, _ := time.LoadLocation("America/Los_Angeles")
@@ -17,7 +31,7 @@ func BuildTimeSegmentMap[T any](startTime time.Time, endTime time.Time, timesegm
 		unixTime := itTime.Unix()
 		dateToCrashesGroupMap[unixTime] = *new(T)
 		timeSlices = append(timeSlices, unixTime)
-		years, months, days := timesegment.SegmentInYearMonthDays()
+		years, months, days := timeSegment.SegmentInYearMonthDays()
 		itTime = itTime.AddDate(years, months, days)
 	}
 

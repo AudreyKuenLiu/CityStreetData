@@ -106,26 +106,23 @@ func (sfr *SfDataRepository) GetSlowStreets(ctx context.Context, params *types.G
 	return streetFeatureSegments, nil
 }
 
-func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, params *types.GetTrafficForStreetsParams) ([]types.CrashEvents, error) {
-	if params == nil || len(params.CNNs) == 0 {
-		return nil, fmt.Errorf("invalid params, must provide cnns")
-	}
-
-	conn, err := sfr.db.Conn(ctx)
-	if err != nil {
-		sfr.logger.Error("could not establish connection")
-		return nil, err
-	}
-
+func createTempTable(ctx context.Context, conn *sql.Conn, tableName string, columnName string, values []int) error {
 	leftToken := "("
 	rightToken := ")"
-	sqlCnns := utils.ArrayToSqlStringArray(params.CNNs, &leftToken, &rightToken)
-	if _, err := conn.ExecContext(ctx, "CREATE TEMP Table selected_cnns (cnn integer primary key);"); err != nil {
-		return nil, err
+	sqlValues := utils.ArrayToSqlStringArray(values, &leftToken, &rightToken)
+	if _, err := conn.ExecContext(ctx, fmt.Sprintf("CREATE TEMP Table %s (%s integer primary key);", tableName, columnName)); err != nil {
+		return err
 	}
 
-	if _, err := conn.ExecContext(ctx, fmt.Sprintf("INSERT INTO selected_cnns (cnn) VALUES %s", sqlCnns)); err != nil {
-		return nil, err
+	if _, err := conn.ExecContext(ctx, fmt.Sprintf("INSERT INTO %s (%s) VALUES %s", tableName, columnName, sqlValues)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func createTempCnnTable(ctx context.Context, conn *sql.Conn, cnns []int) error {
+	if err := createTempTable(ctx, conn, "selected_cnns", "cnn", cnns); err != nil {
+		return err
 	}
 
 	if _, err := conn.ExecContext(ctx, `INSERT INTO selected_cnns (cnn)
@@ -147,6 +144,118 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 			selected_cnns
 			ON sfsi.cnn = selected_cnns.cnn
 		);`); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (sfr *SfDataRepository) GetTrafficStatsForStreets(ctx context.Context, params *types.GetTrafficStatsForStreetsParams) ([]types.TimeSegmentCrashStats, error) {
+	if params == nil || len(params.CNNs) == 0 {
+		return nil, fmt.Errorf("invalid params, must provide cnns")
+	}
+
+	conn, err := sfr.db.Conn(ctx)
+	if err != nil {
+		sfr.logger.Error("could not establish connection")
+		return nil, err
+	}
+
+	if err = createTempCnnTable(ctx, conn, params.CNNs); err != nil {
+		return nil, err
+	}
+
+	timeSegmentArr := []int{}
+	for _, val := range params.TimeSegments {
+		timeSegmentArr = append(timeSegmentArr, int(val.Unix()))
+	}
+	if err = createTempTable(ctx, conn, "selected_time_segments", "time_segment", timeSegmentArr); err != nil {
+		return nil, err
+	}
+
+	queryString := `
+	WITH time_segments AS (
+	SELECT
+		time_segment,
+		CASE WHEN LEAD(time_segment) OVER (ORDER BY time_segment) is NOT NULL 
+		THEN LEAD(time_segment) OVER (ORDER BY time_segment) 
+		ELSE 9e999 END AS next_time_segment
+	FROM
+		selected_time_segments
+	)
+	SELECT
+		ts.time_segment,
+		collision_severity,
+		collision_type,
+		crash_classification,
+		SUM(number_injured) number_injured,
+		SUM(number_killed) number_killed,
+		COUNT(*) number_of_crashes
+	FROM
+		selected_cnns as sis
+		JOIN
+		(
+		SELECT
+			cnn, 
+			occured_at, 
+			collision_severity, 
+			collision_type, 
+			metadata->>'dph_col_grp' as crash_classification,
+			number_killed, 
+			number_injured
+		FROM sf_events_traffic_crashes
+		) as crashes ON (sis.cnn = crashes.cnn)
+		JOIN
+		time_segments ts ON (crashes.occured_at >= ts.time_segment AND crashes.occured_at < ts.next_time_segment)
+		GROUP BY
+		1,2,3,4`
+
+	row, err := conn.QueryContext(ctx, queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	timeSegementCrashStats := []types.TimeSegmentCrashStats{}
+	for row.Next() {
+		var crashStat = types.TimeSegmentCrashStats{}
+		var timeSegmentInt int64
+		var timeSegmentTime time.Time
+
+		err := row.Scan(
+			&timeSegmentInt,
+			&crashStat.CollisionSeverity,
+			&crashStat.CollisionType,
+			&crashStat.DphGroup,
+			&crashStat.NumberInjured,
+			&crashStat.NumberKilled,
+			&crashStat.NumberOfCrashes,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if timeSegmentInt > 0 {
+			timeSegmentTime = time.Unix(timeSegmentInt, 0)
+			crashStat.TimeSegment = timeSegmentTime
+		}
+
+		timeSegementCrashStats = append(timeSegementCrashStats, crashStat)
+	}
+	return timeSegementCrashStats, nil
+}
+
+func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, params *types.GetTrafficForStreetsParams) ([]types.CrashEvents, error) {
+	if params == nil || len(params.CNNs) == 0 {
+		return nil, fmt.Errorf("invalid params, must provide cnns")
+	}
+
+	conn, err := sfr.db.Conn(ctx)
+	if err != nil {
+		sfr.logger.Error("could not establish connection")
+		return nil, err
+	}
+
+	if err = createTempCnnTable(ctx, conn, params.CNNs); err != nil {
 		return nil, err
 	}
 
