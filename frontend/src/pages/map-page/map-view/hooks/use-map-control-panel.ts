@@ -9,9 +9,12 @@ import { ViewState } from "react-map-gl/maplibre";
 import { DEFAULT_ZOOM } from "../constants";
 import { TerraDrawMapLibreGLAdapter } from "terra-draw-maplibre-gl-adapter";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
-import { useActions } from "../../store/street-map-data-form";
+import { useActions, useCnns } from "../../store/street-map-data-form";
 import { PolygonSelectHandler } from "../../../../models/map-models/polygon-select-handler";
-import { StreetSearchTrees } from "../../../../models/map-models/street-search-tree";
+import {
+  StreetSearchTrees,
+  StreetSegmentRBush,
+} from "../../../../models/map-models/street-search-tree";
 
 export enum MapControl {
   PointerSelect,
@@ -59,7 +62,9 @@ export const useMapControlPanel = ({
 }): UseMapControlPanelReturn => {
   const [mapControl, setMapControl] = useState(MapControl.PointerSelect);
   const [hoverInfo, setHoverInfo] = useState<{ cnn: string } | null>(null);
-  const { addStreet, removeStreet, toggleStreet } = useActions();
+  const selectedCnns = useCnns();
+  const { addStreet, removeStreet, toggleStreet, bulkAddStreets } =
+    useActions();
   const [viewState, setViewState] = useState<ViewState>({
     longitude: centerLatLon[1],
     latitude: centerLatLon[0],
@@ -176,6 +181,7 @@ export const useMapControlPanel = ({
     });
     const polygonSelectHandler = new PolygonSelectHandler({
       streetSearchTrees,
+      selectedStreets: new StreetSegmentRBush().load(selectedCnns),
     });
 
     const polygonDrawMode = new TerraDrawPolygonMode({
@@ -201,10 +207,7 @@ export const useMapControlPanel = ({
       const selectedStreets = polygonSelectHandler.onFinish({
         zoomLevel: zoom.current,
       });
-      for (const street of selectedStreets) {
-        //I should look into a bulk add action
-        addStreet(street);
-      }
+      bulkAddStreets(selectedStreets);
       terraDraw?.clear();
     });
 
@@ -221,7 +224,14 @@ export const useMapControlPanel = ({
         terraDraw?.stop();
       }
     };
-  }, [mapControl, panelRef, mapRef, streetSearchTrees, addStreet]);
+  }, [
+    mapControl,
+    panelRef,
+    mapRef,
+    streetSearchTrees,
+    bulkAddStreets,
+    selectedCnns,
+  ]);
 
   return {
     onClick: (event: MapLayerMouseEvent): void => {

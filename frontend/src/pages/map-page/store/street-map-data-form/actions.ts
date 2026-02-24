@@ -205,6 +205,28 @@ export const actions = ({
     });
     return ret;
   },
+  bulkAddStreets: (streetSegments: StreetSegment[]): boolean => {
+    let ret = true;
+    setState((state) => {
+      const [streetGroup, isNull] = getCurrentStreetGroup(state);
+      if (isNull === false) {
+        ret = false;
+        return {};
+      }
+      for (const streetSegment of streetSegments) {
+        addStreetToGroup(state, streetGroup, streetSegment);
+      }
+      return {
+        streetGroups: new Map(state.streetGroups),
+        _cnnToGroupId: new Map(state._cnnToGroupId),
+        isReady: isStreetMapFormReady(state, {
+          streetGroups: state.streetGroups,
+        }),
+        isDirty: true,
+      };
+    });
+    return ret;
+  },
   removeStreet: (cnn: number): boolean => {
     let ret = true;
     setState((state) => {

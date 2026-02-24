@@ -2,16 +2,24 @@ import type { Position } from "geojson";
 import type { TerraDrawMouseEvent } from "terra-draw";
 import { ValidateNotSelfIntersecting } from "terra-draw";
 import { bbox, booleanWithin, polygon } from "@turf/turf";
-import { StreetSearchTrees } from "../street-search-tree";
+import { StreetSearchTrees, StreetSegmentRBush } from "../street-search-tree";
 import { StreetSegment, ViewableZoomLevels } from "..";
 
 export class PolygonSelectHandler {
   private polygonLine: Position[];
   private streetSearchTrees: StreetSearchTrees;
+  private selectedStreetTree: StreetSegmentRBush;
 
-  constructor({ streetSearchTrees }: { streetSearchTrees: StreetSearchTrees }) {
+  constructor({
+    streetSearchTrees,
+    selectedStreets,
+  }: {
+    streetSearchTrees: StreetSearchTrees;
+    selectedStreets: StreetSegmentRBush;
+  }) {
     this.polygonLine = [];
     this.streetSearchTrees = streetSearchTrees;
+    this.selectedStreetTree = selectedStreets;
   }
 
   onClickValidator = (event: TerraDrawMouseEvent): boolean => {
@@ -38,9 +46,13 @@ export class PolygonSelectHandler {
     const polygonObj = polygon([[...this.polygonLine, this.polygonLine[0]]]);
     const zoomLevelsInView = ViewableZoomLevels(zoomLevel);
     const [minX, minY, maxX, maxY] = bbox(polygonObj);
-    const streetSegments = [];
+    const streetSegmentMap = new Map<number, StreetSegment>();
+    const searchTrees = [this.selectedStreetTree];
     for (const zoomLevel of zoomLevelsInView) {
-      const searchedSegments = this.streetSearchTrees[zoomLevel].search({
+      searchTrees.push(this.streetSearchTrees[zoomLevel]);
+    }
+    for (const searchTree of searchTrees) {
+      const searchedSegments = searchTree.search({
         minX,
         minY,
         maxX,
@@ -53,11 +65,14 @@ export class PolygonSelectHandler {
         },
       );
       for (const streetSegment of containedStreetSegments) {
-        streetSegments.push(streetSegment);
+        streetSegmentMap.set(streetSegment.cnn, streetSegment);
       }
     }
+
     this.onClear();
-    return streetSegments;
+    return Array.from(streetSegmentMap.entries()).map(([_, segment]) => {
+      return segment;
+    });
   };
 
   onClear = (): void => {

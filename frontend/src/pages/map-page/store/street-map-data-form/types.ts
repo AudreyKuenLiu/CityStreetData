@@ -40,6 +40,7 @@ export type StreetMapFormActions = {
   editGroup: ({ id, name }: { id: GroupId; name: string }) => boolean;
   toggleStreet: (streetSegment: StreetSegment) => boolean;
   addStreet: (StreetSegment: StreetSegment) => boolean;
+  bulkAddStreets: (StreetSegments: StreetSegment[]) => boolean;
   removeStreet: (cnn: number) => boolean;
   setTimeSegment: (timeSegment: TimeSegments) => void;
   setStartDate: (startDate: Date | null) => void;

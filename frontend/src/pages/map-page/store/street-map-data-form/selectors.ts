@@ -47,11 +47,17 @@ export const useIsReady = (): boolean => {
 export const useCnns = (): StreetSegment[] => {
   return useStreetMapDataForm(
     useShallow((state) => {
-      const currentGroup = state.streetGroups.get(state.currentGroupId);
-      if (currentGroup == null) {
-        return [];
+      const streetGroups = Array.from(state.streetGroups.entries()).map(
+        ([_, streetGroups]) => streetGroups,
+      );
+      const cnns: StreetSegment[] = [];
+      for (const streetGroup of streetGroups) {
+        for (const [, streetSegment] of streetGroup.cnns.entries()) {
+          cnns.push(streetSegment);
+        }
       }
-      return Array.from(currentGroup.cnns.values());
+
+      return cnns;
     }),
   );
 };
