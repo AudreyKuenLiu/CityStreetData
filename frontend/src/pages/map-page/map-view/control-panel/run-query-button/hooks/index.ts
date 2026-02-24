@@ -5,6 +5,7 @@ import { useCrashDataForStreets } from "./use-crash-data-for-streets";
 import { useCrashEventsForStreets } from "./use-crash-events-for-streets";
 import { useIsReady } from "../../../../store/street-map-data-form";
 import { useDataViewContext } from "../../../../context/data-view";
+import { useCrashTrendsForStreets } from "./use-crash-trends-for-streets";
 
 export const useDataViewQuery = (): UseDataViewQueryProps => {
   const {
@@ -18,6 +19,8 @@ export const useDataViewQuery = (): UseDataViewQueryProps => {
     useCrashDataForStreets();
   const { getData: getCrashEvents, isLoading: isCrashEventsLoading } =
     useCrashEventsForStreets();
+  const { getData: getCrashTrends, isLoading: isCrashTrendsLoading } =
+    useCrashTrendsForStreets();
 
   const getData = async (selectedDataView?: DataView): Promise<void> => {
     const dataView = selectedDataView ?? currentDataView;
@@ -30,12 +33,18 @@ export const useDataViewQuery = (): UseDataViewQueryProps => {
     if (dataView === DataViewEnum.HeatmapView) {
       getCrashEvents();
     }
+    if (dataView === DataViewEnum.TrendView) {
+      getCrashTrends();
+    }
     return;
   };
 
   let isLoading: boolean = isGetCrashesLoading;
   if (currentDataView === DataViewEnum.HeatmapView) {
     isLoading = isCrashEventsLoading;
+  }
+  if (currentDataView === DataViewEnum.TrendView) {
+    isLoading = isCrashTrendsLoading;
   }
   if (isLoading !== isCurrentApiLoading) {
     setIsLoading(isLoading);

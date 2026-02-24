@@ -11,11 +11,6 @@ export type GraphGroupFeatures = Map<
   readonly [Date, Map<StreetFeature, string>][]
 >;
 
-export type LineData = {
-  x: Date;
-  y: number;
-};
-
 export type GraphDataActions = {
   setGraphData: (data: GraphGroupData) => void;
   toggleNormalize: () => void;
@@ -30,16 +25,5 @@ export type GraphData = {
   currentGraphType: GraphType;
   actions: GraphDataActions;
 };
-
-export type GroupLineData<T extends string[]> = {
-  id: GroupId;
-  tickValues: Date[];
-  data: readonly {
-    readonly id: T[number];
-    readonly data: LineData[];
-    readonly color: string;
-  }[];
-  axisLegend: string;
-}[];
 
 export type GraphDataState = Omit<GraphData, "actions">;

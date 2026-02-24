@@ -22,7 +22,7 @@ const DataViewConfig = {
   },
   [DataViewEnum.HeatmapView]: {
     icon: <HeatMapOutlined />,
-    label: "Heatmap",
+    label: "Heat Map",
   },
   [DataViewEnum.TrendView]: {
     icon: <LineChartOutlined />,
@@ -43,7 +43,7 @@ const viewOptions = [
     label: (
       <Space size="small">
         <HeatMapOutlined />
-        Heatmap
+        Heat Map
       </Space>
     ),
     key: DataViewEnum.HeatmapView,

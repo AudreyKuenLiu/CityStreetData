@@ -13,15 +13,16 @@ export const classCodeSchema = z.object({
 export const ClassCodeEnum = classCodeSchema.shape;
 export type ClassCode = (typeof ClassCodeEnum)[keyof typeof ClassCodeEnum];
 
-export const CollisionSeveritySchema = z.object({
+export const collisionSeveritySchema = z.object({
   Fatal: "fatal",
   OtherVisible: "other_visible",
   ComplaintOfPain: "complaint_of_pain",
   Medical: "medical",
   Severe: "severe",
 } as const);
-export const CollisionSeverityEnum = CollisionSeveritySchema.shape;
-export type CollisionSeverity = z.infer<typeof CollisionSeveritySchema>;
+export const CollisionSeverityEnum = collisionSeveritySchema.shape;
+export type CollisionSeverity =
+  (typeof CollisionSeverityEnum)[keyof typeof CollisionSeverityEnum];
 
 export const collisionTypeSchema = z.literal([
   "other",
@@ -34,7 +35,7 @@ export const collisionTypeSchema = z.literal([
   "not_stated",
   "head_on",
 ]);
-export type collisionType = z.infer<typeof collisionTypeSchema>;
+export type CollisionType = z.infer<typeof collisionTypeSchema>;
 
 export const crashClassificationSchema = z.object({
   BicycleOnly: "FF",
@@ -62,7 +63,7 @@ export type ApiCrashEvents = {
   cnn: number;
   occured_at: number;
   crash_classification: CrashClassification;
-  collision_severity: string | null;
+  collision_severity: CollisionSeverity;
   collision_type: string | null;
   number_killed: number;
   number_injured: number;

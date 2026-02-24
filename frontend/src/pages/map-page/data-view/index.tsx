@@ -9,7 +9,7 @@ import { useStreetGroupsRef } from "../store/street-map-data-form";
 import { useDataViewContext } from "../context/data-view";
 import { DataViewEnum } from "../context/data-view/types";
 import { HeatmapView } from "./heatmap-view/heatmap-view";
-import { TrendChartList } from "./trend-chart-list";
+import { TrendChartList } from "./trend-chart-list/trend-chart-list";
 
 const useHasNoData = (): boolean => {
   // const trafficCrashData = useTrafficCrashesData();

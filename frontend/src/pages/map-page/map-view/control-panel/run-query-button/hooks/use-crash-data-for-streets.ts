@@ -123,6 +123,7 @@ export const useCrashDataForStreets = (): UseDataViewControllerProps => {
 
   useEffect(() => {
     if (result.isSuccess) {
+      console.log("setting graph data");
       setGraphData(groupCrashes);
     }
   }, [result.isSuccess, groupCrashes, setGraphData]);

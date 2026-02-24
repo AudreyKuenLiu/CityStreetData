@@ -36,6 +36,7 @@ func NewSFDataRepository(logger *slog.Logger) (*SfDataRepository, error) {
 		return nil, err
 	}
 	db.Exec("SELECT SetDecimalPrecision(15);")
+	db.Exec("PRAGMA journal_mode = WAL;")
 
 	return &SfDataRepository{
 		logger: logger,
@@ -116,48 +117,41 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 		return nil, err
 	}
 
+	leftToken := "("
+	rightToken := ")"
+	sqlCnns := utils.ArrayToSqlStringArray(params.CNNs, &leftToken, &rightToken)
+	if _, err := conn.ExecContext(ctx, "CREATE TEMP Table selected_cnns (cnn integer primary key);"); err != nil {
+		return nil, err
+	}
+
+	if _, err := conn.ExecContext(ctx, fmt.Sprintf("INSERT INTO selected_cnns (cnn) VALUES %s", sqlCnns)); err != nil {
+		return nil, err
+	}
+
+	if _, err := conn.ExecContext(ctx, `INSERT INTO selected_cnns (cnn)
+	SELECT cnns
+	FROM
+		(select
+			DISTINCT(f_node_cnn) as cnns
+		FROM
+			sf_streets_and_intersections sfsi
+			JOIN
+			selected_cnns
+			ON sfsi.cnn = selected_cnns.cnn
+		UNION
+		select
+			DISTINCT(t_node_cnn) as cnns
+		FROM
+			sf_streets_and_intersections sfsi
+			JOIN
+			selected_cnns
+			ON sfsi.cnn = selected_cnns.cnn
+		);`); err != nil {
+		return nil, err
+	}
+
 	queryString := fmt.Sprintf(
 		`
-		WITH selected_streets AS (
-			SELECT
-				cnn, f_node_cnn, t_node_cnn
-			FROM
-				sf_streets_and_intersections
-			WHERE
-				cnn IN (%s)
-		),
-		unique_intersections AS (
-			SELECT
-				intersection_cnn as cnn
-			FROM (
-				SELECT
-					DISTINCT(f_node_cnn) as intersection_cnn
-				FROM
-					selected_streets
-				UNION
-				SELECT
-					DISTINCT(t_node_cnn) as intersection_cnn
-				FROM
-					selected_streets
-			)
-		),
-		unique_streets AS (
-			SELECT
-				DISTINCT(cnn) as cnn
-			FROM
-				selected_streets
-		),
-		selected_intersections_and_streets AS (
-			SELECT
-				*
-			FROM
-			(
-				SELECT * from unique_intersections
-				UNION
-				SELECT * from unique_streets
-			)
-			ORDER BY 1
-		)
 		SELECT
 			sis.cnn,
 			crashes.occured_at,
@@ -168,20 +162,15 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 			crashes.crash_classification,
 			ST_AsBinary(crashes.point) as point
 		FROM
-			(
-				SELECT
-					*
-				FROM
-				selected_intersections_and_streets
-			) as sis
+			selected_cnns as sis
 			JOIN
 			(
 				SELECT
-					cnn, 
-					occured_at, 
-					collision_severity, 
-					collision_type, 
-					number_killed, 
+					cnn,
+					occured_at,
+					collision_severity,
+					collision_type,
+					number_killed,
 					number_injured,
 					metadata->>'dph_col_grp' as crash_classification,
 					MakePoint(metadata->>'tb_longitude', metadata->>'tb_latitude', 4326) as point
@@ -191,7 +180,6 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 			) as crashes ON (sis.cnn = crashes.cnn)
 		ORDER BY crashes.occured_at
 	`,
-		utils.ArrayToSqlStringArray(params.CNNs, nil),
 		params.StartTime.Unix(),
 		params.EndTime.Unix(),
 	)
@@ -203,6 +191,7 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 	defer row.Close()
 
 	crashesArr := []types.CrashEvents{}
+	//TODO: scanning a lot of rows is slow to optimize we need to change these queries
 	for row.Next() {
 		var crashEvent = types.CrashEvents{}
 		var occuredAtInt int64

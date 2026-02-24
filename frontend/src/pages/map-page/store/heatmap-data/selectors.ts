@@ -60,54 +60,43 @@ export const useHeatmapFilter = (): HeatmapFilter => {
   return useHeatmapData(useShallow((state) => state.heatmapFilter));
 };
 
+const heatmapFilterToCrashClassification = {
+  [HeatmapFilterEnum.BicycleInvolvedCrashes]: [
+    CrashClassificationEnum.BicycleOnly,
+    CrashClassificationEnum.BicycleParkedCar,
+    CrashClassificationEnum.BicyclePedestrian,
+    CrashClassificationEnum.VehicleBicyclePedestrian,
+    CrashClassificationEnum.BicycleUnknown,
+    CrashClassificationEnum.VehicleBicycle,
+  ],
+  [HeatmapFilterEnum.PedestrianInvolvedCrashes]: [
+    CrashClassificationEnum.PedestrianOnly,
+    CrashClassificationEnum.BicyclePedestrian,
+    CrashClassificationEnum.VehicleBicyclePedestrian,
+    CrashClassificationEnum.VehiclePedestrian,
+  ],
+  [HeatmapFilterEnum.VehicleInvolvedCrashes]: [
+    CrashClassificationEnum.VehiclesOnly,
+    CrashClassificationEnum.VehicleBicycle,
+    CrashClassificationEnum.VehicleBicyclePedestrian,
+    CrashClassificationEnum.VehiclePedestrian,
+  ],
+} as const;
+
 export const useHeatmapLayerProps = (): LayerProps => {
   const heatmapFilter = useHeatmapData(
     useShallow((state) => state.heatmapFilter),
   );
   let filter: FilterSpecification = [">=", ["get", "occured_at"], 0];
-  if (heatmapFilter === HeatmapFilterEnum.BicycleInvolvedCrashes) {
+  if (
+    heatmapFilter === HeatmapFilterEnum.BicycleInvolvedCrashes ||
+    heatmapFilter === HeatmapFilterEnum.PedestrianInvolvedCrashes ||
+    heatmapFilter === HeatmapFilterEnum.VehicleInvolvedCrashes
+  ) {
     filter = [
       "in",
       ["get", "crash_classification"],
-      [
-        "literal",
-        [
-          CrashClassificationEnum.BicycleOnly,
-          CrashClassificationEnum.BicycleParkedCar,
-          CrashClassificationEnum.BicyclePedestrian,
-          CrashClassificationEnum.VehicleBicyclePedestrian,
-          CrashClassificationEnum.BicycleUnknown,
-          CrashClassificationEnum.VehicleBicycle,
-        ],
-      ],
-    ];
-  } else if (heatmapFilter === HeatmapFilterEnum.PedestrianInvolvedCrashes) {
-    filter = [
-      "in",
-      ["get", "crash_classification"],
-      [
-        "literal",
-        [
-          CrashClassificationEnum.PedestrianOnly,
-          CrashClassificationEnum.BicyclePedestrian,
-          CrashClassificationEnum.VehicleBicyclePedestrian,
-          CrashClassificationEnum.VehiclePedestrian,
-        ],
-      ],
-    ];
-  } else if (heatmapFilter === HeatmapFilterEnum.VehicleInvolvedCrashes) {
-    filter = [
-      "in",
-      ["get", "crash_classification"],
-      [
-        "literal",
-        [
-          CrashClassificationEnum.VehiclesOnly,
-          CrashClassificationEnum.VehicleBicycle,
-          CrashClassificationEnum.VehicleBicyclePedestrian,
-          CrashClassificationEnum.VehiclePedestrian,
-        ],
-      ],
+      ["literal", heatmapFilterToCrashClassification[heatmapFilter]],
     ];
   } else if (heatmapFilter === HeatmapFilterEnum.SevereInjuries) {
     filter = [

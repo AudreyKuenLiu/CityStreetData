@@ -6,9 +6,9 @@ import {
   GraphGroupData,
   GraphDataActions,
   GraphType,
-  GroupLineData,
 } from "./types";
 import { actions } from "./actions";
+import { GroupLineData } from "../../types/graphs";
 
 const useGraphData = create<GraphData>()(
   devtools(
@@ -18,7 +18,7 @@ const useGraphData = create<GraphData>()(
       currentGraphType: "InjuriesAndFatalities",
       actions: actions({ setState: set }),
     }),
-    { name: "GraphData" },
+    { name: "AreaChartData" },
   ),
 );
 
@@ -154,7 +154,7 @@ const initializeVehicleCrashesData = (
         id,
         tickValues,
         totalMiles,
-        data: combinedData,
+        lineSeries: combinedData,
         axisLegend: shouldNormalize
           ? "Traffic Crashes per Mile"
           : "Traffic Crashes",
@@ -218,7 +218,7 @@ const initializeTrafficInjuriesAndFatalitiesData = (
         id,
         tickValues,
         totalMiles,
-        data: combinedData,
+        lineSeries: combinedData,
         axisLegend: shouldNormalize
           ? "Traffic Injuries and Fatalities per Mile"
           : "Traffic Injuries and Fatalities",

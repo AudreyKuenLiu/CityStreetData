@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { UseDataViewControllerProps } from "./types";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
@@ -10,31 +10,28 @@ import {
   useTimeSegment,
 } from "../../../../store/street-map-data-form";
 import { CrashEventFeatureCollection } from "../../../../../../models/api-models";
-import { useActions as useHeatmapDataActions } from "../../../../store/heatmap-data";
-import type { HeatmapGroupData } from "../../../../store/heatmap-data";
+import type { GroupTrendData } from "../../../../store/trend-chart-list-data";
+import { useActions as useTrendChartListActions } from "../../../../store/trend-chart-list-data";
 
-export const useCrashEventsForStreets = (): UseDataViewControllerProps => {
+export const useCrashTrendsForStreets = (): UseDataViewControllerProps => {
   const streetGroups = useStreetGroupsRef();
   const startTime = useStartDate();
   const endTime = useEndDate();
   const timeSegment = useTimeSegment();
   const { resetIsDirty } = useActions();
-  const { setHeatmapData } = useHeatmapDataActions();
+  const { setGraphData } = useTrendChartListActions();
 
   const result = useQuery({
     queryKey: [
-      "crashEventsForStreets",
+      "crashTrendsForStreets",
+      startTime,
+      endTime,
+      streetGroups,
       timeSegment,
-      startTime?.toISOString(),
-      endTime?.toISOString(),
-      JSON.stringify(streetGroups),
     ],
     enabled: false,
-    gcTime: Infinity,
-    staleTime: Infinity,
-    queryFn: async (): Promise<{
-      crashEvents: HeatmapGroupData;
-    }> => {
+    gcTime: 0,
+    queryFn: async (): Promise<GroupTrendData> => {
       const allResults = Array.from(streetGroups.values()).map(
         async (streetGroup) => {
           const cnns = Array.from(streetGroup.cnns.keys());
@@ -54,7 +51,6 @@ export const useCrashEventsForStreets = (): UseDataViewControllerProps => {
               timeSegment: timeSegment,
             },
           });
-
           const crashEvents = Array.from(
             Object.entries(response.data.data),
           ).map(([unixTimestampSeconds, crashEvent]) => {
@@ -65,44 +61,54 @@ export const useCrashEventsForStreets = (): UseDataViewControllerProps => {
           return {
             id: streetGroup.id,
             data: crashEvents,
-          };
+          } as const;
         },
       );
 
       const responses = await Promise.all(allResults);
-      const graphDataMap: HeatmapGroupData = new Map();
+      const groupTrendData: GroupTrendData = new Map();
 
       for (const res of responses) {
         const { id, data } = res;
-        graphDataMap.set(id, data ?? []);
+        const dataArr = data?.map(([date, crashEventFeatureCollection]) => {
+          return {
+            timeSegment: date,
+            crashStats: crashEventFeatureCollection.features.map((feature) => {
+              return {
+                crashClassification: feature.properties.crash_classification,
+                collisionSeverity: feature.properties.collision_severity,
+                numberInjured: feature.properties.number_injured,
+                numberKilled: feature.properties.number_killed,
+                occuredAt: new Date(+feature.properties.occured_at * 1000),
+              };
+            }),
+          };
+        });
+        groupTrendData.set(id, dataArr ?? []);
       }
 
-      return { crashEvents: graphDataMap };
+      return groupTrendData;
     },
   });
 
-  const getCrashEvents = async (): Promise<void> => {
+  const getCrashTrends = async (): Promise<void> => {
     await result.refetch();
     resetIsDirty();
   };
 
-  const groupCrashes = useMemo(() => {
+  const groupCrashTrends = useMemo(() => {
     const data = result.data;
-    const newMap: HeatmapGroupData = new Map();
-    return data?.crashEvents ?? newMap;
+    return data ?? new Map();
   }, [result.data]);
 
   useEffect(() => {
     if (result.isSuccess) {
-      console.log("setting heatmap data");
-      setHeatmapData({
-        data: groupCrashes,
-      });
+      setGraphData(groupCrashTrends);
     }
-  }, [result.isSuccess, setHeatmapData, groupCrashes]);
+  }, [result.isSuccess, groupCrashTrends, setGraphData]);
 
   return {
-    getData: getCrashEvents,
+    getData: getCrashTrends,
     isLoading: result.isLoading,
   };
 };
