@@ -30,7 +30,7 @@ export const actions = ({
         heatmapGroupTimeSegments: initHeatmapGroupTimeSegments({
           data,
         }),
-        featureCollectionsIndex: 0, //todo we need to reset this index better
+        featureCollectionsIndex: 0, //TODO we need to reset this index better
       };
     });
   },
