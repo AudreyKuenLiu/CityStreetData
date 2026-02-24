@@ -202,6 +202,7 @@ export const useMapControlPanel = ({
         zoomLevel: zoom.current,
       });
       for (const street of selectedStreets) {
+        //I should look into a bulk add action
         addStreet(street);
       }
       terraDraw?.clear();

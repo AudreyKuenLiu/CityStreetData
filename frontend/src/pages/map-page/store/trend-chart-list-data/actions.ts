@@ -11,4 +11,11 @@ export const actions = ({
       };
     });
   },
+  setCurrentTimeTrend: (timeTrend): void => {
+    setState(() => {
+      return {
+        currentTimeTrend: timeTrend,
+      };
+    });
+  },
 });

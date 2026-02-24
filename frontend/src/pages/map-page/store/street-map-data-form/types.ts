@@ -6,6 +6,11 @@ export enum TimeSegments {
   ThreeMonths = "3M",
   OneYear = "1Y",
 }
+export const TimeSegmentsToName = {
+  [TimeSegments.OneMonth]: "Month",
+  [TimeSegments.ThreeMonths]: "Three Months",
+  [TimeSegments.OneYear]: "Year",
+};
 
 export type GroupId = Brand<string, "GroupId">;
 export const emptyGroupId = "00000000-0000-0000-0000-000000000000" as GroupId;

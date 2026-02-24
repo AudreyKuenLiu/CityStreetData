@@ -12,6 +12,7 @@ import {
   convertToGroupId,
 } from "../../store/street-map-data-form";
 import { RunQueryButton } from "./run-query-button";
+import { useDataViewContext } from "../../context/data-view";
 
 export const ControlPanel = memo(
   ({ onRunQuery }: { onRunQuery: () => void }): React.JSX.Element => {
@@ -24,10 +25,9 @@ export const ControlPanel = memo(
       setStartDate,
       setTimeSegment,
     } = useActions();
+    const { setSelectedTimeSegment } = useDataViewContext();
     const currentStreetGroup = useCurrentStreetGroup();
     const streetGroups = useStreetGroupsRef();
-    // const isDirty = useIsDirty();
-    // const [validRun, setValidRun] = useState(false);
     const timeSegment = useTimeSegment();
     const groups = Array.from(streetGroups.values()).map((streetGroup) => {
       return {
@@ -128,7 +128,14 @@ export const ControlPanel = memo(
             setEndDate(value[1].toDate());
           }}
         />
-        <RunQueryButton onClick={onRunQuery} />
+        <RunQueryButton
+          onClick={() => {
+            if (timeSegment != null) {
+              setSelectedTimeSegment(timeSegment);
+            }
+            onRunQuery();
+          }}
+        />
       </Flex>
     );
   },

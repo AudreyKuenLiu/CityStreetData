@@ -3,7 +3,13 @@ import { useStreetGroupsRef } from "../../store/street-map-data-form";
 import { Flex, Typography } from "antd";
 import { XFilled } from "@ant-design/icons";
 import { useCrashTrendData } from "../../store/trend-chart-list-data";
-import { ResponsiveLine } from "@nivo/line";
+import {
+  PointTooltipComponent,
+  PointTooltipProps,
+  ResponsiveLine,
+} from "@nivo/line";
+import { ControlPanel } from "./control-panel";
+import { AverageLineSeriesId } from "../../store/trend-chart-list-data/types";
 
 export const TrendChartList = (): React.JSX.Element => {
   const streetGroups = useStreetGroupsRef();
@@ -20,6 +26,7 @@ export const TrendChartList = (): React.JSX.Element => {
         padding: "16px",
       }}
     >
+      <ControlPanel />
       {crashTrendData.map(({ id, tickValues, lineSeries, axisLegend }) => {
         const streetGroup = streetGroups.get(id);
         if (streetGroup == null) {
@@ -88,7 +95,7 @@ export const TrendChartList = (): React.JSX.Element => {
                 areaOpacity={1}
                 enablePointLabel={true}
                 pointLabel={(label) => {
-                  if (label.id.includes("AvgLineSeries")) {
+                  if (label.id.includes(AverageLineSeriesId)) {
                     return label.data.yFormatted;
                   }
                   return "";
@@ -122,11 +129,60 @@ export const TrendChartList = (): React.JSX.Element => {
                 //enableTouchCrosshair
                 useMesh={true}
                 margin={{ bottom: 40, left: 80, top: 50, right: 40 }}
+                tooltip={TrendTooltip}
               />
             </div>
           </Flex>
         );
       })}
     </Flex>
+  );
+};
+
+const TrendTooltip = ({
+  point,
+}: PointTooltipProps<{
+  readonly id: string;
+  readonly data: {
+    x: string;
+    y: number;
+  }[];
+  readonly color: string;
+}>): React.JSX.Element => {
+  return (
+    <div
+      style={{
+        background: "white",
+        padding: "14px",
+        width: "200px",
+        border: "1px solid #ccc",
+        //transform: "translate(115px, -100px)",
+        borderRadius: 5,
+      }}
+    >
+      <Flex gap={"middle"} style={{ alignItems: "center" }}>
+        <XFilled
+          style={{
+            fontSize: "24px",
+            color: point.seriesColor,
+          }}
+        />
+        <Typography.Title level={4} style={{ margin: 0 }}>
+          {point.id.split(".")[0]}
+        </Typography.Title>
+      </Flex>
+      <Flex
+        key={point.id}
+        style={{
+          justifyContent: "space-between",
+          padding: "3px 0",
+        }}
+      >
+        <Flex style={{ alignItems: "center", gap: "0.3em" }}>
+          <Typography.Text strong>{point.x}</Typography.Text>
+        </Flex>
+        <Typography.Text>{point.data.yFormatted}</Typography.Text>
+      </Flex>
+    </div>
   );
 };

@@ -10,6 +10,8 @@ export enum TimeTrends {
   MONTHLY, //Jan - Dec
 }
 
+export const AverageLineSeriesId = "Average";
+
 type DateCrashStats = {
   crashClassification: CrashClassification;
   collisionSeverity: CollisionSeverity;
@@ -23,10 +25,11 @@ export type GroupTrendData = Map<
   { timeSegment: Date; crashStats: DateCrashStats[] }[]
 >;
 export type TrendListData = {
-  currentTimeTrend: TimeTrends | null;
+  currentTimeTrend: TimeTrends;
   groupTrendData: GroupTrendData;
   actions: TrendListActions;
 };
 export type TrendListActions = {
   setGraphData: (data: GroupTrendData) => void;
+  setCurrentTimeTrend: (timeTrend: TimeTrends) => void;
 };

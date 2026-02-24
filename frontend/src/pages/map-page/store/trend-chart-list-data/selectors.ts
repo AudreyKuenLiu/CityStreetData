@@ -5,22 +5,31 @@ import {
   GroupTrendData,
   TimeTrends,
   TrendListActions,
+  AverageLineSeriesId,
 } from "./types";
 import { actions } from "./actions";
 import { GroupLineData } from "../../types/graphs";
 import { useShallow } from "zustand/shallow";
-import { getRandomColor } from "../../../../utils";
+import { useDataViewContext } from "../../context/data-view";
+import { TimeSegments } from "../street-map-data-form";
+import { TimeSegmentsToName } from "../street-map-data-form/types";
 
 const useTrendChartListData = create<TrendListData>()(
   devtools(
     (set) => ({
-      currentTimeTrend: null,
+      currentTimeTrend: TimeTrends.HOURLY,
       groupTrendData: new Map(),
       actions: actions({ setState: set }),
     }),
     { name: "TrendListData" },
   ),
 );
+
+const timeTrendsToName = {
+  [TimeTrends.HOURLY]: "Hourly",
+  [TimeTrends.DAILY]: "Daily",
+  [TimeTrends.MONTHLY]: "Monthly",
+};
 
 const timeTrendsToAxis = {
   [TimeTrends.HOURLY]: [
@@ -69,9 +78,11 @@ const timeTrendsToAxis = {
 const initializeTrendDateByTimePeriod = ({
   groupTrendData,
   timeTrends,
+  selectedTimeSegment,
 }: {
   groupTrendData: GroupTrendData;
   timeTrends: TimeTrends;
+  selectedTimeSegment: TimeSegments | null;
 }): GroupLineData<string, string> => {
   const ret = Array.from(groupTrendData.entries()).map(
     ([groupId, dateCrashStats]) => {
@@ -110,11 +121,11 @@ const initializeTrendDateByTimePeriod = ({
               };
             },
           ),
-          color: "#D3D3D3", //getRandomColor(),
+          color: "#D3D3D3",
         };
       });
       const averageLineSeries = {
-        id: "AvgLineSeries",
+        id: AverageLineSeriesId,
         data: Array.from(timeTrendsToAxis[timeTrends]).map(
           (timeTrendSegment) => {
             return {
@@ -142,7 +153,7 @@ const initializeTrendDateByTimePeriod = ({
         id: groupId,
         tickValues: Array.from(timeTrendsToAxis[timeTrends]),
         lineSeries,
-        axisLegend: "",
+        axisLegend: `${timeTrendsToName[timeTrends]} Traffic Injuries Every ${TimeSegmentsToName[selectedTimeSegment ?? TimeSegments.OneYear]}`,
       } as const;
     },
   );
@@ -150,6 +161,7 @@ const initializeTrendDateByTimePeriod = ({
 };
 
 export const useCrashTrendData = (): GroupLineData<string, string> => {
+  const { selectedTimeSegment } = useDataViewContext();
   const groupTrendData = useTrendChartListData(
     useShallow((state) => state.groupTrendData),
   );
@@ -159,7 +171,12 @@ export const useCrashTrendData = (): GroupLineData<string, string> => {
   return initializeTrendDateByTimePeriod({
     groupTrendData,
     timeTrends: timeTrends ?? TimeTrends.DAILY,
+    selectedTimeSegment,
   });
+};
+
+export const useCurrentTimeTrend = (): TimeTrends => {
+  return useTrendChartListData(useShallow((state) => state.currentTimeTrend));
 };
 
 export const useActions = (): TrendListActions => {

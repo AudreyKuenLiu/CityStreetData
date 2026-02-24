@@ -4,9 +4,10 @@ import { Flex, Typography } from "antd";
 import { useStreetGroupsRef } from "../../store/street-map-data-form";
 import { useTrafficCrashesData } from "../../store/area-chart-list-data";
 import { XFilled } from "@ant-design/icons";
-import { SliceTooltip } from "../slice-tooltip";
+import type { SliceTooltipProps } from "@nivo/line";
 
 export const AreaChartList = (): React.JSX.Element => {
+  //TODO: optimize the rendering of this component to handle large number of values instead of just rendering every possible value
   const streetGroups = useStreetGroupsRef();
   const trafficCrashGroupData = useTrafficCrashesData();
 
@@ -130,5 +131,62 @@ export const AreaChartList = (): React.JSX.Element => {
         },
       )}
     </Flex>
+  );
+};
+
+type sliceData = {
+  id: string;
+  color: string;
+  data: {
+    x: Date;
+    y: number;
+  }[];
+};
+
+export const SliceTooltip = ({
+  slice,
+}: SliceTooltipProps<sliceData>): React.JSX.Element => {
+  return (
+    <div
+      style={{
+        background: "white",
+        padding: "14px",
+        width: "200px",
+        border: "1px solid #ccc",
+        transform: "translate(115px, -100px)",
+        borderRadius: 5,
+      }}
+    >
+      <Typography.Title level={4} style={{ marginTop: 0 }}>
+        {slice.points[0].data.x.toDateString()}
+      </Typography.Title>
+      <Flex
+        style={{
+          flexDirection: "column",
+        }}
+      >
+        {slice.points.map((point) => (
+          <Flex
+            key={point.id}
+            style={{
+              justifyContent: "space-between",
+              color: point.seriesColor,
+              padding: "3px 0",
+            }}
+          >
+            <Flex style={{ alignItems: "center", gap: "0.3em" }}>
+              <XFilled
+                style={{
+                  fontSize: "12px",
+                  color: point.seriesColor,
+                }}
+              />
+              <Typography.Text strong>{point.seriesId}</Typography.Text>
+            </Flex>
+            <Typography.Text>{point.data.yFormatted}</Typography.Text>
+          </Flex>
+        ))}
+      </Flex>
+    </div>
   );
 };
