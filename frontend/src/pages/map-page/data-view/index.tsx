@@ -1,15 +1,15 @@
-import React from "react";
+import React, { Suspense } from "react";
 
 import { AreaChartList } from "./area-chart-list/area-chart-list";
 import { ControlPanel } from "./area-chart-list/control-panel";
-import { LoadingOutlined } from "@ant-design/icons";
-import { Flex, Typography, Spin } from "antd";
+import { Flex, Typography } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
 import { useStreetGroupsRef } from "../store/street-map-data-form";
 import { useDataViewContext } from "../context/data-view";
 import { DataViewEnum } from "../context/data-view/types";
 import { HeatmapView } from "./heatmap-view/heatmap-view";
 import { TrendChartList } from "./trend-chart-list/trend-chart-list";
+import { LoadingDataView } from "./loading-data-view";
 
 const useHasNoData = (): boolean => {
   // const trafficCrashData = useTrafficCrashesData();
@@ -30,18 +30,7 @@ export const DataView = (): React.JSX.Element => {
   const { isLoading } = useDataViewContext();
   console.log("rerendering data view");
   if (isLoading) {
-    return (
-      <Flex
-        style={{
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
-      </Flex>
-    );
+    return <LoadingDataView />;
   }
 
   if (hasNoData) {
@@ -62,9 +51,11 @@ export const DataView = (): React.JSX.Element => {
     );
   }
   return (
-    <Flex style={{ position: "relative" }}>
-      <DataViewBody />
-    </Flex>
+    <Suspense fallback={<LoadingDataView />}>
+      <Flex style={{ position: "relative" }}>
+        <DataViewBody />
+      </Flex>
+    </Suspense>
   );
 };
 

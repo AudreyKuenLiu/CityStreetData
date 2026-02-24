@@ -10,6 +10,8 @@ import {
   useStreetGroupsRef,
   useTimeSegment,
   convertToGroupId,
+  useStartDate,
+  useEndDate,
 } from "../../store/street-map-data-form";
 import { RunQueryButton } from "./run-query-button";
 import { useDataViewContext } from "../../context/data-view";
@@ -25,7 +27,13 @@ export const ControlPanel = memo(
       setStartDate,
       setTimeSegment,
     } = useActions();
-    const { setSelectedTimeSegment } = useDataViewContext();
+    const {
+      setSelectedTimeSegment,
+      setSelectedStreetGroups,
+      setSelectedStartEndTime,
+    } = useDataViewContext();
+    const startDate = useStartDate();
+    const endDate = useEndDate();
     const currentStreetGroup = useCurrentStreetGroup();
     const streetGroups = useStreetGroupsRef();
     const timeSegment = useTimeSegment();
@@ -133,6 +141,10 @@ export const ControlPanel = memo(
             if (timeSegment != null) {
               setSelectedTimeSegment(timeSegment);
             }
+            if (startDate != null && endDate != null) {
+              setSelectedStartEndTime([startDate, endDate]);
+            }
+            setSelectedStreetGroups(streetGroups);
             onRunQuery();
           }}
         />

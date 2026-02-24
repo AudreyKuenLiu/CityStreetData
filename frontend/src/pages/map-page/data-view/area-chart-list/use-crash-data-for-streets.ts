@@ -1,24 +1,15 @@
 import { useMemo, useEffect } from "react";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import {
-  useActions,
-  useEndDate,
-  useStartDate,
-  useStreetGroupsRef,
-  useTimeSegment,
-} from "../../../../store/street-map-data-form";
-import { CrashStats, StreetFeature } from "../../../../../../models/api-models";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useActions } from "../../store/street-map-data-form";
+import { CrashStats, StreetFeature } from "../../../../models/api-models";
 import {
   useActions as useGraphDataActions,
   GraphGroupData,
-} from "../../../../store/area-chart-list-data";
-import { UseDataViewControllerProps } from "./types";
-import {
-  GroupId,
-  StreetGroup,
-} from "../../../../store/street-map-data-form/types";
+} from "../../store/area-chart-list-data";
+import { GroupId, StreetGroup } from "../../store/street-map-data-form/types";
 import { length } from "@turf/turf";
+import { useDataViewContext } from "../../context/data-view";
 
 const getTotalMiles = (
   streetGroups: Map<GroupId, StreetGroup>,
@@ -38,15 +29,18 @@ const getTotalMiles = (
   );
 };
 
-export const useCrashDataForStreets = (): UseDataViewControllerProps => {
-  const streetGroups = useStreetGroupsRef();
-  const startTime = useStartDate();
-  const endTime = useEndDate();
-  const timeSegment = useTimeSegment();
+export const useCrashDataForStreets = (): void => {
+  const {
+    selectedTimeSegment: timeSegment,
+    selectedStartEndTime,
+    selectedStreetGroups,
+  } = useDataViewContext();
+  const [startTime, endTime] = selectedStartEndTime ?? [undefined, undefined];
+  const streetGroups = selectedStreetGroups ?? new Map();
   const { resetIsDirty } = useActions();
   const { setGraphData } = useGraphDataActions();
 
-  const result = useQuery({
+  const result = useSuspenseQuery({
     queryKey: [
       "crashDataForStreets",
       startTime,
@@ -54,15 +48,19 @@ export const useCrashDataForStreets = (): UseDataViewControllerProps => {
       streetGroups,
       timeSegment,
     ],
-    enabled: false,
-    gcTime: 0,
+    gcTime: Infinity,
     queryFn: async (): Promise<{
       graphData: GraphGroupData;
     }> => {
       const allResults = Array.from(streetGroups.values()).map(
         async (streetGroup) => {
           const cnns = Array.from(streetGroup.cnns.keys());
-          if (cnns.length === 0 || startTime == null || endTime == null) {
+          if (
+            cnns.length === 0 ||
+            startTime == null ||
+            endTime == null ||
+            timeSegment == null
+          ) {
             return {
               id: streetGroup.id,
             };
@@ -111,11 +109,6 @@ export const useCrashDataForStreets = (): UseDataViewControllerProps => {
     },
   });
 
-  const getCrashes = async (): Promise<void> => {
-    await result.refetch();
-    resetIsDirty();
-  };
-
   const groupCrashes = useMemo(() => {
     const data = result.data;
     return data?.graphData ?? new Map();
@@ -125,11 +118,7 @@ export const useCrashDataForStreets = (): UseDataViewControllerProps => {
     if (result.isSuccess) {
       console.log("setting graph data");
       setGraphData(groupCrashes);
+      resetIsDirty();
     }
-  }, [result.isSuccess, groupCrashes, setGraphData]);
-
-  return {
-    getData: getCrashes,
-    isLoading: result.isLoading,
-  };
+  }, [result.isSuccess, groupCrashes, setGraphData, resetIsDirty]);
 };

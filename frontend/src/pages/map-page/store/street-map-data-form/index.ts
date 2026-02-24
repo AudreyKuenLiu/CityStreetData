@@ -1,3 +1,3 @@
 export { TimeSegments, convertToGroupId } from "./types";
-export type { GroupId } from "./types";
+export type { GroupId, StreetGroup } from "./types";
 export * from "./selectors";
