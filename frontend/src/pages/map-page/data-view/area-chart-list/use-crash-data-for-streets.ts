@@ -34,6 +34,7 @@ export const useCrashDataForStreets = (): void => {
     selectedTimeSegment: timeSegment,
     selectedStartEndTime,
     selectedStreetGroups,
+    selectedIsDirtyHash,
   } = useDataViewContext();
   const [startTime, endTime] = selectedStartEndTime ?? [undefined, undefined];
   const streetGroups = selectedStreetGroups ?? new Map();
@@ -47,8 +48,9 @@ export const useCrashDataForStreets = (): void => {
       endTime,
       streetGroups,
       timeSegment,
+      selectedIsDirtyHash,
     ],
-    gcTime: Infinity,
+    gcTime: 0,
     queryFn: async (): Promise<{
       graphData: GraphGroupData;
     }> => {
@@ -65,6 +67,7 @@ export const useCrashDataForStreets = (): void => {
               id: streetGroup.id,
             };
           }
+          console.log("calling again in api");
 
           const response = await axios.get<{
             data: { [key: number]: CrashStats };

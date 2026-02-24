@@ -9,6 +9,8 @@ type StreetGroups = ReturnType<typeof useStreetGroupsRef>;
 
 type DataViewFields = {
   currentDataView: DataView;
+  selectedIsDirtyHash: string | null;
+  setSelectedIsDirtyHash: (isDirtyHash: string) => void;
   setDataView: (dataView: DataView) => void;
   selectedTimeSegment: TimeSegments | null;
   setSelectedTimeSegment: (timeSegment: TimeSegments) => void;
@@ -38,10 +40,15 @@ export const DataViewProvider = ({
   >(null);
   const [selectedStreetGroups, setSelectedStreetGroups] =
     useState<StreetGroups | null>(null);
+  const [selectedIsDirtyHash, setSelectedIsDirtyHash] = useState<string | null>(
+    null,
+  );
 
   return (
     <DataViewContext.Provider
       value={{
+        selectedIsDirtyHash,
+        setSelectedIsDirtyHash,
         currentDataView,
         setDataView,
         selectedTimeSegment,

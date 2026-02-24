@@ -21,7 +21,7 @@ const useStreetMapDataForm = create<StreetMapForm>()(
       startDate: null,
       endDate: null,
       isReady: false,
-      isDirty: false,
+      isDirtyHash: null,
       _cnnToGroupId: new Map<number, string>(), //more of an internal field to keep track of where cnns are do not use in selector
       actions: actions({ setState: set }),
     }),
@@ -39,7 +39,10 @@ export const useEndDate = (): Date | null => {
   return useStreetMapDataForm((state) => state.endDate);
 };
 export const useIsDirty = (): boolean => {
-  return useStreetMapDataForm(useShallow((state) => state.isDirty));
+  return useStreetMapDataForm(useShallow((state) => state.isDirtyHash)) != null;
+};
+export const useIsDirtyHash = (): string | null => {
+  return useStreetMapDataForm(useShallow((state) => state.isDirtyHash));
 };
 export const useIsReady = (): boolean => {
   return useStreetMapDataForm(useShallow((state) => state.isReady));

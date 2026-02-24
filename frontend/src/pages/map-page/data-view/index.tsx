@@ -26,30 +26,30 @@ const useHasNoData = (): boolean => {
 };
 
 export const DataView = (): React.JSX.Element => {
-  const hasNoData = useHasNoData();
+  //const hasNoData = useHasNoData();
   const { isLoading } = useDataViewContext();
   console.log("rerendering data view");
   if (isLoading) {
     return <LoadingDataView />;
   }
 
-  if (hasNoData) {
-    return (
-      <Flex
-        style={{
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <ContainerOutlined style={{ fontSize: "64px", color: "gray" }} />
-        <Typography.Title level={3} type="secondary">
-          No Data
-        </Typography.Title>
-      </Flex>
-    );
-  }
+  // if (hasNoData) {
+  //   return (
+  //     <Flex
+  //       style={{
+  //         flexDirection: "column",
+  //         justifyContent: "center",
+  //         alignItems: "center",
+  //         height: "100vh",
+  //       }}
+  //     >
+  //       <ContainerOutlined style={{ fontSize: "64px", color: "gray" }} />
+  //       <Typography.Title level={3} type="secondary">
+  //         No Data
+  //       </Typography.Title>
+  //     </Flex>
+  //   );
+  // }
   return (
     <Suspense fallback={<LoadingDataView />}>
       <Flex style={{ position: "relative" }}>

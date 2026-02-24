@@ -58,6 +58,6 @@ export type StreetMapForm = {
   endDate: Date | null;
   timeSegment: TimeSegments | null;
   isReady: boolean;
-  isDirty: boolean;
+  isDirtyHash: string | null;
   actions: StreetMapFormActions;
 };

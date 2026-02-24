@@ -7,11 +7,13 @@ import { TimeSegmentLabels, TimeSegmentOptions } from "./constants";
 import {
   useActions,
   useCurrentStreetGroup,
-  useStreetGroupsRef,
+  // useStreetGroupsRef,
   useTimeSegment,
   convertToGroupId,
   useStartDate,
   useEndDate,
+  useStreetGroupsRef,
+  useIsDirtyHash,
 } from "../../store/street-map-data-form";
 import { RunQueryButton } from "./run-query-button";
 import { useDataViewContext } from "../../context/data-view";
@@ -31,12 +33,14 @@ export const ControlPanel = memo(
       setSelectedTimeSegment,
       setSelectedStreetGroups,
       setSelectedStartEndTime,
+      setSelectedIsDirtyHash,
     } = useDataViewContext();
     const startDate = useStartDate();
     const endDate = useEndDate();
     const currentStreetGroup = useCurrentStreetGroup();
     const streetGroups = useStreetGroupsRef();
     const timeSegment = useTimeSegment();
+    const isDirtyHash = useIsDirtyHash();
     const groups = Array.from(streetGroups.values()).map((streetGroup) => {
       return {
         id: streetGroup.id,
@@ -145,6 +149,9 @@ export const ControlPanel = memo(
               setSelectedStartEndTime([startDate, endDate]);
             }
             setSelectedStreetGroups(streetGroups);
+            if (isDirtyHash) {
+              setSelectedIsDirtyHash(isDirtyHash);
+            }
             onRunQuery();
           }}
         />

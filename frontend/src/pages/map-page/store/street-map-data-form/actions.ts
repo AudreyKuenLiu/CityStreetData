@@ -180,7 +180,7 @@ export const actions = ({
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),
-        isDirty: true,
+        isDirtyHash: crypto.randomUUID(),
       };
     });
     return ret;
@@ -200,7 +200,7 @@ export const actions = ({
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),
-        isDirty: true,
+        isDirtyHash: crypto.randomUUID(),
       };
     });
     return ret;
@@ -222,7 +222,7 @@ export const actions = ({
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),
-        isDirty: true,
+        isDirtyHash: crypto.randomUUID(),
       };
     });
     return ret;
@@ -241,7 +241,7 @@ export const actions = ({
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),
-        isDirty: true,
+        isDirtyHash: crypto.randomUUID(),
       };
     });
     return ret;
@@ -253,7 +253,7 @@ export const actions = ({
         isReady: isStreetMapFormReady(state, {
           timeSegment,
         }),
-        isDirty: true,
+        isDirtyHash: crypto.randomUUID(),
       };
     });
   },
@@ -263,7 +263,7 @@ export const actions = ({
       return {
         startDate: newDate,
         isReady: isStreetMapFormReady(state, { startDate: newDate }),
-        isDirty: true,
+        isDirtyHash: crypto.randomUUID(),
       };
     });
   },
@@ -273,14 +273,14 @@ export const actions = ({
       return {
         endDate: newDate,
         isReady: isStreetMapFormReady(state, { endDate: newDate }),
-        isDirty: true,
+        isDirtyHash: crypto.randomUUID(),
       };
     });
   },
   resetIsDirty: (): void => {
     setState(() => {
       return {
-        isDirty: false,
+        isDirtyHash: null,
       };
     });
   },
