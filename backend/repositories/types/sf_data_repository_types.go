@@ -62,13 +62,32 @@ type GetTrafficStatsForStreetsParams struct {
 }
 
 type TimeSegmentCrashStats struct {
-	TimeSegment       time.Time
-	CollisionSeverity types.CollisionSeverity `json:"collision_severity"`
-	CollisionType     types.CollisionType     `json:"collision_type"`
-	DphGroup          *types.DphGroup         `json:"crash_classification"`
-	NumberInjured     int                     `json:"number_injured"`
-	NumberKilled      int                     `json:"number_killed"`
-	NumberOfCrashes   int                     `json:"number_of_crashes"`
+	TimeSegment         time.Time
+	CollisionSeverity   types.CollisionSeverity `json:"collision_severity"`
+	CollisionType       types.CollisionType     `json:"collision_type"`
+	CrashClassification *types.DphGroup         `json:"crash_classification"`
+	NumberInjured       int                     `json:"number_injured"`
+	NumberKilled        int                     `json:"number_killed"`
+	NumberOfCrashes     int                     `json:"number_of_crashes"`
+}
+
+type GetMergedTrafficCrashesForStreetParams struct {
+	CollisionSeverities  *[]types.CollisionSeverity
+	CollisionTypes       *[]types.CollisionType
+	CrashClassifications *[]types.DphGroup
+	StartTime            time.Time
+	EndTime              time.Time
+	CNNs                 []int
+}
+
+type MergedCrashEvents struct {
+	Point               *geometry.Geometry       `json:"-"`
+	CollisionSeverity   *types.CollisionSeverity `json:"collision_severity"`
+	CollisionType       *types.CollisionType     `json:"collision_type"`
+	CrashClassification *types.DphGroup          `json:"crash_classification"`
+	NumberKilled        int                      `json:"number_killed"`
+	NumberInjured       int                      `json:"number_injured"`
+	NumberOfCrashes     int                      `json:"number_of_crashes"`
 }
 
 type GetTrafficForStreetsParams struct {

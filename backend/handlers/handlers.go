@@ -50,9 +50,9 @@ func NewHandlers(p Params) (*handlers, error) {
 func (h *handlers) InitHandlers() error {
 	h.echoInstance.GET("/api/viewport/streets", h.getSegmentsForViewport)
 	h.echoInstance.GET("/api/streets/crashevents", h.crashEventsForStreets)
+	h.echoInstance.GET("/api/streets/mergedcrashevents", h.getMergedCrashEventsForStreets)
 	h.echoInstance.GET("/api/streets/crashdata", h.getCrashDataForStreets)
 	h.echoInstance.GET("/api/streets/features", h.getStreetFeatures)
-	h.echoInstance.GET("/api/segmentsForGrid", h.getSegmentsForGrid)
 	return nil
 }
 
@@ -182,6 +182,42 @@ func (h *handlers) getStreetFeatures(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
+func (h *handlers) getMergedCrashEventsForStreets(c echo.Context) error {
+	cnnsStr := c.QueryParam("cnns")
+	startTimeStr := c.QueryParam("startTime")
+	endTimeStr := c.QueryParam("endTime")
+
+	cnns := []int{}
+	if len(cnnsStr) > 0 {
+		err := json.Unmarshal([]byte(cnnsStr), &cnns)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
+		}
+	}
+	startTimeEpoch, err := strconv.ParseInt(startTimeStr, 10, 64)
+	startTime := time.Unix(startTimeEpoch, 0)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
+	}
+	endTimeEpoch, err := strconv.ParseInt(endTimeStr, 10, 64)
+	endTime := time.Unix(endTimeEpoch, 0)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
+	}
+
+	result, err := h.sfDataController.GetMergedCrashesForStreets(c.Request().Context(), &cTypes.GetMergedCrashesForStreetsParams{
+		CNNs:      cnns,
+		StartTime: startTime,
+		EndTime:   endTime,
+	})
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting traffic crashes for cnns: %v", err))
+	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
 func (h *handlers) getSegmentsForViewport(c echo.Context) error {
 	nePointStr := c.QueryParam("nePoint")
 	swPointStr := c.QueryParam("swPoint")
@@ -217,33 +253,5 @@ func (h *handlers) getSegmentsForViewport(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting segments for viewport: %v", err))
 	}
-	return c.JSON(http.StatusOK, result)
-}
-
-func (h *handlers) getSegmentsForGrid(c echo.Context) error {
-	cityGrid := c.QueryParam("cityGrid")
-	filterStr := c.QueryParam("filters")
-
-	cityGridObj := [][]cTypes.RectangleCell{}
-	err := json.Unmarshal([]byte(cityGrid), &cityGridObj)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cityGrid: %v", err))
-	}
-	var filters types.StreetFeatureFilters
-	if len(filterStr) > 0 {
-		err = json.Unmarshal([]byte(filterStr), &filters)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing filters: %v", err))
-		}
-	}
-
-	result, err := h.sfDataController.GetSegmentsForGrid(c.Request().Context(), &cTypes.GetSegmentsForGridParams{
-		Grid:    &cityGridObj,
-		Filters: &filters,
-	})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting segments for CityGrid: %v", err))
-	}
-
 	return c.JSON(http.StatusOK, result)
 }

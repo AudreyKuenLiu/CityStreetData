@@ -225,7 +225,7 @@ func (sfr *SfDataRepository) GetTrafficStatsForStreets(ctx context.Context, para
 			&timeSegmentInt,
 			&crashStat.CollisionSeverity,
 			&crashStat.CollisionType,
-			&crashStat.DphGroup,
+			&crashStat.CrashClassification,
 			&crashStat.NumberInjured,
 			&crashStat.NumberKilled,
 			&crashStat.NumberOfCrashes,
@@ -242,6 +242,134 @@ func (sfr *SfDataRepository) GetTrafficStatsForStreets(ctx context.Context, para
 		timeSegementCrashStats = append(timeSegementCrashStats, crashStat)
 	}
 	return timeSegementCrashStats, nil
+}
+
+func (sfr *SfDataRepository) GetMergedTrafficCrashesForStreets(ctx context.Context, params *types.GetMergedTrafficCrashesForStreetParams) ([]types.MergedCrashEvents, error) {
+	if params == nil || len(params.CNNs) == 0 {
+		return nil, fmt.Errorf("invalid params, must provide cnns")
+	}
+
+	conn, err := sfr.db.Conn(ctx)
+	if err != nil {
+		sfr.logger.Error("could not establish connection")
+		return nil, err
+	}
+
+	if err := createTempTable(ctx, conn, "selected_cnns", "cnn", params.CNNs); err != nil {
+		return nil, err
+	}
+
+	queryString := fmt.Sprintf(
+		`
+		WITH selected_intersections AS (
+			SELECT cnn
+			FROM
+			(select
+				DISTINCT(f_node_cnn) as cnn
+			FROM
+				sf_streets_and_intersections sfsi
+				JOIN
+				selected_cnns
+				ON sfsi.cnn = selected_cnns.cnn
+			UNION
+			select
+				DISTINCT(t_node_cnn) as cnn
+			FROM
+				sf_streets_and_intersections sfsi
+				JOIN
+				selected_cnns
+				ON sfsi.cnn = selected_cnns.cnn
+			)
+		),
+		filtered_crashes AS (
+			SELECT
+				cnn,
+				occured_at,
+				collision_severity,
+				collision_type,
+				number_killed,
+				number_injured,
+				metadata->>'dph_col_grp' as crash_classification,
+				MakePoint(metadata->>'tb_longitude', metadata->>'tb_latitude', 4326) as point
+			FROM sf_events_traffic_crashes
+			WHERE
+				occured_at BETWEEN %d AND %d
+		),
+		merged_crashes AS (
+			SELECT
+				collision_severity,
+				collision_type,
+				crash_classification,
+				SUM(number_killed) as number_killed,
+				SUM(number_injured) as number_injured,
+				count(*) as number_of_crashes,
+				ST_Centroid(ST_Union(point)) as point
+			FROM
+				selected_intersections as sis
+				JOIN
+				filtered_crashes as crashes ON (sis.cnn = crashes.cnn)
+			GROUP BY
+				1,2,3
+		),
+		selected_crashes AS (
+			SELECT
+				collision_severity,
+				collision_type,
+				crash_classification,
+				number_killed,
+				number_injured,
+				1 as number_of_crashes,
+				point
+			FROM
+				selected_cnns as sc
+				JOIN
+				filtered_crashes as crashes ON (sc.cnn = crashes.cnn)
+		)
+		SELECT
+			collision_severity,
+			collision_type,
+			crash_classification,
+			number_killed,
+			number_injured,
+			number_of_crashes,
+			ST_AsBinary(point) as point
+		FROM
+		(
+			select * from selected_crashes
+			UNION
+			select * from merged_crashes
+		)
+		`,
+		params.StartTime.Unix(),
+		params.EndTime.Unix(),
+	)
+
+	row, err := conn.QueryContext(ctx, queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	mergedCrashesArr := []types.MergedCrashEvents{}
+	for row.Next() {
+		var mergedCrashEvent = types.MergedCrashEvents{}
+
+		err := row.Scan(
+			&mergedCrashEvent.CollisionSeverity,
+			&mergedCrashEvent.CollisionType,
+			&mergedCrashEvent.CrashClassification,
+			&mergedCrashEvent.NumberKilled,
+			&mergedCrashEvent.NumberInjured,
+			&mergedCrashEvent.NumberOfCrashes,
+			&mergedCrashEvent.Point,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		mergedCrashesArr = append(mergedCrashesArr, mergedCrashEvent)
+	}
+	return mergedCrashesArr, nil
 }
 
 func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, params *types.GetTrafficForStreetsParams) ([]types.CrashEvents, error) {
@@ -300,7 +428,6 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 	defer row.Close()
 
 	crashesArr := []types.CrashEvents{}
-	//TODO: scanning a lot of rows is slow to optimize we need to change these queries
 	for row.Next() {
 		var crashEvent = types.CrashEvents{}
 		var occuredAtInt int64

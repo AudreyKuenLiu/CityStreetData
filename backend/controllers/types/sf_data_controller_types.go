@@ -34,13 +34,10 @@ type GetSegmentsForViewportParams struct {
 	Filters   *types.StreetFeatureFilters
 }
 
-type GetSegmentsForGridParams struct {
-	Grid    *[][]RectangleCell
-	Filters *types.StreetFeatureFilters
-}
-
-type GetSegmentsForGridReturn struct {
-	StreetSegmentGrid *[][][]rTypes.StreetSegment
+type GetMergedCrashesForStreetsParams struct {
+	CNNs      []int
+	StartTime time.Time
+	EndTime   time.Time
 }
 
 type GetCrashesForStreetsParams struct {

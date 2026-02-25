@@ -19,6 +19,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
+	e.Use(middleware.Gzip())
 
 	//Starting fileserver for webapp
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	cMapper "citystreetdata/controllers/mappers"
 	"citystreetdata/controllers/types"
 	cUtils "citystreetdata/controllers/utils"
 	rTypes "citystreetdata/repositories/types"
@@ -62,20 +63,20 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 		}
 		crashStats.NumberInjured += crashData.NumberInjured
 		crashStats.NumberKilled += crashData.NumberKilled
-		if crashData.DphGroup != nil {
-			if *crashData.DphGroup == dTypes.VehiclesOnly {
+		if crashData.CrashClassification != nil {
+			if *crashData.CrashClassification == dTypes.VehiclesOnly {
 				crashStats.NumberOfVehicleOnlyCrashes += crashData.NumberOfCrashes
 			}
-			if *crashData.DphGroup == dTypes.VehicleBicycle {
+			if *crashData.CrashClassification == dTypes.VehicleBicycle {
 				crashStats.NumberOfVehicleBicycleCrashes += crashData.NumberOfCrashes
 			}
-			if *crashData.DphGroup == dTypes.VehiclePedestrian {
+			if *crashData.CrashClassification == dTypes.VehiclePedestrian {
 				crashStats.NumberOfVehiclePedestrianCrashes += crashData.NumberOfCrashes
 			}
-			if *crashData.DphGroup == dTypes.BicyclePedestrian {
+			if *crashData.CrashClassification == dTypes.BicyclePedestrian {
 				crashStats.NumberOfBicyclePedestrianCrashes += crashData.NumberOfCrashes
 			}
-			if *crashData.DphGroup == dTypes.BicycleOnly {
+			if *crashData.CrashClassification == dTypes.BicycleOnly {
 				crashStats.NumberOfBicycleOnlyCrashes += crashData.NumberOfCrashes
 			}
 		}
@@ -85,6 +86,30 @@ func (sfc *SfDataController) GetCrashDataForStreets(ctx context.Context, params 
 	return &types.CrashDataForStreets{
 		Data: dateToCrashesGroupMap,
 	}, nil
+}
+
+func (sfc *SfDataController) GetMergedCrashesForStreets(ctx context.Context, params *types.GetMergedCrashesForStreetsParams) (geojson.FeatureCollection, error) {
+	if params == nil {
+		return nil, fmt.Errorf("no params passed to GetMergedCrashesForStreets")
+	}
+
+	mergedEvents, err := sfc.sfDataRepository.GetMergedTrafficCrashesForStreets(ctx, &rTypes.GetMergedTrafficCrashesForStreetParams{
+		CNNs:      params.CNNs,
+		StartTime: params.StartTime,
+		EndTime:   params.EndTime,
+	})
+
+	featureCollection := geojson.FeatureCollection{}
+	for _, crashEvent := range mergedEvents {
+		crashFeature, err := cMapper.MergedCrashEventToFeature(&crashEvent)
+		if err != nil {
+			return nil, err
+		}
+		featureCollection = append(featureCollection, crashFeature)
+
+	}
+
+	return featureCollection, err
 }
 
 func (sfc *SfDataController) GetCrashesForStreets(ctx context.Context, params *types.GetCrashesForStreetsParams) (*types.CrashEventsForStreets, error) {
@@ -117,7 +142,7 @@ func (sfc *SfDataController) GetCrashesForStreets(ctx context.Context, params *t
 	for _, crashData := range crashEvents {
 		closestTime, idx = findClosestTime(crashData.OccuredAt.Unix(), idx)
 		crashCollection := timeToCrashCollection[closestTime]
-		crashFeature, err := crashData.ToFeature()
+		crashFeature, err := cMapper.CrashEventToFeature(&crashData)
 		if err != nil {
 			return nil, err
 		}
@@ -157,32 +182,4 @@ func (sfc *SfDataController) GetSegmentsForViewport(ctx context.Context, params 
 	})
 
 	return ret, err
-}
-
-func (sfc *SfDataController) GetSegmentsForGrid(ctx context.Context, params *types.GetSegmentsForGridParams) (*types.GetSegmentsForGridReturn, error) {
-	if params == nil || params.Grid == nil {
-		return nil, fmt.Errorf("no params passed to GetSegmentsForGrid")
-	}
-
-	streetSegmentGrid := [][][]rTypes.StreetSegment{}
-	grid := params.Grid
-	for _, row := range *grid {
-		streetSegmentGridRow := [][]rTypes.StreetSegment{}
-		for _, cell := range row {
-			streetSegments, err := sfc.sfDataRepository.GetSegmentsWithinPolygon(ctx, &rTypes.GetSegmentsWithinPolygonParams{
-				Polygon: cell.ToPolygon(),
-				Filters: params.Filters,
-			})
-			streetSegmentGridRow = append(streetSegmentGridRow, streetSegments)
-			if err != nil {
-				return nil, err
-			}
-
-		}
-		streetSegmentGrid = append(streetSegmentGrid, streetSegmentGridRow)
-	}
-
-	return &types.GetSegmentsForGridReturn{
-		StreetSegmentGrid: &streetSegmentGrid,
-	}, nil
 }
