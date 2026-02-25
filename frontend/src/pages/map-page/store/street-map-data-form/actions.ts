@@ -215,11 +215,11 @@ export const actions = ({
         ret = false;
         return {};
       }
-      let existingSegment = false;
+      let existingSegment = true;
 
       for (const streetSegment of streetSegments) {
         existingSegment =
-          state._cnnToGroupId.get(streetSegment.cnn) != null || existingSegment;
+          state._cnnToGroupId.get(streetSegment.cnn) != null && existingSegment;
         addStreetToGroup(state, streetGroup, streetSegment);
       }
       return {
