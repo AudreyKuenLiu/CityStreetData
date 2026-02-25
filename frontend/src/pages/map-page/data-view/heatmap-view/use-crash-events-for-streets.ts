@@ -1,37 +1,35 @@
 import { useMemo, useEffect } from "react";
-import { UseDataViewControllerProps } from "./types";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import {
-  useActions,
-  useEndDate,
-  useStartDate,
-  useStreetGroupsRef,
-  useTimeSegment,
-} from "../../../../store/street-map-data-form";
-import { CrashEventFeatureCollection } from "../../../../../../models/api-models";
-import { useActions as useHeatmapDataActions } from "../../../../store/heatmap-data";
-import type { HeatmapGroupData } from "../../../../store/heatmap-data";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { CrashEventFeatureCollection } from "../../../../models/api-models";
+import { useActions as useHeatmapDataActions } from "../../store/heatmap-data";
+import type { HeatmapGroupData } from "../../store/heatmap-data";
+import { useDataViewContext } from "../../context/data-view";
+import { useActions } from "../../store/street-map-data-form";
 
-export const useCrashEventsForStreets = (): UseDataViewControllerProps => {
-  const streetGroups = useStreetGroupsRef();
-  const startTime = useStartDate();
-  const endTime = useEndDate();
-  const timeSegment = useTimeSegment();
+export const useCrashEventsForStreets = (): void => {
+  const {
+    selectedTimeSegment: timeSegment,
+    selectedStartEndTime,
+    selectedStreetGroups,
+    selectedIsDirtyHash,
+  } = useDataViewContext();
+  const [startTime, endTime] = selectedStartEndTime ?? [undefined, undefined];
+  const streetGroups = selectedStreetGroups ?? new Map();
   const { resetIsDirty } = useActions();
+
   const { setHeatmapData } = useHeatmapDataActions();
 
-  const result = useQuery({
+  const result = useSuspenseQuery({
     queryKey: [
       "crashEventsForStreets",
       timeSegment,
       startTime?.toISOString(),
       endTime?.toISOString(),
-      JSON.stringify(streetGroups),
+      streetGroups,
+      selectedIsDirtyHash,
     ],
-    enabled: false,
-    gcTime: Infinity,
-    staleTime: Infinity,
+    gcTime: 0,
     queryFn: async (): Promise<{
       crashEvents: HeatmapGroupData;
     }> => {
@@ -81,11 +79,6 @@ export const useCrashEventsForStreets = (): UseDataViewControllerProps => {
     },
   });
 
-  const getCrashEvents = async (): Promise<void> => {
-    await result.refetch();
-    resetIsDirty();
-  };
-
   const groupCrashes = useMemo(() => {
     const data = result.data;
     const newMap: HeatmapGroupData = new Map();
@@ -98,11 +91,7 @@ export const useCrashEventsForStreets = (): UseDataViewControllerProps => {
       setHeatmapData({
         data: groupCrashes,
       });
+      resetIsDirty();
     }
-  }, [result.isSuccess, setHeatmapData, groupCrashes]);
-
-  return {
-    getData: getCrashEvents,
-    isLoading: result.isLoading,
-  };
+  }, [result.isSuccess, setHeatmapData, groupCrashes, resetIsDirty]);
 };

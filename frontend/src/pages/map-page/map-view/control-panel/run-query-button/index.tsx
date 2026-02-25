@@ -7,9 +7,9 @@ import {
   LineChartOutlined,
   RedoOutlined,
 } from "@ant-design/icons";
-import { useDataViewQuery } from "./hooks";
-import { useIsDirty } from "../../../store/street-map-data-form";
+import { useIsDirty, useIsReady } from "../../../store/street-map-data-form";
 import { DataViewEnum, DataViewKeys } from "../../../context/data-view/types";
+import { useDataViewContext } from "../../../context/data-view";
 
 const DataViewConfig = {
   [DataViewEnum.NoView]: {
@@ -66,19 +66,12 @@ export const RunQueryButton = ({
 }): React.JSX.Element => {
   const [validRun, setValidRun] = useState(false);
   const isDirty = useIsDirty();
-
-  const {
-    canGetData: canRunQuery,
-    getData: runQuery,
-    setDataView,
-    currentDataView,
-    isLoading,
-  } = useDataViewQuery();
+  const canRunQuery = useIsReady();
+  const { currentDataView, setDataView } = useDataViewContext();
 
   useEffect(() => {
     const handleKeyDown = async (e: KeyboardEvent): Promise<void> => {
       if (e.key === "Enter" && canRunQuery && isDirty) {
-        await runQuery();
         setValidRun(true);
         if (currentDataView === DataViewEnum.NoView) {
           setDataView(DataViewKeys.parse(DataViewEnum.AreaChartView));
@@ -90,7 +83,7 @@ export const RunQueryButton = ({
     return (): void => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [canRunQuery, runQuery, setDataView, onClick, currentDataView, isDirty]);
+  }, [canRunQuery, setDataView, onClick, currentDataView, isDirty]);
 
   useEffect(() => {
     if (!canRunQuery) {
@@ -106,7 +99,6 @@ export const RunQueryButton = ({
           items: viewOptions,
           onClick: async (e) => {
             const selectedDataView = DataViewKeys.parse(e.key);
-            await runQuery(selectedDataView);
             setDataView(selectedDataView);
             setValidRun(true);
             onClick();
@@ -124,12 +116,8 @@ export const RunQueryButton = ({
               DataViewConfig[currentDataView].icon
             )
           }
-          loading={isLoading}
           disabled={!canRunQuery}
           onClick={async () => {
-            if (isDirty) {
-              await runQuery();
-            }
             setValidRun(true);
             if (currentDataView === DataViewEnum.NoView) {
               setDataView(DataViewKeys.parse(DataViewEnum.AreaChartView));

@@ -3,15 +3,13 @@ import { useStreetGroupsRef } from "../../store/street-map-data-form";
 import { Flex, Typography } from "antd";
 import { XFilled } from "@ant-design/icons";
 import { useCrashTrendData } from "../../store/trend-chart-list-data";
-import {
-  PointTooltipComponent,
-  PointTooltipProps,
-  ResponsiveLine,
-} from "@nivo/line";
+import { PointTooltipProps, ResponsiveLine } from "@nivo/line";
 import { ControlPanel } from "./control-panel";
 import { AverageLineSeriesId } from "../../store/trend-chart-list-data/types";
+import { useCrashTrendsForStreets } from "./use-crash-trends-for-streets";
 
 export const TrendChartList = (): React.JSX.Element => {
+  useCrashTrendsForStreets();
   const streetGroups = useStreetGroupsRef();
   const crashTrendData = useCrashTrendData();
 

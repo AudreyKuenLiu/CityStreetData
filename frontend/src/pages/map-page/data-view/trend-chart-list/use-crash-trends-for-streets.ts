@@ -1,35 +1,34 @@
 import { useEffect, useMemo } from "react";
-import { UseDataViewControllerProps } from "./types";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import {
-  useActions,
-  useEndDate,
-  useStartDate,
-  useStreetGroupsRef,
-  useTimeSegment,
-} from "../../../../store/street-map-data-form";
-import { CrashEventFeatureCollection } from "../../../../../../models/api-models";
-import type { GroupTrendData } from "../../../../store/trend-chart-list-data";
-import { useActions as useTrendChartListActions } from "../../../../store/trend-chart-list-data";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { CrashEventFeatureCollection } from "../../../../models/api-models";
+import type { GroupTrendData } from "../../store/trend-chart-list-data";
+import { useActions } from "../../store/street-map-data-form";
+import { useActions as useTrendChartListActions } from "../../store/trend-chart-list-data";
+import { useDataViewContext } from "../../context/data-view";
 
-export const useCrashTrendsForStreets = (): UseDataViewControllerProps => {
-  const streetGroups = useStreetGroupsRef();
-  const startTime = useStartDate();
-  const endTime = useEndDate();
-  const timeSegment = useTimeSegment();
+export const useCrashTrendsForStreets = (): void => {
+  const {
+    selectedTimeSegment: timeSegment,
+    selectedStartEndTime,
+    selectedStreetGroups,
+    selectedIsDirtyHash,
+  } = useDataViewContext();
+  const [startTime, endTime] = selectedStartEndTime ?? [undefined, undefined];
+  const streetGroups = selectedStreetGroups ?? new Map();
   const { resetIsDirty } = useActions();
+
   const { setGraphData } = useTrendChartListActions();
 
-  const result = useQuery({
+  const result = useSuspenseQuery({
     queryKey: [
       "crashTrendsForStreets",
+      timeSegment,
       startTime,
       endTime,
       streetGroups,
-      timeSegment,
+      selectedIsDirtyHash,
     ],
-    enabled: false,
     gcTime: 0,
     queryFn: async (): Promise<GroupTrendData> => {
       const allResults = Array.from(streetGroups.values()).map(
@@ -91,11 +90,6 @@ export const useCrashTrendsForStreets = (): UseDataViewControllerProps => {
     },
   });
 
-  const getCrashTrends = async (): Promise<void> => {
-    await result.refetch();
-    resetIsDirty();
-  };
-
   const groupCrashTrends = useMemo(() => {
     const data = result.data;
     return data ?? new Map();
@@ -104,11 +98,7 @@ export const useCrashTrendsForStreets = (): UseDataViewControllerProps => {
   useEffect(() => {
     if (result.isSuccess) {
       setGraphData(groupCrashTrends);
+      resetIsDirty();
     }
-  }, [result.isSuccess, groupCrashTrends, setGraphData]);
-
-  return {
-    getData: getCrashTrends,
-    isLoading: result.isLoading,
-  };
+  }, [result.isSuccess, groupCrashTrends, setGraphData, resetIsDirty]);
 };

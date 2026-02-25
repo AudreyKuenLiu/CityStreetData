@@ -12,8 +12,10 @@ import {
 } from "../../store/heatmap-data";
 import { Source } from "react-map-gl/maplibre";
 import { HeatmapControls } from "./heatmap-controls";
+import { useCrashEventsForStreets } from "./use-crash-events-for-streets";
 
 export const HeatmapView = (): React.JSX.Element => {
+  useCrashEventsForStreets();
   const mapRef = useRef<MapRef | null>(null);
   const currentFeatureCollections = useHeatmapFeatureCollections();
   const layerProps = useHeatmapLayerProps();
