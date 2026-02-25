@@ -193,6 +193,8 @@ export const actions = ({
         ret = false;
         return {};
       }
+      const existingSegment = streetGroup.cnns.get(streetSegment.cnn) != null;
+
       addStreetToGroup(state, streetGroup, streetSegment);
       return {
         streetGroups: new Map(state.streetGroups),
@@ -200,7 +202,7 @@ export const actions = ({
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),
-        isDirtyHash: crypto.randomUUID(),
+        isDirtyHash: existingSegment ? state.isDirtyHash : crypto.randomUUID(),
       };
     });
     return ret;
@@ -213,7 +215,11 @@ export const actions = ({
         ret = false;
         return {};
       }
+      let existingSegment = false;
+
       for (const streetSegment of streetSegments) {
+        existingSegment =
+          state._cnnToGroupId.get(streetSegment.cnn) != null || existingSegment;
         addStreetToGroup(state, streetGroup, streetSegment);
       }
       return {
@@ -222,7 +228,7 @@ export const actions = ({
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),
-        isDirtyHash: crypto.randomUUID(),
+        isDirtyHash: existingSegment ? state.isDirtyHash : crypto.randomUUID(),
       };
     });
     return ret;
@@ -230,6 +236,7 @@ export const actions = ({
   removeStreet: (cnn: number): boolean => {
     let ret = true;
     setState((state) => {
+      const existingSegment = state._cnnToGroupId.get(cnn) != null;
       if (!removeCnnFromGroup(state, cnn)) {
         ret = false;
         return {};
@@ -241,7 +248,7 @@ export const actions = ({
         isReady: isStreetMapFormReady(state, {
           streetGroups: state.streetGroups,
         }),
-        isDirtyHash: crypto.randomUUID(),
+        isDirtyHash: existingSegment ? crypto.randomUUID() : state.isDirtyHash,
       };
     });
     return ret;
@@ -253,7 +260,10 @@ export const actions = ({
         isReady: isStreetMapFormReady(state, {
           timeSegment,
         }),
-        isDirtyHash: crypto.randomUUID(),
+        isDirtyHash:
+          timeSegment !== state.timeSegment
+            ? crypto.randomUUID()
+            : state.isDirtyHash,
       };
     });
   },
@@ -263,7 +273,10 @@ export const actions = ({
       return {
         startDate: newDate,
         isReady: isStreetMapFormReady(state, { startDate: newDate }),
-        isDirtyHash: crypto.randomUUID(),
+        isDirtyHash:
+          startDate !== state.startDate
+            ? crypto.randomUUID()
+            : state.isDirtyHash,
       };
     });
   },
@@ -273,7 +286,8 @@ export const actions = ({
       return {
         endDate: newDate,
         isReady: isStreetMapFormReady(state, { endDate: newDate }),
-        isDirtyHash: crypto.randomUUID(),
+        isDirtyHash:
+          endDate !== state.endDate ? crypto.randomUUID() : state.isDirtyHash,
       };
     });
   },

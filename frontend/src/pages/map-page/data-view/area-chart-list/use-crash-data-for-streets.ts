@@ -67,7 +67,6 @@ export const useCrashDataForStreets = (): void => {
               id: streetGroup.id,
             };
           }
-          console.log("calling again in api");
 
           const response = await axios.get<{
             data: { [key: number]: CrashStats };
