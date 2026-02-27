@@ -1,51 +1,118 @@
 import { StoreApi } from "zustand";
-import type {
-  HeatmapData,
-  HeatmapDataActions,
-  HeatmapFilter,
-  HeatmapGroupData,
-  HeatmapGroupTimeSegments,
-} from "./types";
+import type { HeatmapData, HeatmapDataActions, HeatmapFilter } from "./types";
+import { TimeSegments } from "../street-map-data-form";
+import {
+  addTimeSegment,
+  GroupId,
+  StreetGroups,
+} from "../street-map-data-form/types";
+import { CrashEventFeatureCollection } from "../../../../models/api-models";
+import { CrashMap } from "../../../../models/map-models";
+import { feature, featureCollection } from "@turf/turf";
 
-const initHeatmapGroupTimeSegments = ({
-  data,
+const buildTimeList = ({
+  startEndTime,
+  timeSegment,
 }: {
-  data: HeatmapGroupData;
-}): HeatmapGroupTimeSegments => {
-  const heatmapGroupTimesegments: HeatmapGroupTimeSegments = new Map();
-  for (const [groupId, featureCollection] of data.entries()) {
-    heatmapGroupTimesegments.set(groupId, {
-      featureCollectionSegments: featureCollection,
-    });
+  startEndTime: [Date, Date];
+  timeSegment: TimeSegments;
+}): Date[] => {
+  const [startTime, endTime] = startEndTime;
+  let it = startTime;
+  const ret = [];
+
+  while (it < endTime) {
+    ret.push(it);
+    it = addTimeSegment(it, timeSegment);
   }
-  return heatmapGroupTimesegments;
+  ret.push(endTime);
+
+  return ret;
+};
+
+const buildGroupFeatureCollections = ({
+  crashMap,
+  streetGroups,
+}: {
+  crashMap: CrashMap;
+  streetGroups: StreetGroups;
+}): (readonly [GroupId, CrashEventFeatureCollection])[] => {
+  const groupIdCollection = Array.from(streetGroups.entries()).map(
+    ([groupId, streetGroup]) => {
+      const streetSegments = Array.from(streetGroup.cnns.entries()).map(
+        ([_, streetSegment]) => {
+          return streetSegment;
+        },
+      );
+      const uniqueCnns = new Set<number>();
+      for (const segment of streetSegments) {
+        uniqueCnns.add(segment.cnn);
+        if (segment.f_node_cnn != null) {
+          uniqueCnns.add(segment.f_node_cnn);
+        }
+        if (segment.t_node_cnn != null) {
+          uniqueCnns.add(segment.t_node_cnn);
+        }
+      }
+
+      const crashFeatures = [];
+      for (const cnn of uniqueCnns) {
+        const crashes = crashMap.get(cnn) ?? [];
+        for (const crash of crashes) {
+          const { point, ...properties } = crash;
+          crashFeatures.push(
+            feature(point, {
+              ...properties,
+            }),
+          );
+        }
+      }
+
+      const collection = featureCollection(crashFeatures);
+
+      return [groupId, collection] as const;
+    },
+  );
+
+  return groupIdCollection;
 };
 
 export const actions = ({
   setState,
 }: Pick<StoreApi<HeatmapData>, "setState">): HeatmapDataActions => ({
-  setHeatmapData: ({ data }): void => {
+  initializeHeatmap: ({
+    data,
+    selectedStartEndTime,
+    selectedStreetGroups,
+    selectedTimeSegment,
+  }): void => {
+    const timeList = buildTimeList({
+      startEndTime: selectedStartEndTime,
+      timeSegment: selectedTimeSegment,
+    });
+    const groupIdFeatureCollections = buildGroupFeatureCollections({
+      crashMap: data,
+      streetGroups: selectedStreetGroups,
+    });
+
     setState(() => {
       return {
-        heatmapGroupTimeSegments: initHeatmapGroupTimeSegments({
-          data,
-        }),
-        featureCollectionsIndex: 0, //TODO we need to reset this index better
+        timeSegmentList: timeList,
+        timeSegmentIdx: 0,
+        groupIdFeatureCollections,
       };
     });
   },
-  setFeatureCollectionsIndex: ({ newIdx }): boolean => {
+  setTimeSegmentIdx: ({ newIdx }): boolean => {
     let ret = true;
     setState((curState) => {
-      const maxLength =
-        curState.heatmapGroupTimeSegments.entries().next().value?.[1]
-          .featureCollectionSegments.length ?? 0;
+      const maxLength = curState.timeSegmentList.length;
       if (newIdx >= maxLength || newIdx < 0) {
         ret = false;
         return {};
       }
       return {
-        featureCollectionsIndex: newIdx,
+        timeSegmentIdx: newIdx,
       };
     });
     return ret;

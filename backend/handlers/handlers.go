@@ -49,8 +49,8 @@ func NewHandlers(p Params) (*handlers, error) {
 
 func (h *handlers) InitHandlers() error {
 	h.echoInstance.GET("/api/viewport/streets", h.getSegmentsForViewport)
-	h.echoInstance.GET("/api/streets/crashevents", h.crashEventsForStreets)
-	h.echoInstance.GET("/api/streets/mergedcrashevents", h.getMergedCrashEventsForStreets)
+	h.echoInstance.GET("/api/streets/crashevents", h.getCrashEventsForStreets)
+	h.echoInstance.GET("/api/streets/crashevents/all", h.getAllCrashEventsForStreets)
 	h.echoInstance.GET("/api/streets/crashdata", h.getCrashDataForStreets)
 	h.echoInstance.GET("/api/streets/features", h.getStreetFeatures)
 	return nil
@@ -98,7 +98,13 @@ func (h *handlers) getCrashDataForStreets(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (h *handlers) crashEventsForStreets(c echo.Context) error {
+func (h *handlers) getAllCrashEventsForStreets(c echo.Context) error {
+	result := h.sfDataController.AllCrashEvents(c.Request().Context())
+
+	return c.JSON(http.StatusOK, result)
+}
+
+func (h *handlers) getCrashEventsForStreets(c echo.Context) error {
 	cnnsStr := c.QueryParam("cnns")
 	startTimeStr := c.QueryParam("startTime")
 	endTimeStr := c.QueryParam("endTime")
@@ -178,42 +184,6 @@ func (h *handlers) getStreetFeatures(c echo.Context) error {
 		CompletedAfter:  startTime,
 		CompletedBefore: endTime,
 	})
-
-	return c.JSON(http.StatusOK, result)
-}
-
-func (h *handlers) getMergedCrashEventsForStreets(c echo.Context) error {
-	cnnsStr := c.QueryParam("cnns")
-	startTimeStr := c.QueryParam("startTime")
-	endTimeStr := c.QueryParam("endTime")
-
-	cnns := []int{}
-	if len(cnnsStr) > 0 {
-		err := json.Unmarshal([]byte(cnnsStr), &cnns)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
-		}
-	}
-	startTimeEpoch, err := strconv.ParseInt(startTimeStr, 10, 64)
-	startTime := time.Unix(startTimeEpoch, 0)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
-	}
-	endTimeEpoch, err := strconv.ParseInt(endTimeStr, 10, 64)
-	endTime := time.Unix(endTimeEpoch, 0)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
-	}
-
-	result, err := h.sfDataController.GetMergedCrashesForStreets(c.Request().Context(), &cTypes.GetMergedCrashesForStreetsParams{
-		CNNs:      cnns,
-		StartTime: startTime,
-		EndTime:   endTime,
-	})
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error getting traffic crashes for cnns: %v", err))
-	}
 
 	return c.JSON(http.StatusOK, result)
 }

@@ -1,9 +1,14 @@
 import { LineString } from "geojson";
+import { ApiCrashEventPoint } from "../api-models";
 
 export interface StreetSegment {
   cnn: number;
+  f_node_cnn: number | null;
+  t_node_cnn: number | null;
   line: LineString;
 }
+
+export type CrashMap = Map<number, ApiCrashEventPoint[]>;
 
 export enum ZoomLevelInView {
   ONE, //least zoomed in (zoomLevel >= 15.5)

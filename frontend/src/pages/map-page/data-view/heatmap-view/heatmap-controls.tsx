@@ -6,15 +6,16 @@ import {
   Typography,
   Select,
 } from "antd";
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   useHeatmapTimeSegmentDates,
-  useFeatureCollectionsIndex,
   useActions,
-  useFullTimePeriodDisply,
+  useFullTimePeriodDisplay,
   useHeatmapFilter,
 } from "../../store/heatmap-data";
 import { HeatmapFilterEnum } from "../../store/heatmap-data/types";
+import _ from "lodash";
+import { useDataViewContext } from "../../context/data-view";
 
 const heatmapOptions = [
   {
@@ -53,14 +54,24 @@ const heatmapOptions = [
 
 export const HeatmapControls = (): React.JSX.Element => {
   const dates = useHeatmapTimeSegmentDates();
-  const {
-    setFeatureCollectionsIndex,
-    toggleFullTimePeriodDisplay,
-    setHeatmapFilter,
-  } = useActions();
-  const currentIdx = useFeatureCollectionsIndex();
-  const shouldDisplayFullTimePeriod = useFullTimePeriodDisply();
+  const { setTimeSegmentIdx, toggleFullTimePeriodDisplay, setHeatmapFilter } =
+    useActions();
+  const [idx, setIdx] = useState(0);
+  const shouldDisplayFullTimePeriod = useFullTimePeriodDisplay();
   const heatmapFilter = useHeatmapFilter();
+  const { selectedTimeSegment, selectedStartEndTime } = useDataViewContext();
+  useEffect(() => {
+    setIdx(0);
+  }, [selectedTimeSegment, selectedStartEndTime, setIdx]);
+
+  const throttleTimeSegment = useMemo(
+    () =>
+      _.throttle((val: number) => {
+        console.log("calling");
+        setTimeSegmentIdx({ newIdx: val });
+      }, 250),
+    [setTimeSegmentIdx],
+  );
 
   const marks: SliderSingleProps["marks"] = {
     0: dates[0]?.toLocaleDateString(),
@@ -125,9 +136,11 @@ export const HeatmapControls = (): React.JSX.Element => {
           style={{ width: "100%" }}
           min={0}
           max={dates.length - 1}
-          value={currentIdx}
+          value={idx}
           onChange={(val) => {
-            setFeatureCollectionsIndex({ newIdx: val });
+            console.log("setting time segment", val);
+            setIdx(val);
+            throttleTimeSegment(val);
           }}
           tooltip={{
             formatter: (value) => {

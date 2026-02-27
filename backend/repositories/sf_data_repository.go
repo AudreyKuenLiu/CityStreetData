@@ -44,6 +44,63 @@ func NewSFDataRepository(logger *slog.Logger) (*SfDataRepository, error) {
 	}, nil
 }
 
+func (sfr *SfDataRepository) GetAllCrashEvents(ctx context.Context) ([]types.CrashEvents, error) {
+
+	conn, err := sfr.db.Conn(ctx)
+	if err != nil {
+		sfr.logger.Error("could not establish connection")
+		return nil, err
+	}
+
+	queryString := `
+		SELECT
+			cnn,
+			occured_at,
+			collision_severity,
+			collision_type,
+			number_killed,
+			number_injured,
+			metadata->>'dph_col_grp' as crash_classification,
+			ST_AsBinary(MakePoint(metadata->>'tb_longitude', metadata->>'tb_latitude', 4326)) as point
+		FROM sf_events_traffic_crashes
+		ORDER BY occured_at
+	`
+
+	row, err := conn.QueryContext(ctx, queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	crashesArr := []types.CrashEvents{}
+	for row.Next() {
+		var crashEvent = types.CrashEvents{}
+		var occuredAtTime time.Time
+
+		err := row.Scan(
+			&crashEvent.CNN,
+			&crashEvent.OccuredAtUnix,
+			&crashEvent.CollisionSeverity,
+			&crashEvent.CollisionType,
+			&crashEvent.NumberKilled,
+			&crashEvent.NumberInjured,
+			&crashEvent.CrashClassification,
+			&crashEvent.Point,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if crashEvent.OccuredAtUnix > 0 {
+			occuredAtTime = time.Unix(crashEvent.OccuredAtUnix, 0)
+			crashEvent.OccuredAt = occuredAtTime
+		}
+
+		crashesArr = append(crashesArr, crashEvent)
+	}
+	return crashesArr, nil
+}
+
 func (sfr *SfDataRepository) GetSlowStreets(ctx context.Context, params *types.GetSlowStreetParams) ([]types.StreetFeatureSegment, error) {
 	if params == nil {
 		return nil, fmt.Errorf("must provide params")
@@ -244,134 +301,6 @@ func (sfr *SfDataRepository) GetTrafficStatsForStreets(ctx context.Context, para
 	return timeSegementCrashStats, nil
 }
 
-func (sfr *SfDataRepository) GetMergedTrafficCrashesForStreets(ctx context.Context, params *types.GetMergedTrafficCrashesForStreetParams) ([]types.MergedCrashEvents, error) {
-	if params == nil || len(params.CNNs) == 0 {
-		return nil, fmt.Errorf("invalid params, must provide cnns")
-	}
-
-	conn, err := sfr.db.Conn(ctx)
-	if err != nil {
-		sfr.logger.Error("could not establish connection")
-		return nil, err
-	}
-
-	if err := createTempTable(ctx, conn, "selected_cnns", "cnn", params.CNNs); err != nil {
-		return nil, err
-	}
-
-	queryString := fmt.Sprintf(
-		`
-		WITH selected_intersections AS (
-			SELECT cnn
-			FROM
-			(select
-				DISTINCT(f_node_cnn) as cnn
-			FROM
-				sf_streets_and_intersections sfsi
-				JOIN
-				selected_cnns
-				ON sfsi.cnn = selected_cnns.cnn
-			UNION
-			select
-				DISTINCT(t_node_cnn) as cnn
-			FROM
-				sf_streets_and_intersections sfsi
-				JOIN
-				selected_cnns
-				ON sfsi.cnn = selected_cnns.cnn
-			)
-		),
-		filtered_crashes AS (
-			SELECT
-				cnn,
-				occured_at,
-				collision_severity,
-				collision_type,
-				number_killed,
-				number_injured,
-				metadata->>'dph_col_grp' as crash_classification,
-				MakePoint(metadata->>'tb_longitude', metadata->>'tb_latitude', 4326) as point
-			FROM sf_events_traffic_crashes
-			WHERE
-				occured_at BETWEEN %d AND %d
-		),
-		merged_crashes AS (
-			SELECT
-				collision_severity,
-				collision_type,
-				crash_classification,
-				SUM(number_killed) as number_killed,
-				SUM(number_injured) as number_injured,
-				count(*) as number_of_crashes,
-				ST_Centroid(ST_Union(point)) as point
-			FROM
-				selected_intersections as sis
-				JOIN
-				filtered_crashes as crashes ON (sis.cnn = crashes.cnn)
-			GROUP BY
-				1,2,3
-		),
-		selected_crashes AS (
-			SELECT
-				collision_severity,
-				collision_type,
-				crash_classification,
-				number_killed,
-				number_injured,
-				1 as number_of_crashes,
-				point
-			FROM
-				selected_cnns as sc
-				JOIN
-				filtered_crashes as crashes ON (sc.cnn = crashes.cnn)
-		)
-		SELECT
-			collision_severity,
-			collision_type,
-			crash_classification,
-			number_killed,
-			number_injured,
-			number_of_crashes,
-			ST_AsBinary(point) as point
-		FROM
-		(
-			select * from selected_crashes
-			UNION
-			select * from merged_crashes
-		)
-		`,
-		params.StartTime.Unix(),
-		params.EndTime.Unix(),
-	)
-
-	row, err := conn.QueryContext(ctx, queryString)
-	if err != nil {
-		return nil, err
-	}
-	defer row.Close()
-
-	mergedCrashesArr := []types.MergedCrashEvents{}
-	for row.Next() {
-		var mergedCrashEvent = types.MergedCrashEvents{}
-
-		err := row.Scan(
-			&mergedCrashEvent.CollisionSeverity,
-			&mergedCrashEvent.CollisionType,
-			&mergedCrashEvent.CrashClassification,
-			&mergedCrashEvent.NumberKilled,
-			&mergedCrashEvent.NumberInjured,
-			&mergedCrashEvent.NumberOfCrashes,
-			&mergedCrashEvent.Point,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		mergedCrashesArr = append(mergedCrashesArr, mergedCrashEvent)
-	}
-	return mergedCrashesArr, nil
-}
-
 func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, params *types.GetTrafficForStreetsParams) ([]types.CrashEvents, error) {
 	if params == nil || len(params.CNNs) == 0 {
 		return nil, fmt.Errorf("invalid params, must provide cnns")
@@ -430,12 +359,11 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 	crashesArr := []types.CrashEvents{}
 	for row.Next() {
 		var crashEvent = types.CrashEvents{}
-		var occuredAtInt int64
 		var occuredAtTime time.Time
 
 		err := row.Scan(
 			&crashEvent.CNN,
-			&occuredAtInt,
+			&crashEvent.OccuredAtUnix,
 			&crashEvent.CollisionSeverity,
 			&crashEvent.CollisionType,
 			&crashEvent.NumberKilled,
@@ -447,8 +375,8 @@ func (sfr *SfDataRepository) GetTrafficCrashesForStreets(ctx context.Context, pa
 			return nil, err
 		}
 
-		if occuredAtInt > 0 {
-			occuredAtTime = time.Unix(occuredAtInt, 0)
+		if crashEvent.OccuredAtUnix > 0 {
+			occuredAtTime = time.Unix(crashEvent.OccuredAtUnix, 0)
 			crashEvent.OccuredAt = occuredAtTime
 
 		}
@@ -475,6 +403,8 @@ func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, param
 	queryStr := fmt.Sprintf(`
 	SELECT
 		si.cnn,
+		si.f_node_cnn,
+		si.t_node_cnn,
 		TRIM(si.street || ' ' || COALESCE(si.st_type, '')) as street,
 		ST_AsBinary(si.line) as line
 	FROM
@@ -502,7 +432,7 @@ func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, param
 	for rows.Next() {
 		var segment = types.StreetSegment{}
 
-		err := rows.Scan(&segment.CNN, &segment.StreetName, &segment.Line)
+		err := rows.Scan(&segment.CNN, &segment.FNodeCNN, &segment.TNodeCNN, &segment.StreetName, &segment.Line)
 		if err != nil {
 			sfr.logger.Error("could not parse row", "error", err)
 			return nil, err

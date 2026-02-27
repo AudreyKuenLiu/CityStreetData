@@ -1,26 +1,27 @@
 import React, { createContext, useContext, useState } from "react";
 import { DataViewEnum, type DataView } from "./types";
-import {
-  TimeSegments,
-  useStreetGroupsRef,
-} from "../../store/street-map-data-form";
+import { TimeSegments } from "../../store/street-map-data-form";
+import type { StreetGroups } from "../../store/street-map-data-form";
 
-type StreetGroups = ReturnType<typeof useStreetGroupsRef>;
+export interface UserFields {
+  selectedTimeSegment: TimeSegments;
+  selectedStartEndTime: [Date, Date];
+  selectedStreetGroups: StreetGroups;
+}
+
+type OptionalFields<T> = {
+  [K in keyof T]: T[K] | null;
+};
 
 type DataViewFields = {
   currentDataView: DataView;
   selectedIsDirtyHash: string | null;
   setSelectedIsDirtyHash: (isDirtyHash: string) => void;
   setDataView: (dataView: DataView) => void;
-  selectedTimeSegment: TimeSegments | null;
   setSelectedTimeSegment: (timeSegment: TimeSegments) => void;
-  selectedStartEndTime: [Date, Date] | null;
   setSelectedStartEndTime: (startEndTime: [Date, Date]) => void;
-  selectedStreetGroups: StreetGroups | null;
   setSelectedStreetGroups: (streetGroups: StreetGroups) => void;
-  isLoading: boolean;
-  setIsLoading: (isLoading: boolean) => void;
-};
+} & OptionalFields<UserFields>;
 
 const DataViewContext = createContext<DataViewFields | null>(null);
 
@@ -32,7 +33,6 @@ export const DataViewProvider = ({
   const [currentDataView, setDataView] = useState<DataView>(
     DataViewEnum.NoView,
   );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedTimeSegment, setSelectedTimeSegment] =
     useState<TimeSegments | null>(null);
   const [selectedStartEndTime, setSelectedStartEndTime] = useState<
@@ -57,8 +57,6 @@ export const DataViewProvider = ({
         setSelectedStartEndTime,
         selectedStreetGroups,
         setSelectedStreetGroups,
-        isLoading,
-        setIsLoading,
       }}
     >
       {children}

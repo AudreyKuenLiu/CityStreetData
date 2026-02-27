@@ -84,8 +84,7 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       type: "Feature" as const,
       geometry: segment.line,
       properties: {
-        cnn: segment.cnn,
-        line: segment.line,
+        ...segment,
         zoomLevel: ZoomLevelInView.ONE,
       },
     }));
@@ -93,8 +92,7 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       type: "Feature" as const,
       geometry: segment.line,
       properties: {
-        cnn: segment.cnn,
-        line: segment.line,
+        ...segment,
         zoomLevel: ZoomLevelInView.TWO,
       },
     }));
@@ -102,8 +100,7 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       type: "Feature" as const,
       geometry: segment.line,
       properties: {
-        cnn: segment.cnn,
-        line: segment.line,
+        ...segment,
         zoomLevel: ZoomLevelInView.THREE,
       },
     }));

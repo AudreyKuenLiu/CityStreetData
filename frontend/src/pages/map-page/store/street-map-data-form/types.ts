@@ -1,5 +1,6 @@
 import { Brand } from "../../../../types";
 import { StreetSegment } from "../../../../models/map-models";
+import { addMonths, addYears } from "date-fns";
 
 export enum TimeSegments {
   OneMonth = "1M",
@@ -10,6 +11,19 @@ export const TimeSegmentsToName = {
   [TimeSegments.OneMonth]: "Month",
   [TimeSegments.ThreeMonths]: "Three Months",
   [TimeSegments.OneYear]: "Year",
+};
+
+export const addTimeSegment = (
+  date: Date,
+  selectedSegment: TimeSegments,
+): Date => {
+  if (selectedSegment === TimeSegments.OneMonth) {
+    return addMonths(date, 1);
+  }
+  if (selectedSegment === TimeSegments.ThreeMonths) {
+    return addMonths(date, 3);
+  }
+  return addYears(date, 1);
 };
 
 export type GroupId = Brand<string, "GroupId">;
@@ -25,6 +39,7 @@ export const convertToGroupId = (id: string): GroupId | undefined => {
   }
   return;
 };
+export type StreetGroups = Map<GroupId, StreetGroup>;
 
 export type StreetGroup = {
   id: GroupId;

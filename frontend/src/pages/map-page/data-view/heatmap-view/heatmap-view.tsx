@@ -12,10 +12,8 @@ import {
 } from "../../store/heatmap-data";
 import { Source } from "react-map-gl/maplibre";
 import { HeatmapControls } from "./heatmap-controls";
-import { useCrashEventsForStreets } from "./use-crash-events-for-streets";
 
 export const HeatmapView = (): React.JSX.Element => {
-  useCrashEventsForStreets();
   const mapRef = useRef<MapRef | null>(null);
   const currentFeatureCollections = useHeatmapFeatureCollections();
   const layerProps = useHeatmapLayerProps();
@@ -41,7 +39,7 @@ export const HeatmapView = (): React.JSX.Element => {
           SanFranciscoNEPoint[1],
           SanFranciscoNEPoint[0],
         ]}
-        reuseMaps
+        reuseMaps={false}
         maxZoom={MAX_ZOOM}
         style={{ width: "100%", height: "100%" }}
         mapStyle="https://tiles.openfreemap.org/styles/bright"

@@ -55,11 +55,13 @@ export type CrashClassification =
 
 export type ViewportStreetSegment = {
   cnn: number;
+  f_node_cnn: number | null;
+  t_node_cnn: number | null;
   street: string;
   line: LineString;
 };
 
-export type ApiCrashEvents = {
+export type ApiCrashEvent = {
   cnn: number;
   occured_at: number;
   crash_classification: CrashClassification;
@@ -68,6 +70,10 @@ export type ApiCrashEvents = {
   number_killed: number;
   number_injured: number;
 };
+
+export type ApiCrashEventPoint = {
+  point: Point;
+} & ApiCrashEvent;
 
 export type CrashStats = {
   number_killed: number;
@@ -83,7 +89,7 @@ export type CrashStats = {
 
 export type CrashEventFeatureCollection = FeatureCollection<
   Point,
-  ApiCrashEvents
+  ApiCrashEvent
 >;
 
 export const streetFeatureTypeSchema = z.literal(["SpeedLimit"]);

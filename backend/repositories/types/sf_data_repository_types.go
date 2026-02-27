@@ -2,11 +2,9 @@ package types
 
 import (
 	"citystreetdata/types"
-	"encoding/json"
 
 	"time"
 
-	"github.com/twpayne/go-geos/geojson"
 	"github.com/twpayne/go-geos/geometry"
 )
 
@@ -35,6 +33,8 @@ type StreetFeatureSegment struct {
 
 type StreetSegment struct {
 	CNN        int                `json:"cnn"`
+	FNodeCNN   *int               `json:"f_node_cnn"`
+	TNodeCNN   *int               `json:"t_node_cnn"`
 	StreetName string             `json:"street"`
 	Line       *geometry.Geometry `json:"line"`
 }
@@ -100,54 +100,12 @@ type GetTrafficForStreetsParams struct {
 
 type CrashEvents struct {
 	CNN                 int                      `json:"cnn"`
-	OccuredAt           time.Time                `json:"occured_at"`
+	OccuredAt           time.Time                `json:"-"`
+	OccuredAtUnix       int64                    `json:"occured_at"`
 	CollisionSeverity   *types.CollisionSeverity `json:"collision_severity"`
 	CollisionType       *types.CollisionType     `json:"collision_type"`
+	CrashClassification *types.DphGroup          `json:"crash_classification"`
 	NumberKilled        int                      `json:"number_killed"`
 	NumberInjured       int                      `json:"number_injured"`
-	CrashClassification *types.DphGroup          `json:"crash_classification"`
-	Point               *geometry.Geometry       `json:"-"`
-}
-
-func (c CrashEvents) ToFeature() (*geojson.Feature, error) {
-	properties := map[string]any{}
-	mappedCrashEvents := struct {
-		CNN                 int                      `json:"cnn"`
-		OccuredAt           int64                    `json:"occured_at"`
-		CollisionSeverity   *types.CollisionSeverity `json:"collision_severity"`
-		CollisionType       *types.CollisionType     `json:"collision_type"`
-		NumberKilled        int                      `json:"number_killed"`
-		NumberInjured       int                      `json:"number_injured"`
-		CrashClassification *types.DphGroup          `json:"crash_classification"`
-	}{
-		CNN:                 c.CNN,
-		OccuredAt:           c.OccuredAt.Unix(),
-		CollisionSeverity:   c.CollisionSeverity,
-		CollisionType:       c.CollisionType,
-		NumberKilled:        c.NumberKilled,
-		NumberInjured:       c.NumberInjured,
-		CrashClassification: c.CrashClassification,
-	}
-
-	encoding, err := json.Marshal(mappedCrashEvents)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(encoding, &properties)
-	if err != nil {
-		return nil, err
-	}
-
-	if c.Point == nil {
-		return &geojson.Feature{
-			ID:         c.CNN,
-			Properties: properties,
-		}, nil
-	}
-
-	return &geojson.Feature{
-		ID:         c.CNN,
-		Geometry:   *c.Point,
-		Properties: properties,
-	}, nil
+	Point               *geometry.Geometry       `json:"point"`
 }

@@ -6,7 +6,6 @@ import {
   HeatmapFilterEnum,
   type HeatmapData,
   type HeatmapDataActions,
-  type HeatmapGroupTimeSegments,
 } from "./types";
 import { actions } from "./actions";
 import { GroupId } from "../street-map-data-form";
@@ -19,14 +18,15 @@ import { MAX_ZOOM } from "../../map-view/constants";
 import { LayerProps } from "react-map-gl/maplibre";
 import {
   DataDrivenPropertyValueSpecification,
-  FilterSpecification,
+  ExpressionFilterSpecification,
 } from "maplibre-gl";
 
 const useHeatmapData = create<HeatmapData>()(
   devtools(
     (set) => ({
-      heatmapGroupTimeSegments: new Map(),
-      featureCollectionsIndex: 0,
+      timeSegmentList: [],
+      groupIdFeatureCollections: [],
+      timeSegmentIdx: 0,
       fullTimePeriodDisplay: false,
       heatmapFilter: HeatmapFilterEnum.AllInjuries,
       actions: actions({ setState: set }),
@@ -34,27 +34,6 @@ const useHeatmapData = create<HeatmapData>()(
     { name: "HeatmapData" },
   ),
 );
-
-export const useHeatmapFeatureCollectionsByTimeSegment = (): (readonly [
-  GroupId,
-  CrashEventFeatureCollection,
-])[] => {
-  const heatmapGroupTimeSegments = useHeatmapData(
-    useShallow((state) => state.heatmapGroupTimeSegments),
-  );
-  const currentSegmentIdx = useHeatmapData(
-    (state) => state.featureCollectionsIndex,
-  );
-
-  return Array.from(
-    heatmapGroupTimeSegments.entries().map(([groupId, collections]) => {
-      return [
-        groupId,
-        collections.featureCollectionSegments[currentSegmentIdx][1],
-      ] as const;
-    }),
-  );
-};
 
 export const useHeatmapFilter = (): HeatmapFilter => {
   return useHeatmapData(useShallow((state) => state.heatmapFilter));
@@ -84,27 +63,43 @@ const heatmapFilterToCrashClassification = {
 } as const;
 
 export const useHeatmapLayerProps = (): LayerProps => {
-  const heatmapFilter = useHeatmapData(
-    useShallow((state) => state.heatmapFilter),
+  const heatmapFilter = useHeatmapFilter();
+
+  const timeSegmentList = useHeatmapData(
+    useShallow((state) => state.timeSegmentList),
   );
-  let filter: FilterSpecification = [">=", ["get", "occured_at"], 0];
+  const idx = useTimeSegmentIdx();
+  const fullPeriod = useFullTimePeriodDisplay();
+
+  const dynamicFilter: ExpressionFilterSpecification = ["all"];
+
   if (
     heatmapFilter === HeatmapFilterEnum.BicycleInvolvedCrashes ||
     heatmapFilter === HeatmapFilterEnum.PedestrianInvolvedCrashes ||
     heatmapFilter === HeatmapFilterEnum.VehicleInvolvedCrashes
   ) {
-    filter = [
+    dynamicFilter.push([
       "in",
       ["get", "crash_classification"],
       ["literal", heatmapFilterToCrashClassification[heatmapFilter]],
-    ];
+    ]);
   } else if (heatmapFilter === HeatmapFilterEnum.SevereInjuries) {
-    filter = [
+    dynamicFilter.push([
       "in",
       ["get", "collision_severity"],
       ["literal", [CollisionSeverityEnum.Severe]],
-    ];
+    ]);
   }
+
+  let startDate = timeSegmentList[idx] ?? new Date();
+  let endDate = timeSegmentList[idx + 1] ?? new Date();
+  if (fullPeriod) {
+    startDate = timeSegmentList[0] ?? new Date();
+    endDate = timeSegmentList[timeSegmentList.length - 1] ?? new Date();
+  }
+  dynamicFilter.push([">=", ["get", "occured_at"], startDate.getTime() / 1000]);
+  dynamicFilter.push(["<", ["get", "occured_at"], endDate.getTime() / 1000]);
+  // console.log("this is the startEndTime", startDate, endDate);
 
   let heatmapWeight: DataDrivenPropertyValueSpecification<number> = [
     "interpolate",
@@ -126,9 +121,8 @@ export const useHeatmapLayerProps = (): LayerProps => {
   ) {
     heatmapWeight = ["interpolate", ["linear"], 0, 0, 10, 1];
   }
-
   return {
-    filter,
+    filter: dynamicFilter,
     maxzoom: MAX_ZOOM,
     type: "heatmap",
     paint: {
@@ -185,71 +179,20 @@ export const useHeatmapFeatureCollections = (): (readonly [
   GroupId,
   CrashEventFeatureCollection,
 ])[] => {
-  const heatmapGroupTimeSegments = useHeatmapData(
-    useShallow((state) => state.heatmapGroupTimeSegments),
-  );
-  const currentSegmentIdx = useHeatmapData(
-    (state) => state.featureCollectionsIndex,
-  );
-  const fullTimePeriodDisplay = useHeatmapData(
-    (state) => state.fullTimePeriodDisplay,
-  );
-
-  if (fullTimePeriodDisplay) {
-    return Array.from(
-      heatmapGroupTimeSegments.entries().map(([groupId, collections]) => {
-        const mergedFeatureCollection: CrashEventFeatureCollection = {
-          type: "FeatureCollection",
-          features: [],
-        };
-        for (const [
-          ,
-          featureCollection,
-        ] of collections.featureCollectionSegments) {
-          mergedFeatureCollection.features = [
-            ...mergedFeatureCollection.features,
-            ...featureCollection.features,
-          ];
-        }
-        return [groupId, mergedFeatureCollection] as const;
-      }),
-    );
-  }
-  return Array.from(
-    heatmapGroupTimeSegments.entries().map(([groupId, collections]) => {
-      return [
-        groupId,
-        collections.featureCollectionSegments[currentSegmentIdx][1],
-      ] as const;
-    }),
-  );
+  return useHeatmapData(useShallow((state) => state.groupIdFeatureCollections));
 };
 
-export const useHeatmapTimeSegments = (): HeatmapGroupTimeSegments => {
-  return useHeatmapData(useShallow((state) => state.heatmapGroupTimeSegments));
+export const useTimeSegmentIdx = (): number => {
+  return useHeatmapData((state) => state.timeSegmentIdx);
 };
 
-export const useFeatureCollectionsIndex = (): number => {
-  return useHeatmapData((state) => state.featureCollectionsIndex);
-};
-
-export const useFullTimePeriodDisply = (): boolean => {
+export const useFullTimePeriodDisplay = (): boolean => {
   return useHeatmapData((state) => state.fullTimePeriodDisplay);
 };
 
 export const useHeatmapTimeSegmentDates = (): Date[] => {
-  return useHeatmapData(
-    useShallow((state) => {
-      const heatmapTimeSegment = state.heatmapGroupTimeSegments.entries().next()
-        .value?.[1];
-      if (heatmapTimeSegment == null) {
-        return [];
-      }
-      return heatmapTimeSegment.featureCollectionSegments.map(([date]) => {
-        return date;
-      });
-    }),
-  );
+  const arr = useHeatmapData(useShallow((state) => state.timeSegmentList));
+  return arr.slice(0, -1);
 };
 
 export const useActions = (): HeatmapDataActions => {

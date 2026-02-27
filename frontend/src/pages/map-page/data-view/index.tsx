@@ -10,6 +10,7 @@ import { DataViewEnum } from "../context/data-view/types";
 import { HeatmapView } from "./heatmap-view/heatmap-view";
 import { TrendChartList } from "./trend-chart-list/trend-chart-list";
 import { LoadingDataView } from "./loading-data-view";
+import { useAllCrashEvents } from "./use-all-crash-events";
 
 const useHasNoData = (): boolean => {
   // const trafficCrashData = useTrafficCrashesData();
@@ -26,30 +27,6 @@ const useHasNoData = (): boolean => {
 };
 
 export const DataView = (): React.JSX.Element => {
-  //const hasNoData = useHasNoData();
-  const { isLoading } = useDataViewContext();
-  console.log("rerendering data view");
-  if (isLoading) {
-    return <LoadingDataView />;
-  }
-
-  // if (hasNoData) {
-  //   return (
-  //     <Flex
-  //       style={{
-  //         flexDirection: "column",
-  //         justifyContent: "center",
-  //         alignItems: "center",
-  //         height: "100vh",
-  //       }}
-  //     >
-  //       <ContainerOutlined style={{ fontSize: "64px", color: "gray" }} />
-  //       <Typography.Title level={3} type="secondary">
-  //         No Data
-  //       </Typography.Title>
-  //     </Flex>
-  //   );
-  // }
   return (
     <Suspense fallback={<LoadingDataView />}>
       <Flex style={{ position: "relative" }}>
@@ -61,6 +38,7 @@ export const DataView = (): React.JSX.Element => {
 
 const DataViewBody = (): React.JSX.Element => {
   const { currentDataView } = useDataViewContext();
+  useAllCrashEvents();
   if (currentDataView === DataViewEnum.AreaChartView) {
     return (
       <Flex

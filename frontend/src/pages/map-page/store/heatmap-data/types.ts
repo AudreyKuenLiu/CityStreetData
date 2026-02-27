@@ -2,6 +2,8 @@ import { GroupId } from "../street-map-data-form";
 import { CrashEventFeatureCollection } from "../../../../models/api-models";
 import { FeatureCollection, Point } from "geojson";
 import { z } from "zod";
+import { CrashMap } from "../../../../models/map-models";
+import { UserFields } from "../../context/data-view";
 
 export type DateFeatureCollections = (readonly [
   Date,
@@ -35,8 +37,15 @@ export type HeatmapFilter =
   (typeof HeatmapFilterEnum)[keyof typeof HeatmapFilterEnum];
 
 export type HeatmapDataActions = {
-  setHeatmapData: ({ data }: { data: HeatmapGroupData }) => void;
-  setFeatureCollectionsIndex: ({ newIdx }: { newIdx: number }) => boolean;
+  initializeHeatmap: ({
+    data,
+    selectedStartEndTime,
+    selectedStreetGroups,
+    selectedTimeSegment,
+  }: {
+    data: CrashMap;
+  } & UserFields) => void;
+  setTimeSegmentIdx: ({ newIdx }: { newIdx: number }) => boolean;
   setHeatmapFilter: ({
     heatmapFilter,
   }: {
@@ -46,8 +55,12 @@ export type HeatmapDataActions = {
 };
 
 export type HeatmapData = {
-  heatmapGroupTimeSegments: HeatmapGroupTimeSegments;
-  featureCollectionsIndex: number;
+  groupIdFeatureCollections: (readonly [
+    GroupId,
+    CrashEventFeatureCollection,
+  ])[];
+  timeSegmentIdx: number;
+  timeSegmentList: Date[];
   fullTimePeriodDisplay: boolean;
   heatmapFilter: HeatmapFilter;
   actions: HeatmapDataActions;
