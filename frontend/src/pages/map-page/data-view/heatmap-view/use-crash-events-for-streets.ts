@@ -5,9 +5,17 @@ import { CrashEventFeatureCollection } from "../../../../models/api-models";
 import { useActions as useHeatmapDataActions } from "../../store/heatmap-data";
 import type { HeatmapGroupData } from "../../store/heatmap-data";
 import { useDataViewContext } from "../../context/data-view";
-import { useActions } from "../../store/street-map-data-form";
+import {
+  useActions,
+  useStreetGroupsRef,
+} from "../../store/street-map-data-form";
 
 export const useCrashEventsForStreets = (): void => {
+  //okay the way to do this can be via intervals: every time query a new start and end time check if it
+  //has already been queried, if so then don't query again, if not query for the missing data, and then
+  //updating the existing storage with the data and update
+
+  //maybe the best way to do this is to get all the crashes and do querying by cnns, etc..
   const {
     selectedTimeSegment: timeSegment,
     selectedStartEndTime,
@@ -15,10 +23,14 @@ export const useCrashEventsForStreets = (): void => {
     selectedIsDirtyHash,
   } = useDataViewContext();
   const [startTime, endTime] = selectedStartEndTime ?? [undefined, undefined];
-  const streetGroups = selectedStreetGroups ?? new Map();
+  const streetGroups: ReturnType<typeof useStreetGroupsRef> =
+    selectedStreetGroups ?? new Map();
   const { resetIsDirty } = useActions();
 
   const { setHeatmapData } = useHeatmapDataActions();
+  // const cnns = Array.from(streetGroups.values()).map((streetGroup) => {
+  //   return streetGroup.cnns;
+  // });
 
   const result = useSuspenseQuery({
     queryKey: [
@@ -29,7 +41,7 @@ export const useCrashEventsForStreets = (): void => {
       streetGroups,
       selectedIsDirtyHash,
     ],
-    gcTime: 0,
+    gcTime: 300_000, // 5 minutes,
     queryFn: async (): Promise<{
       crashEvents: HeatmapGroupData;
     }> => {

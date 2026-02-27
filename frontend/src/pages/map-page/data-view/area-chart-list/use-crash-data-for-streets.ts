@@ -50,7 +50,7 @@ export const useCrashDataForStreets = (): void => {
       timeSegment,
       selectedIsDirtyHash,
     ],
-    gcTime: 0,
+    gcTime: 120_000, //2 minutes
     queryFn: async (): Promise<{
       graphData: GraphGroupData;
     }> => {

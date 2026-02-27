@@ -29,7 +29,7 @@ export const useCrashTrendsForStreets = (): void => {
       streetGroups,
       selectedIsDirtyHash,
     ],
-    gcTime: 0,
+    gcTime: 120_000, //2 minutes
     queryFn: async (): Promise<GroupTrendData> => {
       const allResults = Array.from(streetGroups.values()).map(
         async (streetGroup) => {
