@@ -3,6 +3,7 @@ import axios from "axios";
 import { ApiCrashEventPoint } from "../../../models/api-models";
 import { useActions as useHeatmapActions } from "../store/heatmap-data";
 import { useActions } from "../store/street-map-data-form";
+import { useActions as useAreaChartListAction } from "../store/area-chart-list-data";
 import { useEffect } from "react";
 import { CrashMap } from "../../../models/map-models";
 import { useDataViewContext } from "../context/data-view";
@@ -11,6 +12,7 @@ import { TimeSegments } from "../store/street-map-data-form";
 
 export const useAllCrashEvents = (): void => {
   const { initializeHeatmap } = useHeatmapActions();
+  const { initializeGraphData } = useAreaChartListAction();
   const {
     selectedStreetGroups,
     selectedStartEndTime,
@@ -51,10 +53,20 @@ export const useAllCrashEvents = (): void => {
         selectedTimeSegment: selectedTimeSegment ?? TimeSegments.OneYear,
       });
     }
+    if (currentDataView === DataViewEnum.AreaChartView) {
+      console.log("reinitializing areachart");
+      initializeGraphData({
+        data: result.data,
+        selectedStartEndTime: selectedStartEndTime ?? [new Date(), new Date()],
+        selectedStreetGroups: selectedStreetGroups ?? new Map(),
+        selectedTimeSegment: selectedTimeSegment ?? TimeSegments.OneYear,
+      });
+    }
     resetIsDirty();
   }, [
     result.data,
     initializeHeatmap,
+    initializeGraphData,
     currentDataView,
     selectedStartEndTime,
     selectedStreetGroups,

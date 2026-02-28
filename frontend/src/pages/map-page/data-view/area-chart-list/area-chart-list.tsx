@@ -5,11 +5,9 @@ import { useStreetGroupsRef } from "../../store/street-map-data-form";
 import { useTrafficCrashesData } from "../../store/area-chart-list-data";
 import { XFilled } from "@ant-design/icons";
 import type { SliceTooltipProps } from "@nivo/line";
-import { useCrashDataForStreets } from "./use-crash-data-for-streets";
 
 export const AreaChartList = (): React.JSX.Element => {
   //TODO: optimize the rendering of this component to handle large number of values instead of just rendering every possible value
-  useCrashDataForStreets();
   const streetGroups = useStreetGroupsRef();
   const trafficCrashGroupData = useTrafficCrashesData();
 

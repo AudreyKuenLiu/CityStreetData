@@ -1,18 +1,27 @@
 import { GroupId } from "../street-map-data-form";
 import { CrashStats, StreetFeature } from "../../../../models/api-models";
+import type { CrashMap } from "../../../../models/map-models";
+import { UserFields } from "../../context/data-view";
 
 export type DateCrashStats = readonly [Date, CrashStats];
-export type GraphGroupData = Map<
+export type GraphGroupData = (readonly [
   GroupId,
-  { totalMiles: number; dateCrashStats: DateCrashStats[] }
->;
+  { totalMiles: number; dateCrashStats: DateCrashStats[] },
+])[];
 export type GraphGroupFeatures = Map<
   GroupId,
   readonly [Date, Map<StreetFeature, string>][]
 >;
 
 export type GraphDataActions = {
-  setGraphData: (data: GraphGroupData) => void;
+  initializeGraphData: ({
+    data,
+    selectedStartEndTime,
+    selectedStreetGroups,
+    selectedTimeSegment,
+  }: {
+    data: CrashMap;
+  } & UserFields) => void;
   toggleNormalize: () => void;
   selectCurrentGraph: (graphType: GraphType) => void;
 };

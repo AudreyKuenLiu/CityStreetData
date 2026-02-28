@@ -1,34 +1,10 @@
 import { StoreApi } from "zustand";
 import type { HeatmapData, HeatmapDataActions, HeatmapFilter } from "./types";
-import { TimeSegments } from "../street-map-data-form";
-import {
-  addTimeSegment,
-  GroupId,
-  StreetGroups,
-} from "../street-map-data-form/types";
+import { GroupId, StreetGroups } from "../street-map-data-form/types";
 import { CrashEventFeatureCollection } from "../../../../models/api-models";
 import { CrashMap } from "../../../../models/map-models";
 import { feature, featureCollection } from "@turf/turf";
-
-const buildTimeList = ({
-  startEndTime,
-  timeSegment,
-}: {
-  startEndTime: [Date, Date];
-  timeSegment: TimeSegments;
-}): Date[] => {
-  const [startTime, endTime] = startEndTime;
-  let it = startTime;
-  const ret = [];
-
-  while (it < endTime) {
-    ret.push(it);
-    it = addTimeSegment(it, timeSegment);
-  }
-  ret.push(endTime);
-
-  return ret;
-};
+import { buildTimeList, getSelectedCnns } from "../../utils";
 
 const buildGroupFeatureCollections = ({
   crashMap,
@@ -44,16 +20,7 @@ const buildGroupFeatureCollections = ({
           return streetSegment;
         },
       );
-      const uniqueCnns = new Set<number>();
-      for (const segment of streetSegments) {
-        uniqueCnns.add(segment.cnn);
-        if (segment.f_node_cnn != null) {
-          uniqueCnns.add(segment.f_node_cnn);
-        }
-        if (segment.t_node_cnn != null) {
-          uniqueCnns.add(segment.t_node_cnn);
-        }
-      }
+      const uniqueCnns = getSelectedCnns(streetSegments);
 
       const crashFeatures = [];
       for (const cnn of uniqueCnns) {

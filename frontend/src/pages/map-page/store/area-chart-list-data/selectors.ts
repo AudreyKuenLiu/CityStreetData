@@ -13,7 +13,7 @@ import { GroupLineData } from "../../types/graphs";
 const useGraphData = create<GraphData>()(
   devtools(
     (set) => ({
-      graphGroupData: new Map(),
+      graphGroupData: [],
       shouldNormalize: false,
       currentGraphType: "InjuriesAndFatalities",
       actions: actions({ setState: set }),
@@ -58,8 +58,7 @@ const initializeVehicleCrashesData = (
     "Bicycle-Pedestrian",
   ]
 > => {
-  const groupGraphDataArray = Array.from(data.entries());
-  const groupIdGraphDataArray = groupGraphDataArray.map(
+  const groupIdGraphDataArray = data.map(
     ([id, { totalMiles, dateCrashStats: groupCrash }]) => {
       const sortedGroupCrashes = sortDateEvents(groupCrash);
       const otherCrashes = sortedGroupCrashes.map(([time, crashStats]) => {
@@ -168,8 +167,7 @@ const initializeTrafficInjuriesAndFatalitiesData = (
   data: GraphGroupData,
   shouldNormalize: boolean,
 ): GroupLineData<["Fatalities", "Severe Injuries", "Injuries"]> => {
-  const groupGraphDataArray = Array.from(data.entries());
-  const groupIdGraphDataArray = groupGraphDataArray.map(
+  const groupIdGraphDataArray = data.map(
     ([id, { totalMiles, dateCrashStats: groupCrash }]) => {
       const sortedGroupCrashes = sortDateEvents(groupCrash);
       const fatalitiesData = sortedGroupCrashes.map(([time, crashStats]) => {
