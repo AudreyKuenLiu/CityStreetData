@@ -1,14 +1,29 @@
 import React, { Suspense } from "react";
 
-import { AreaChartList } from "./area-chart-list/area-chart-list";
+// import { AreaChartList } from "./area-chart-list/area-chart-list";
+// import { TrendChartList } from "./trend-chart-list/trend-chart-list";
+// import { HeatmapView } from "./heatmap-view/heatmap-view";
+const AreaChartList = React.lazy(() =>
+  import("./area-chart-list/area-chart-list").then((module) => ({
+    default: module.AreaChartList,
+  })),
+);
+const TrendChartList = React.lazy(() =>
+  import("./trend-chart-list/trend-chart-list").then((module) => ({
+    default: module.TrendChartList,
+  })),
+);
+const HeatmapView = React.lazy(() =>
+  import("./heatmap-view/heatmap-view").then((module) => ({
+    default: module.HeatmapView,
+  })),
+);
 import { ControlPanel } from "./area-chart-list/control-panel";
 import { Flex, Typography } from "antd";
 import { ContainerOutlined } from "@ant-design/icons";
 import { useStreetGroupsRef } from "../store/street-map-data-form";
 import { useDataViewContext } from "../context/data-view";
 import { DataViewEnum } from "../context/data-view/types";
-import { HeatmapView } from "./heatmap-view/heatmap-view";
-import { TrendChartList } from "./trend-chart-list/trend-chart-list";
 import { LoadingDataView } from "./loading-data-view";
 import { useAllCrashEvents } from "./use-all-crash-events";
 

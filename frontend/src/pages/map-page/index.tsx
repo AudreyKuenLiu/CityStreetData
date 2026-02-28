@@ -4,6 +4,9 @@ import { MapView } from "./map-view";
 import { ConfigProvider, Splitter } from "antd";
 import { Layout } from "antd";
 import { DataView } from "./data-view";
+// const DataView = React.lazy(() =>
+//   import("./data-view").then((module) => ({ default: module.DataView })),
+// );
 import { DataViewProvider } from "./context/data-view";
 import { LeftPanelClassName, RightPanelClassName } from "./map-view/constants";
 
