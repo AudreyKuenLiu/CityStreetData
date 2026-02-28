@@ -1,8 +1,5 @@
 import React, { Suspense } from "react";
 
-// import { AreaChartList } from "./area-chart-list/area-chart-list";
-// import { TrendChartList } from "./trend-chart-list/trend-chart-list";
-// import { HeatmapView } from "./heatmap-view/heatmap-view";
 const AreaChartList = React.lazy(() =>
   import("./area-chart-list/area-chart-list").then((module) => ({
     default: module.AreaChartList,
