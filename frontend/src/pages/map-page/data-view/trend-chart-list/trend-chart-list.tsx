@@ -6,10 +6,8 @@ import { useCrashTrendData } from "../../store/trend-chart-list-data";
 import { PointTooltipProps, ResponsiveLine } from "@nivo/line";
 import { ControlPanel } from "./control-panel";
 import { AverageLineSeriesId } from "../../store/trend-chart-list-data/types";
-import { useCrashTrendsForStreets } from "./use-crash-trends-for-streets";
 
 export const TrendChartList = (): React.JSX.Element => {
-  useCrashTrendsForStreets();
   const streetGroups = useStreetGroupsRef();
   const crashTrendData = useCrashTrendData();
 

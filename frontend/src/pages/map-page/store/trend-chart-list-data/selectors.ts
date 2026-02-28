@@ -2,10 +2,11 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import {
   TrendListData,
-  GroupTrendData,
+  GroupTimeTrendData,
   TimeTrends,
   TrendListActions,
   AverageLineSeriesId,
+  timeTrendsToAxis,
 } from "./types";
 import { actions } from "./actions";
 import { GroupLineData } from "../../types/graphs";
@@ -18,7 +19,7 @@ const useTrendChartListData = create<TrendListData>()(
   devtools(
     (set) => ({
       currentTimeTrend: TimeTrends.HOURLY,
-      groupTrendData: new Map(),
+      groupTimeTrendData: [],
       actions: actions({ setState: set }),
     }),
     { name: "TrendListData" },
@@ -31,145 +32,97 @@ const timeTrendsToName = {
   [TimeTrends.MONTHLY]: "Monthly",
 };
 
-const timeTrendsToAxis = {
-  [TimeTrends.HOURLY]: [
-    "00:00",
-    "01:00",
-    "02:00",
-    "03:00",
-    "04:00",
-    "05:00",
-    "06:00",
-    "07:00",
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-    "20:00",
-    "21:00",
-    "22:00",
-    "23:00",
-  ],
-  [TimeTrends.DAILY]: ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"],
-  [TimeTrends.MONTHLY]: [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sept",
-    "Oct",
-    "Nov",
-    "Dec",
-  ],
-} as const;
-
 const initializeTrendDateByTimePeriod = ({
-  groupTrendData,
+  groupTimeTrendData,
   timeTrends,
   selectedTimeSegment,
 }: {
-  groupTrendData: GroupTrendData;
+  groupTimeTrendData: GroupTimeTrendData;
   timeTrends: TimeTrends;
   selectedTimeSegment: TimeSegments | null;
 }): GroupLineData<string, string> => {
-  const ret = Array.from(groupTrendData.entries()).map(
-    ([groupId, dateCrashStats]) => {
-      let lineSeries = dateCrashStats.map(({ timeSegment, crashStats }) => {
-        const crashStatMap = new Map<
-          (typeof timeTrendsToAxis)[keyof typeof timeTrendsToAxis][number],
-          number
-        >();
-        for (const crashStat of crashStats) {
-          const { occuredAt } = crashStat;
-          let occuredTrendSegment =
-            timeTrendsToAxis[timeTrends][occuredAt.getMonth()];
-          if (timeTrends === TimeTrends.HOURLY) {
-            occuredTrendSegment =
-              timeTrendsToAxis[timeTrends][occuredAt.getHours()];
-          } else if (timeTrends === TimeTrends.DAILY) {
-            occuredTrendSegment =
-              timeTrendsToAxis[timeTrends][occuredAt.getDay()];
-          }
-          const totalInjuries =
-            (crashStatMap.get(occuredTrendSegment) ?? 0) +
-            crashStat.numberInjured;
-          // (crashStat.collisionSeverity === "severe"
-          //   ? crashStat.numberInjured
-          //   : 0);
-          crashStatMap.set(occuredTrendSegment, totalInjuries);
+  const ret = groupTimeTrendData.map(([groupId, dateCrashStats]) => {
+    let lineSeries = dateCrashStats.map(({ timeSegment, crashStats }) => {
+      const crashStatMap = new Map<
+        (typeof timeTrendsToAxis)[keyof typeof timeTrendsToAxis][number],
+        number
+      >();
+      for (const crashStat of crashStats) {
+        const { occuredAt } = crashStat;
+        let occuredTrendSegment =
+          timeTrendsToAxis[timeTrends][occuredAt.getMonth()];
+        if (timeTrends === TimeTrends.HOURLY) {
+          occuredTrendSegment =
+            timeTrendsToAxis[timeTrends][occuredAt.getHours()];
+        } else if (timeTrends === TimeTrends.DAILY) {
+          occuredTrendSegment =
+            timeTrendsToAxis[timeTrends][occuredAt.getDay()];
         }
+        const totalInjuries =
+          (crashStatMap.get(occuredTrendSegment) ?? 0) +
+          crashStat.numberInjured;
+        // (crashStat.collisionSeverity === "severe"
+        //   ? crashStat.numberInjured
+        //   : 0);
+        crashStatMap.set(occuredTrendSegment, totalInjuries);
+      }
 
-        return {
-          id: timeSegment.toDateString(),
-          data: Array.from(timeTrendsToAxis[timeTrends]).map(
-            (timeTrendSegment) => {
-              return {
-                y: crashStatMap.get(timeTrendSegment) ?? 0,
-                x: timeTrendSegment,
-              };
-            },
-          ),
-          color: "#D3D3D3",
-        };
-      });
-      const averageLineSeries = {
-        id: AverageLineSeriesId,
+      return {
+        id: timeSegment.toDateString(),
         data: Array.from(timeTrendsToAxis[timeTrends]).map(
           (timeTrendSegment) => {
             return {
-              y: 0,
+              y: crashStatMap.get(timeTrendSegment) ?? 0,
               x: timeTrendSegment,
             };
           },
         ),
-        color: "black",
+        color: "#D3D3D3",
       };
-      for (const lines of lineSeries) {
-        for (const [idx, { y }] of lines.data.entries()) {
-          averageLineSeries.data[idx].y += y;
-        }
-      }
-      averageLineSeries.data = averageLineSeries.data.map((vals) => {
+    });
+    const averageLineSeries = {
+      id: AverageLineSeriesId,
+      data: Array.from(timeTrendsToAxis[timeTrends]).map((timeTrendSegment) => {
         return {
-          y: Number((vals.y / lineSeries.length).toFixed(2)),
-          x: vals.x,
+          y: 0,
+          x: timeTrendSegment,
         };
-      });
-      lineSeries = [averageLineSeries, ...lineSeries];
-
+      }),
+      color: "black",
+    };
+    for (const lines of lineSeries) {
+      for (const [idx, { y }] of lines.data.entries()) {
+        averageLineSeries.data[idx].y += y;
+      }
+    }
+    averageLineSeries.data = averageLineSeries.data.map((vals) => {
       return {
-        id: groupId,
-        tickValues: Array.from(timeTrendsToAxis[timeTrends]),
-        lineSeries,
-        axisLegend: `${timeTrendsToName[timeTrends]} Traffic Injuries Every ${TimeSegmentsToName[selectedTimeSegment ?? TimeSegments.OneYear]}`,
-      } as const;
-    },
-  );
+        y: Number((vals.y / lineSeries.length).toFixed(2)),
+        x: vals.x,
+      };
+    });
+    lineSeries = [averageLineSeries, ...lineSeries];
+
+    return {
+      id: groupId,
+      tickValues: Array.from(timeTrendsToAxis[timeTrends]),
+      lineSeries,
+      axisLegend: `${timeTrendsToName[timeTrends]} Traffic Injuries Every ${TimeSegmentsToName[selectedTimeSegment ?? TimeSegments.OneYear]}`,
+    } as const;
+  });
   return ret;
 };
 
 export const useCrashTrendData = (): GroupLineData<string, string> => {
   const { selectedTimeSegment } = useDataViewContext();
-  const groupTrendData = useTrendChartListData(
-    useShallow((state) => state.groupTrendData),
+  const groupTimeTrendData = useTrendChartListData(
+    useShallow((state) => state.groupTimeTrendData),
   );
   const timeTrends = useTrendChartListData(
     useShallow((state) => state.currentTimeTrend),
   );
   return initializeTrendDateByTimePeriod({
-    groupTrendData,
+    groupTimeTrendData,
     timeTrends: timeTrends ?? TimeTrends.DAILY,
     selectedTimeSegment,
   });

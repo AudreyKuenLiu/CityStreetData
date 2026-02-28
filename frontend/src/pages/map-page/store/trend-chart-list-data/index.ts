@@ -1,2 +1,2 @@
-export type { GroupTrendData } from "./types";
+export type { GroupTimeTrendData } from "./types";
 export * from "./selectors";
