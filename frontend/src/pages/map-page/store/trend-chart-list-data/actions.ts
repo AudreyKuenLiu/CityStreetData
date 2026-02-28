@@ -106,6 +106,13 @@ export const actions = ({
       };
     });
   },
+  setTimeTrendFilter: (filter): void => {
+    setState(() => {
+      return {
+        currentTimeTrendFilter: filter,
+      };
+    });
+  },
   setGraphData: (data: GroupTimeTrendData): void => {
     setState(() => {
       return {

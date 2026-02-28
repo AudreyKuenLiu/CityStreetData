@@ -8,7 +8,7 @@ import {
   GraphType,
 } from "./types";
 import { actions } from "./actions";
-import { GroupLineData } from "../../types/graphs";
+import { GroupLineData } from "../../types/data-view";
 
 const useGraphData = create<GraphData>()(
   devtools(

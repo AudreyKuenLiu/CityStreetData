@@ -1,17 +1,11 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/shallow";
 import { devtools } from "zustand/middleware";
-import {
-  HeatmapFilter,
-  HeatmapFilterEnum,
-  type HeatmapData,
-  type HeatmapDataActions,
-} from "./types";
+import { type HeatmapData, type HeatmapDataActions } from "./types";
 import { actions } from "./actions";
 import { GroupId } from "../street-map-data-form";
 import {
   CollisionSeverityEnum,
-  CrashClassificationEnum,
   CrashEventFeatureCollection,
 } from "../../../../models/api-models";
 import { MAX_ZOOM } from "../../map-view/constants";
@@ -20,6 +14,11 @@ import {
   DataDrivenPropertyValueSpecification,
   ExpressionFilterSpecification,
 } from "maplibre-gl";
+import {
+  InjuryCrashTypeFilter,
+  InjuryCrashTypeFilterEnum,
+  injuryCrashTypeToCrashClassification,
+} from "../../types/data-view";
 
 const useHeatmapData = create<HeatmapData>()(
   devtools(
@@ -28,39 +27,16 @@ const useHeatmapData = create<HeatmapData>()(
       groupIdFeatureCollections: [],
       timeSegmentIdx: 0,
       fullTimePeriodDisplay: false,
-      heatmapFilter: HeatmapFilterEnum.AllInjuries,
+      heatmapFilter: InjuryCrashTypeFilterEnum.AllInjuries,
       actions: actions({ setState: set }),
     }),
     { name: "HeatmapData" },
   ),
 );
 
-export const useHeatmapFilter = (): HeatmapFilter => {
+export const useHeatmapFilter = (): InjuryCrashTypeFilter => {
   return useHeatmapData(useShallow((state) => state.heatmapFilter));
 };
-
-const heatmapFilterToCrashClassification = {
-  [HeatmapFilterEnum.BicycleInvolvedCrashes]: [
-    CrashClassificationEnum.BicycleOnly,
-    CrashClassificationEnum.BicycleParkedCar,
-    CrashClassificationEnum.BicyclePedestrian,
-    CrashClassificationEnum.VehicleBicyclePedestrian,
-    CrashClassificationEnum.BicycleUnknown,
-    CrashClassificationEnum.VehicleBicycle,
-  ],
-  [HeatmapFilterEnum.PedestrianInvolvedCrashes]: [
-    CrashClassificationEnum.PedestrianOnly,
-    CrashClassificationEnum.BicyclePedestrian,
-    CrashClassificationEnum.VehicleBicyclePedestrian,
-    CrashClassificationEnum.VehiclePedestrian,
-  ],
-  [HeatmapFilterEnum.VehicleInvolvedCrashes]: [
-    CrashClassificationEnum.VehiclesOnly,
-    CrashClassificationEnum.VehicleBicycle,
-    CrashClassificationEnum.VehicleBicyclePedestrian,
-    CrashClassificationEnum.VehiclePedestrian,
-  ],
-} as const;
 
 export const useHeatmapLayerProps = (): LayerProps => {
   const heatmapFilter = useHeatmapFilter();
@@ -74,16 +50,16 @@ export const useHeatmapLayerProps = (): LayerProps => {
   const dynamicFilter: ExpressionFilterSpecification = ["all"];
 
   if (
-    heatmapFilter === HeatmapFilterEnum.BicycleInvolvedCrashes ||
-    heatmapFilter === HeatmapFilterEnum.PedestrianInvolvedCrashes ||
-    heatmapFilter === HeatmapFilterEnum.VehicleInvolvedCrashes
+    heatmapFilter === InjuryCrashTypeFilterEnum.BicycleInvolvedCrashes ||
+    heatmapFilter === InjuryCrashTypeFilterEnum.PedestrianInvolvedCrashes ||
+    heatmapFilter === InjuryCrashTypeFilterEnum.VehicleInvolvedCrashes
   ) {
     dynamicFilter.push([
       "in",
       ["get", "crash_classification"],
-      ["literal", heatmapFilterToCrashClassification[heatmapFilter]],
+      ["literal", injuryCrashTypeToCrashClassification[heatmapFilter]],
     ]);
-  } else if (heatmapFilter === HeatmapFilterEnum.SevereInjuries) {
+  } else if (heatmapFilter === InjuryCrashTypeFilterEnum.SevereInjuries) {
     dynamicFilter.push([
       "in",
       ["get", "collision_severity"],
@@ -114,9 +90,9 @@ export const useHeatmapLayerProps = (): LayerProps => {
   if (
     heatmapFilter in
     [
-      HeatmapFilterEnum.BicycleInvolvedCrashes,
-      HeatmapFilterEnum.PedestrianInvolvedCrashes,
-      HeatmapFilterEnum.VehicleInvolvedCrashes,
+      InjuryCrashTypeFilterEnum.BicycleInvolvedCrashes,
+      InjuryCrashTypeFilterEnum.PedestrianInvolvedCrashes,
+      InjuryCrashTypeFilterEnum.VehicleInvolvedCrashes,
     ]
   ) {
     heatmapWeight = ["interpolate", ["linear"], 0, 0, 10, 1];

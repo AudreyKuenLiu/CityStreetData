@@ -5,16 +5,30 @@ import {
 } from "../../../../models/api-models";
 import { CrashMap } from "../../../../models/map-models";
 import { UserFields } from "../../context/data-view";
+import z from "zod";
+import { InjuryCrashTypeFilter } from "../../types/data-view";
 
-export enum TimeTrends {
+export enum TimeTrendsEnum {
   HOURLY, //0-24hrs
   DAILY, //Mon - Fri
   MONTHLY, //Jan - Dec
 }
 
+const TimeTrendFilterSchema = z.object({
+  AllInjuries: "AllInjuries",
+  SevereInjuries: "SevereInjuries",
+  VehicleInvolvedCrashes: "VehicleInvolvedCrashes",
+  BicycleInvolvedCrashes: "BicycleInvolvedCrashes",
+  PedestrianInvolvedCrashes: "PedestrianInvolvedCrashes",
+} as const);
+export const TimeTrendFilterKeys = TimeTrendFilterSchema.keyof();
+export const TimeTrendFilterEnum = TimeTrendFilterSchema.shape;
+export type TimeTrendFilter =
+  (typeof TimeTrendFilterEnum)[keyof typeof TimeTrendFilterEnum];
+
 export const AverageLineSeriesId = "Average";
 export const timeTrendsToAxis = {
-  [TimeTrends.HOURLY]: [
+  [TimeTrendsEnum.HOURLY]: [
     "00:00",
     "01:00",
     "02:00",
@@ -40,8 +54,8 @@ export const timeTrendsToAxis = {
     "22:00",
     "23:00",
   ],
-  [TimeTrends.DAILY]: ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"],
-  [TimeTrends.MONTHLY]: [
+  [TimeTrendsEnum.DAILY]: ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"],
+  [TimeTrendsEnum.MONTHLY]: [
     "Jan",
     "Feb",
     "Mar",
@@ -71,7 +85,8 @@ export type GroupTimeTrendData = (readonly [
 ])[];
 
 export type TrendListData = {
-  currentTimeTrend: TimeTrends;
+  currentTimeTrend: TimeTrendsEnum;
+  currentTimeTrendFilter: InjuryCrashTypeFilter;
   groupTimeTrendData: GroupTimeTrendData;
   actions: TrendListActions;
 };
@@ -83,5 +98,6 @@ export type TrendListActions = {
     selectedTimeSegment,
   }: { data: CrashMap } & UserFields) => void;
   setGraphData: (data: GroupTimeTrendData) => void;
-  setCurrentTimeTrend: (timeTrend: TimeTrends) => void;
+  setTimeTrendFilter: (filter: InjuryCrashTypeFilter) => void;
+  setCurrentTimeTrend: (timeTrend: TimeTrendsEnum) => void;
 };

@@ -13,44 +13,9 @@ import {
   useFullTimePeriodDisplay,
   useHeatmapFilter,
 } from "../../store/heatmap-data";
-import { HeatmapFilterEnum } from "../../store/heatmap-data/types";
+import { injuryCrashTypeOptions } from "../../types/data-view";
 import _ from "lodash";
 import { useDataViewContext } from "../../context/data-view";
-
-const heatmapOptions = [
-  {
-    label: <span>Traffic Injuries</span>,
-    title: "Traffic Injuries",
-    options: [
-      {
-        label: <span>All Injuries</span>,
-        value: HeatmapFilterEnum.AllInjuries,
-      },
-      {
-        label: <span>Severe Injuries</span>,
-        value: HeatmapFilterEnum.SevereInjuries,
-      },
-    ],
-  },
-  {
-    label: <span>Traffic Crashes</span>,
-    title: "Traffic Crashes",
-    options: [
-      {
-        label: <span>Vehicle Involved</span>,
-        value: HeatmapFilterEnum.VehicleInvolvedCrashes,
-      },
-      {
-        label: <span>Bicycle Involved </span>,
-        value: HeatmapFilterEnum.BicycleInvolvedCrashes,
-      },
-      {
-        label: <span>Pedestrian Involved</span>,
-        value: HeatmapFilterEnum.PedestrianInvolvedCrashes,
-      },
-    ],
-  },
-];
 
 export const HeatmapControls = (): React.JSX.Element => {
   const dates = useHeatmapTimeSegmentDates();
@@ -97,7 +62,7 @@ export const HeatmapControls = (): React.JSX.Element => {
         onChange={(newOpt) => {
           setHeatmapFilter({ heatmapFilter: newOpt });
         }}
-        options={heatmapOptions}
+        options={injuryCrashTypeOptions}
         size="large"
       />
       <Flex

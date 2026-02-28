@@ -1,24 +1,29 @@
 import React from "react";
-import { Flex, Segmented, SegmentedProps } from "antd";
-import { TimeTrends } from "../../store/trend-chart-list-data/types";
-import { useCurrentTimeTrend } from "../../store/trend-chart-list-data";
+import { Divider, Flex, Segmented, SegmentedProps, Select } from "antd";
+import { TimeTrendsEnum } from "../../store/trend-chart-list-data/types";
+import {
+  useCurrentTimeTrend,
+  useCurrentTimeTrendFilter,
+} from "../../store/trend-chart-list-data";
 import { useActions } from "../../store/trend-chart-list-data";
 import { useDataViewContext } from "../../context/data-view";
 import { TimeSegments } from "../../store/street-map-data-form";
+import { injuryCrashTypeOptions } from "../../types/data-view";
 
 export const ControlPanel = (): React.JSX.Element => {
   const currentOption = useCurrentTimeTrend();
-  const { setCurrentTimeTrend } = useActions();
+  const timeFilter = useCurrentTimeTrendFilter();
+  const { setCurrentTimeTrend, setTimeTrendFilter } = useActions();
   const { selectedTimeSegment } = useDataViewContext();
-  let TimeTrendOptions: SegmentedProps<TimeTrends>["options"] = [
-    { label: "Hourly", value: TimeTrends.HOURLY },
-    { label: "Daily", value: TimeTrends.DAILY },
-    { label: "Monthly", value: TimeTrends.MONTHLY },
+  let TimeTrendOptions: SegmentedProps<TimeTrendsEnum>["options"] = [
+    { label: "Hourly", value: TimeTrendsEnum.HOURLY },
+    { label: "Daily", value: TimeTrendsEnum.DAILY },
+    { label: "Monthly", value: TimeTrendsEnum.MONTHLY },
   ];
   if (selectedTimeSegment !== TimeSegments.OneYear) {
     TimeTrendOptions = [
-      { label: "Hourly", value: TimeTrends.HOURLY },
-      { label: "Daily", value: TimeTrends.DAILY },
+      { label: "Hourly", value: TimeTrendsEnum.HOURLY },
+      { label: "Daily", value: TimeTrendsEnum.DAILY },
     ];
   }
 
@@ -34,6 +39,17 @@ export const ControlPanel = (): React.JSX.Element => {
         width: "100%",
       }}
     >
+      <Select
+        style={{ height: "fit-content" }}
+        placeholder="Select data type"
+        value={timeFilter}
+        onChange={(newOpt) => {
+          setTimeTrendFilter(newOpt);
+        }}
+        options={injuryCrashTypeOptions}
+        size="large"
+      />
+      <Divider orientation="vertical" size="large" style={{ height: "85%" }} />
       <Segmented
         size="large"
         style={{ background: "white" }}

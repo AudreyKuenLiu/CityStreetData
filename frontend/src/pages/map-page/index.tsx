@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 
-import { MapView } from "./map-view";
+const MapView = React.lazy(() =>
+  import("./map-view").then((module) => ({ default: module.MapView })),
+);
 import { ConfigProvider, Splitter } from "antd";
 import { Layout } from "antd";
 const DataView = React.lazy(() =>
