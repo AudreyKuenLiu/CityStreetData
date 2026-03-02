@@ -116,7 +116,11 @@ const initializeVehicleCrashesData = (
 
       const tickValues = sortedGroupCrashes.map(([time, _]) => time);
       const combinedData = [
-        { id: "Other" as const, data: otherCrashes, color: "#000000" },
+        {
+          id: "Other" as const,
+          data: otherCrashes,
+          color: "#000000",
+        },
         {
           id: "Bicycle-Pedestrian" as const,
           data: bicyclePedestrianCrashes,
@@ -194,7 +198,11 @@ const initializeTrafficInjuriesAndFatalitiesData = (
       );
       const tickValues = sortedGroupCrashes.map(([time, _]) => time);
       const combinedData = [
-        { id: "Fatalities" as const, data: fatalitiesData, color: "#E34444" },
+        {
+          id: "Fatalities" as const,
+          data: fatalitiesData,
+          color: "#E34444",
+        },
         {
           id: "Severe Injuries" as const,
           data: severeInjuriesData,

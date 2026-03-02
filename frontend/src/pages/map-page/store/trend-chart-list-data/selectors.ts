@@ -21,6 +21,7 @@ import { useDataViewContext } from "../../context/data-view";
 import { TimeSegments } from "../street-map-data-form";
 import { TimeSegmentsToName } from "../street-map-data-form/types";
 import { CollisionSeverityEnum } from "../../../../models/api-models";
+import { format } from "date-fns";
 
 const useTrendChartListData = create<TrendListData>()(
   devtools(
@@ -70,6 +71,25 @@ const getTimeTrendCrashStatVal = ({
   return 0;
 };
 
+const timeTrendId = ({
+  date,
+  timeSegment,
+}: {
+  date: Date;
+  timeSegment: TimeSegments;
+}): string => {
+  if (
+    timeSegment === TimeSegments.OneMonth ||
+    timeSegment === TimeSegments.ThreeMonths
+  ) {
+    return format(date, "MMMM, yyyy");
+  }
+  if (timeSegment === TimeSegments.OneYear) {
+    return format(date, "yyyy");
+  }
+  return date.toDateString();
+};
+
 const initializeTrendDateByTimePeriod = ({
   groupTimeTrendData,
   timeTrends,
@@ -81,8 +101,9 @@ const initializeTrendDateByTimePeriod = ({
   selectedTimeTrendFilter: InjuryCrashTypeFilter;
   selectedTimeSegment: TimeSegments | null;
 }): GroupLineData<string, string> => {
+  const timeSegment = selectedTimeSegment ?? TimeSegments.OneYear;
   const ret = groupTimeTrendData.map(([groupId, dateCrashStats]) => {
-    let lineSeries = dateCrashStats.map(({ timeSegment, crashStats }) => {
+    let lineSeries = dateCrashStats.map(({ timeSegment: date, crashStats }) => {
       const crashStatMap = new Map<
         (typeof timeTrendsToAxis)[keyof typeof timeTrendsToAxis][number],
         number
@@ -108,7 +129,10 @@ const initializeTrendDateByTimePeriod = ({
       }
 
       return {
-        id: timeSegment.toDateString(),
+        id: timeTrendId({
+          date,
+          timeSegment,
+        }).concat(`.${date.getTime() / 1000}`),
         data: Array.from(timeTrendsToAxis[timeTrends]).map(
           (timeTrendSegment) => {
             return {

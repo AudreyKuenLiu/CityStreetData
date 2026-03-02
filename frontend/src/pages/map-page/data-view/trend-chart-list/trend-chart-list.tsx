@@ -145,6 +145,8 @@ const TrendTooltip = ({
   }[];
   readonly color: string;
 }>): React.JSX.Element => {
+  const titleString = point.id.split(".")[0];
+
   return (
     <div
       style={{
@@ -164,7 +166,7 @@ const TrendTooltip = ({
           }}
         />
         <Typography.Title level={4} style={{ margin: 0 }}>
-          {point.id.split(".")[0]}
+          {titleString}
         </Typography.Title>
       </Flex>
       <Flex
@@ -175,7 +177,7 @@ const TrendTooltip = ({
         }}
       >
         <Flex style={{ alignItems: "center", gap: "0.3em" }}>
-          <Typography.Text strong>{point.x}</Typography.Text>
+          <Typography.Text strong>{point.data.x}</Typography.Text>
         </Flex>
         <Typography.Text>{point.data.yFormatted}</Typography.Text>
       </Flex>

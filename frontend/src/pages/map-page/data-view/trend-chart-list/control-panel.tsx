@@ -66,6 +66,7 @@ export const ControlPanel = (): React.JSX.Element => {
           }
         }}
       />
+      <Divider orientation="vertical" size="large" style={{ height: "85%" }} />
     </Flex>
   );
 };

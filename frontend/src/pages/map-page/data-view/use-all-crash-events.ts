@@ -26,7 +26,8 @@ export const useAllCrashEvents = (): void => {
 
   const result = useSuspenseQuery({
     queryKey: ["allCrashEvents"],
-    gcTime: 300_000, // 5 minutes,
+    gcTime: Infinity,
+    staleTime: Infinity,
     queryFn: async (): Promise<CrashMap> => {
       const result = await axios.get<ApiCrashEventPoint[]>(
         `/api/streets/crashevents/all`,

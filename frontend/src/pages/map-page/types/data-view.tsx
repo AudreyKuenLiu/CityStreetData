@@ -52,7 +52,6 @@ export const injuryCrashTypeToCrashClassification = {
   ],
 } as const;
 
-
 export const injuryCrashTypeOptions = [
   {
     label: <span>Traffic Injuries</span>,
@@ -87,4 +86,3 @@ export const injuryCrashTypeOptions = [
     ],
   },
 ];
-
