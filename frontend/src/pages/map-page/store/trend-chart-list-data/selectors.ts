@@ -9,6 +9,9 @@ import {
   timeTrendsToAxis,
   TimeTrendFilterEnum,
   TimeTrendCrashStat,
+  TimeTrendId,
+  initialTimeTrendFilter,
+  initialTimePeriod,
 } from "./types";
 import { actions } from "./actions";
 import {
@@ -21,13 +24,15 @@ import { useDataViewContext } from "../../context/data-view";
 import { TimeSegments } from "../street-map-data-form";
 import { TimeSegmentsToName } from "../street-map-data-form/types";
 import { CollisionSeverityEnum } from "../../../../models/api-models";
-import { format } from "date-fns";
+import { SelectProps } from "antd";
+import { timeTrendId } from "./utils";
 
 const useTrendChartListData = create<TrendListData>()(
   devtools(
     (set) => ({
-      currentTimeTrendFilter: TimeTrendFilterEnum.AllInjuries,
-      currentTimeTrend: TimeTrendsEnum.HOURLY,
+      currentTimeTrendFilter: initialTimeTrendFilter,
+      currentTimeTrend: initialTimePeriod,
+      currentTimeSegments: [],
       groupTimeTrendData: [],
       actions: actions({ setState: set }),
     }),
@@ -71,79 +76,67 @@ const getTimeTrendCrashStatVal = ({
   return 0;
 };
 
-const timeTrendId = ({
-  date,
-  timeSegment,
-}: {
-  date: Date;
-  timeSegment: TimeSegments;
-}): string => {
-  if (
-    timeSegment === TimeSegments.OneMonth ||
-    timeSegment === TimeSegments.ThreeMonths
-  ) {
-    return format(date, "MMMM, yyyy");
-  }
-  if (timeSegment === TimeSegments.OneYear) {
-    return format(date, "yyyy");
-  }
-  return date.toDateString();
-};
-
 const initializeTrendDateByTimePeriod = ({
   groupTimeTrendData,
   timeTrends,
   selectedTimeSegment,
   selectedTimeTrendFilter,
+  currentTimeSegments,
 }: {
   groupTimeTrendData: GroupTimeTrendData;
   timeTrends: TimeTrendsEnum;
   selectedTimeTrendFilter: InjuryCrashTypeFilter;
   selectedTimeSegment: TimeSegments | null;
-}): GroupLineData<string, string> => {
+  currentTimeSegments: TimeTrendId[];
+}): GroupLineData<TimeTrendId, string> => {
   const timeSegment = selectedTimeSegment ?? TimeSegments.OneYear;
   const ret = groupTimeTrendData.map(([groupId, dateCrashStats]) => {
-    let lineSeries = dateCrashStats.map(({ timeSegment: date, crashStats }) => {
-      const crashStatMap = new Map<
-        (typeof timeTrendsToAxis)[keyof typeof timeTrendsToAxis][number],
-        number
-      >();
-      for (const crashStat of crashStats) {
-        const { occuredAt } = crashStat;
-        let occuredTrendSegment =
-          timeTrendsToAxis[timeTrends][occuredAt.getMonth()];
-        if (timeTrends === TimeTrendsEnum.HOURLY) {
-          occuredTrendSegment =
-            timeTrendsToAxis[timeTrends][occuredAt.getHours()];
-        } else if (timeTrends === TimeTrendsEnum.DAILY) {
-          occuredTrendSegment =
-            timeTrendsToAxis[timeTrends][occuredAt.getDay()];
+    let lineSeries = dateCrashStats
+      .map(({ timeSegment: date, crashStats }) => {
+        const crashStatMap = new Map<
+          (typeof timeTrendsToAxis)[keyof typeof timeTrendsToAxis][number],
+          number
+        >();
+        for (const crashStat of crashStats) {
+          const { occuredAt } = crashStat;
+          let occuredTrendSegment =
+            timeTrendsToAxis[timeTrends][occuredAt.getMonth()];
+          if (timeTrends === TimeTrendsEnum.HOURLY) {
+            occuredTrendSegment =
+              timeTrendsToAxis[timeTrends][occuredAt.getHours()];
+          } else if (timeTrends === TimeTrendsEnum.DAILY) {
+            occuredTrendSegment =
+              timeTrendsToAxis[timeTrends][occuredAt.getDay()];
+          }
+          const totalInjuries =
+            (crashStatMap.get(occuredTrendSegment) ?? 0) +
+            getTimeTrendCrashStatVal({
+              crashStat,
+              filter: selectedTimeTrendFilter,
+            });
+          crashStatMap.set(occuredTrendSegment, totalInjuries);
         }
-        const totalInjuries =
-          (crashStatMap.get(occuredTrendSegment) ?? 0) +
-          getTimeTrendCrashStatVal({
-            crashStat,
-            filter: selectedTimeTrendFilter,
-          });
-        crashStatMap.set(occuredTrendSegment, totalInjuries);
-      }
 
-      return {
-        id: timeTrendId({
-          date,
-          timeSegment,
-        }).concat(`.${date.getTime() / 1000}`),
-        data: Array.from(timeTrendsToAxis[timeTrends]).map(
-          (timeTrendSegment) => {
-            return {
-              y: crashStatMap.get(timeTrendSegment) ?? 0,
-              x: timeTrendSegment,
-            };
-          },
-        ),
-        color: "#D3D3D3",
-      };
-    });
+        return {
+          id: timeTrendId({
+            date,
+            selectedTimeSegment: timeSegment,
+          }),
+          data: Array.from(timeTrendsToAxis[timeTrends]).map(
+            (timeTrendSegment) => {
+              return {
+                y: crashStatMap.get(timeTrendSegment) ?? 0,
+                x: timeTrendSegment,
+              };
+            },
+          ),
+          color: "#D3D3D3",
+        };
+      })
+      .filter((lineSeries) => {
+        return currentTimeSegments.some((v) => v === lineSeries.id);
+      });
+
     const averageLineSeries = {
       id: AverageLineSeriesId,
       data: Array.from(timeTrendsToAxis[timeTrends]).map((timeTrendSegment) => {
@@ -171,13 +164,13 @@ const initializeTrendDateByTimePeriod = ({
       id: groupId,
       tickValues: Array.from(timeTrendsToAxis[timeTrends]),
       lineSeries,
-      axisLegend: `${timeTrendsToName[timeTrends]} Traffic Injuries Every ${TimeSegmentsToName[selectedTimeSegment ?? TimeSegments.OneYear]}`,
+      axisLegend: `${timeTrendsToName[timeTrends]} Traffic Injuries Every ${TimeSegmentsToName[timeSegment]}`,
     } as const;
   });
   return ret;
 };
 
-export const useCrashTrendData = (): GroupLineData<string, string> => {
+export const useCrashTrendData = (): GroupLineData<TimeTrendId, string> => {
   const { selectedTimeSegment } = useDataViewContext();
   const groupTimeTrendData = useTrendChartListData(
     useShallow((state) => state.groupTimeTrendData),
@@ -188,11 +181,14 @@ export const useCrashTrendData = (): GroupLineData<string, string> => {
   const currentTimeTrendFilter = useTrendChartListData(
     useShallow((state) => state.currentTimeTrendFilter),
   );
+  const currentTimeSegments = useCurrentTimeSegments();
+
   return initializeTrendDateByTimePeriod({
     groupTimeTrendData,
     timeTrends: timeTrends ?? TimeTrendsEnum.DAILY,
     selectedTimeSegment,
     selectedTimeTrendFilter: currentTimeTrendFilter,
+    currentTimeSegments,
   });
 };
 
@@ -204,6 +200,36 @@ export const useCurrentTimeTrendFilter = (): InjuryCrashTypeFilter => {
   return useTrendChartListData(
     useShallow((state) => state.currentTimeTrendFilter),
   );
+};
+
+export const useCurrentTimeSegments = (): TimeTrendId[] => {
+  return useTrendChartListData(
+    useShallow((state) => state.currentTimeSegments),
+  );
+};
+export const useTimeSegmentOptions = (): SelectProps["options"] => {
+  const timeTrendData = useTrendChartListData(
+    useShallow((state) => state.groupTimeTrendData),
+  );
+  const { selectedTimeSegment } = useDataViewContext();
+
+  const [, timeSegmentCrashStats] = timeTrendData[0] ?? [null, []];
+
+  const options = timeSegmentCrashStats.map(({ timeSegment: date }) => {
+    const id = timeTrendId({
+      date,
+      selectedTimeSegment: selectedTimeSegment ?? TimeSegments.OneYear,
+    });
+    return {
+      label: id.split(".")[0],
+      value: id,
+      date,
+    };
+  });
+  options.sort((a, b) => {
+    return a.date.getTime() - b.date.getTime();
+  });
+  return options;
 };
 
 export const useActions = (): TrendListActions => {

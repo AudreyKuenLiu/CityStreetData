@@ -2,6 +2,7 @@ import { StoreApi } from "zustand";
 import type {
   GroupTimeTrendData,
   TimeTrendCrashStat,
+  TimeTrendId,
   TrendListActions,
   TrendListData,
 } from "./types";
@@ -9,6 +10,8 @@ import type { CrashMap } from "../../../../models/map-models";
 import type { UserFields } from "../../context/data-view";
 import { buildTimeList, findFromTimeList, getSelectedCnns } from "../../utils";
 import { ApiCrashEvent } from "../../../../models/api-models";
+import { timeTrendId } from "./utils";
+import { TimeSegments } from "../street-map-data-form";
 
 const apiCrashEventToTimeTrendCrashStats = (
   apiCrashEvent: ApiCrashEvent,
@@ -20,6 +23,23 @@ const apiCrashEventToTimeTrendCrashStats = (
     numberKilled: apiCrashEvent.number_killed,
     occuredAt: new Date(apiCrashEvent.occured_at * 1000),
   };
+};
+
+const initializeCurrentTimeSegments = ({
+  groupTimeTrendData,
+  selectedTimeSegment,
+}: {
+  groupTimeTrendData: GroupTimeTrendData;
+  selectedTimeSegment: TimeSegments;
+}): TimeTrendId[] => {
+  const timeSegments = groupTimeTrendData[0][1].map(({ timeSegment }) => {
+    return timeSegment;
+  });
+  return timeSegments
+    .map((date) => {
+      return timeTrendId({ date, selectedTimeSegment });
+    })
+    .slice(0, 30);
 };
 
 const initializeGraphData = ({
@@ -95,14 +115,26 @@ export const actions = ({
     selectedStreetGroups,
     selectedTimeSegment,
   }): void => {
+    const groupTimeTrendData = initializeGraphData({
+      data,
+      selectedStartEndTime,
+      selectedStreetGroups,
+      selectedTimeSegment,
+    });
     setState(() => {
       return {
-        groupTimeTrendData: initializeGraphData({
-          data,
-          selectedStartEndTime,
-          selectedStreetGroups,
+        groupTimeTrendData,
+        currentTimeSegments: initializeCurrentTimeSegments({
+          groupTimeTrendData,
           selectedTimeSegment,
         }),
+      };
+    });
+  },
+  setTimeSegments: (timeSegments): void => {
+    setState(() => {
+      return {
+        currentTimeSegments: timeSegments,
       };
     });
   },

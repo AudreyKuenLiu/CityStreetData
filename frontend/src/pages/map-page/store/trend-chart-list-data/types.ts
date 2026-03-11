@@ -7,6 +7,7 @@ import { CrashMap } from "../../../../models/map-models";
 import { UserFields } from "../../context/data-view";
 import z from "zod";
 import { InjuryCrashTypeFilter } from "../../types/data-view";
+import { Brand } from "../../../../types";
 
 export enum TimeTrendsEnum {
   HOURLY, //0-24hrs
@@ -25,8 +26,8 @@ export const TimeTrendFilterKeys = TimeTrendFilterSchema.keyof();
 export const TimeTrendFilterEnum = TimeTrendFilterSchema.shape;
 export type TimeTrendFilter =
   (typeof TimeTrendFilterEnum)[keyof typeof TimeTrendFilterEnum];
-
-export const AverageLineSeriesId = "Average";
+export type TimeTrendId = Brand<string, "TimeTrendId">;
+export const AverageLineSeriesId = "Average" as TimeTrendId;
 export const timeTrendsToAxis = {
   [TimeTrendsEnum.HOURLY]: [
     "00:00",
@@ -86,6 +87,7 @@ export type GroupTimeTrendData = (readonly [
 
 export type TrendListData = {
   currentTimeTrend: TimeTrendsEnum;
+  currentTimeSegments: TimeTrendId[];
   currentTimeTrendFilter: InjuryCrashTypeFilter;
   groupTimeTrendData: GroupTimeTrendData;
   actions: TrendListActions;
@@ -98,6 +100,10 @@ export type TrendListActions = {
     selectedTimeSegment,
   }: { data: CrashMap } & UserFields) => void;
   setGraphData: (data: GroupTimeTrendData) => void;
+  setTimeSegments: (timeSegments: TimeTrendId[]) => void;
   setTimeTrendFilter: (filter: InjuryCrashTypeFilter) => void;
   setCurrentTimeTrend: (timeTrend: TimeTrendsEnum) => void;
 };
+
+export const initialTimeTrendFilter = TimeTrendFilterEnum.AllInjuries;
+export const initialTimePeriod = TimeTrendsEnum.HOURLY;

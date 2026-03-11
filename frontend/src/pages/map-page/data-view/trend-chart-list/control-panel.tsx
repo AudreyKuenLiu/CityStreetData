@@ -2,19 +2,25 @@ import React from "react";
 import { Divider, Flex, Segmented, SegmentedProps, Select } from "antd";
 import { TimeTrendsEnum } from "../../store/trend-chart-list-data/types";
 import {
+  useCurrentTimeSegments,
   useCurrentTimeTrend,
   useCurrentTimeTrendFilter,
+  useTimeSegmentOptions,
 } from "../../store/trend-chart-list-data";
 import { useActions } from "../../store/trend-chart-list-data";
 import { useDataViewContext } from "../../context/data-view";
 import { TimeSegments } from "../../store/street-map-data-form";
 import { injuryCrashTypeOptions } from "../../types/data-view";
+import { TimeSegmentsToName } from "../../store/street-map-data-form/types";
 
 export const ControlPanel = (): React.JSX.Element => {
   const currentOption = useCurrentTimeTrend();
   const timeFilter = useCurrentTimeTrendFilter();
-  const { setCurrentTimeTrend, setTimeTrendFilter } = useActions();
+  const { setCurrentTimeTrend, setTimeTrendFilter, setTimeSegments } =
+    useActions();
   const { selectedTimeSegment } = useDataViewContext();
+  const currentTimeSegments = useCurrentTimeSegments();
+  const timeSelectOption = useTimeSegmentOptions();
   let TimeTrendOptions: SegmentedProps<TimeTrendsEnum>["options"] = [
     { label: "Hourly", value: TimeTrendsEnum.HOURLY },
     { label: "Daily", value: TimeTrendsEnum.DAILY },
@@ -67,6 +73,20 @@ export const ControlPanel = (): React.JSX.Element => {
         }}
       />
       <Divider orientation="vertical" size="large" style={{ height: "85%" }} />
+      <Select
+        mode="multiple"
+        style={{ width: 300, overflow: "hidden" }}
+        size="large"
+        maxCount={60}
+        maxTagCount={"responsive"}
+        allowClear
+        value={currentTimeSegments}
+        placeholder={`Select time periods`}
+        onChange={(vals) => {
+          setTimeSegments(vals);
+        }}
+        options={timeSelectOption}
+      />
     </Flex>
   );
 };
