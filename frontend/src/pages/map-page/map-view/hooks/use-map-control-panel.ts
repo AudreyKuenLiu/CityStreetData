@@ -86,6 +86,8 @@ export const useMapControlPanel = ({
         toggleStreet({
           cnn: features[0].properties.cnn,
           line: JSON.parse(features[0].properties.line),
+          f_node_cnn: features[0].properties.f_node_cnn,
+          t_node_cnn: features[0].properties.t_node_cnn,
         });
       }
     },
@@ -117,6 +119,8 @@ export const useMapControlPanel = ({
         addStreet({
           cnn: street.properties.cnn,
           line: JSON.parse(street.properties.line),
+          f_node_cnn: street.properties.f_node_cnn,
+          t_node_cnn: street.properties.t_node_cnn,
         });
       }
     },

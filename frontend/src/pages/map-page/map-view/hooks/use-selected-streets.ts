@@ -21,13 +21,15 @@ export const useSelectedStreets = (): useSelectedStreetsReturnType => {
         data: {
           type: "FeatureCollection" as const,
           features: Array.from(streetGroup.cnns.values()).map(
-            ({ cnn, line }) => {
+            ({ cnn, line, f_node_cnn, t_node_cnn }) => {
               return {
                 type: "Feature" as const,
                 geometry: line,
                 properties: {
                   line: line,
-                  cnn: cnn,
+                  cnn,
+                  f_node_cnn,
+                  t_node_cnn,
                 },
               };
             },

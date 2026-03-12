@@ -186,6 +186,7 @@ export const actions = ({
     return ret;
   },
   addStreet: (streetSegment: StreetSegment): boolean => {
+    console.log("adding street segment", streetSegment);
     let ret = true;
     setState((state) => {
       const [streetGroup, isNull] = getCurrentStreetGroup(state);
