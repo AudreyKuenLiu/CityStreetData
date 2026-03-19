@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useMemo, useEffect } from "react";
 import { Flex, Slider } from "antd";
+import _ from "lodash";
 
 export const ChartScroller = ({
   allTicks,
@@ -21,6 +22,14 @@ export const ChartScroller = ({
     0: allTicks[0].toLocaleDateString(),
     [totalLength - 1]: allTicks[totalLength - 1].toLocaleDateString(),
   };
+
+  const throttledFn = useMemo(
+    () =>
+      _.throttle((val: [number, number]) => {
+        scrollHandler(val);
+      }, 50),
+    [scrollHandler],
+  );
 
   return (
     <Flex
@@ -46,7 +55,7 @@ export const ChartScroller = ({
         value={interval}
         marks={marks}
         onChange={(v: number | number[]) => {
-          scrollHandler(v as [number, number]);
+          throttledFn(v as [number, number]);
         }}
         tooltip={{
           formatter: (value) => {
