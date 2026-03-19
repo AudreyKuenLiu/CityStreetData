@@ -32,7 +32,6 @@ export const HeatmapControls = (): React.JSX.Element => {
   const throttleTimeSegment = useMemo(
     () =>
       _.throttle((val: number) => {
-        console.log("calling");
         setTimeSegmentIdx({ newIdx: val });
       }, 250),
     [setTimeSegmentIdx],

@@ -75,7 +75,6 @@ export const useHeatmapLayerProps = (): LayerProps => {
   }
   dynamicFilter.push([">=", ["get", "occured_at"], startDate.getTime() / 1000]);
   dynamicFilter.push(["<", ["get", "occured_at"], endDate.getTime() / 1000]);
-  // console.log("this is the startEndTime", startDate, endDate);
 
   let heatmapWeight: DataDrivenPropertyValueSpecification<number> = [
     "interpolate",

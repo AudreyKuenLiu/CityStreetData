@@ -27,8 +27,6 @@ export const useVirtualChartData = ({
         setPanelSize(panelSize);
         setVisibleInterval((prev) => {
           const [prevStart] = prev;
-
-          console.log("setting visible interval", prev, totalTicks);
           return [prevStart, prevStart + totalTicks];
         });
       }
@@ -48,7 +46,6 @@ export const useVirtualChartData = ({
     (range: [number, number]): void => {
       const [leftP, rightP] = range;
       const currentRange = Math.floor(panelSize / (rightP - leftP));
-      //console.log("calling scroll handler", sizePerTick, currentRange);
       if (currentRange >= sizePerTick && rightP - leftP >= 1) {
         setVisibleInterval(range);
       }
