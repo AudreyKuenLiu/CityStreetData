@@ -30,7 +30,7 @@ export const ControlPanel = (): React.JSX.Element => {
       style={{
         position: "sticky",
         alignItems: "center",
-        top: "0",
+        top: "16px",
         left: "0",
         zIndex: "2",
         minWidth: "800px",

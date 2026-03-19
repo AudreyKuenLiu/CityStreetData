@@ -39,21 +39,21 @@ export const buildTimeList = ({
   return ret;
 };
 
-export const findFromTimeList = <T>({
+export const findFromTimeList = ({
   occured_at,
   timeList,
   matchFn,
 }: {
   occured_at: number;
-  timeList: T[];
-  matchFn: (timeVal: T, nextTimeVal: T, occured_at: number) => -1 | 0 | 1;
+  timeList: Date[];
+  matchFn: (timeVal: Date, nextTimeVal: Date, occured_at: number) => -1 | 0 | 1;
 }): number => {
   let startIdx = 0;
   let endIdx = timeList.length - 1;
   while (startIdx <= endIdx) {
     const mid = Math.floor((startIdx + endIdx) / 2);
     const timeVal = timeList[mid];
-    const nextVal = timeList[mid + 1];
+    const nextVal = timeList[mid + 1] ?? new Date(0);
     if (matchFn(timeVal, nextVal, occured_at) === 0) {
       return mid;
     } else if (matchFn(timeVal, nextVal, occured_at) === -1) {

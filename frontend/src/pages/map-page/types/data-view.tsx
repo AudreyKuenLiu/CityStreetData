@@ -14,6 +14,7 @@ export type GroupLineData<
     readonly data: { x: X; y: Y }[];
     readonly color: string;
   }[];
+  allTickValues: X[];
   axisLegend: string;
 }[];
 

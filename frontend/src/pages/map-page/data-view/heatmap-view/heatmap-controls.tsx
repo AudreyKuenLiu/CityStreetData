@@ -103,7 +103,6 @@ export const HeatmapControls = (): React.JSX.Element => {
           max={dates.length - 1}
           value={idx}
           onChange={(val) => {
-            console.log("setting time segment", val);
             setIdx(val);
             throttleTimeSegment(val);
           }}

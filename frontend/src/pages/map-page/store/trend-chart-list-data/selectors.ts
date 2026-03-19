@@ -163,6 +163,7 @@ const initializeTrendDateByTimePeriod = ({
     return {
       id: groupId,
       tickValues: Array.from(timeTrendsToAxis[timeTrends]),
+      allTickValues: Array.from(timeTrendsToAxis[timeTrends]),
       lineSeries,
       axisLegend: `${timeTrendsToName[timeTrends]} Traffic Injuries Every ${TimeSegmentsToName[timeSegment]}`,
     } as const;

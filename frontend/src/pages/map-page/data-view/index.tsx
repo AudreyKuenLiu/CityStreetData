@@ -15,9 +15,7 @@ const HeatmapView = React.lazy(() =>
     default: module.HeatmapView,
   })),
 );
-import { ControlPanel } from "./area-chart-list/control-panel";
-import { Flex, Typography } from "antd";
-import { ContainerOutlined } from "@ant-design/icons";
+import { Flex } from "antd";
 import { useStreetGroupsRef } from "../store/street-map-data-form";
 import { useDataViewContext } from "../context/data-view";
 import { DataViewEnum } from "../context/data-view/types";
@@ -52,21 +50,7 @@ const DataViewBody = (): React.JSX.Element => {
   const { currentDataView } = useDataViewContext();
   useAllCrashEvents();
   if (currentDataView === DataViewEnum.AreaChartView) {
-    return (
-      <Flex
-        style={{
-          overflow: "scroll",
-          flexWrap: "wrap",
-          padding: "16px",
-          height: "100vh",
-          alignContent: "flex-start",
-          gap: "20px",
-        }}
-      >
-        <ControlPanel />
-        <AreaChartList />
-      </Flex>
-    );
+    return <AreaChartList />;
   }
   if (currentDataView === DataViewEnum.HeatmapView) {
     return <HeatmapView />;
