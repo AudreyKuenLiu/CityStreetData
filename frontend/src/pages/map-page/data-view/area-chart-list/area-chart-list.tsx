@@ -168,6 +168,7 @@ export const AreaChartList = (): React.JSX.Element => {
         </Flex>
         <ChartScroller
           allTicks={allTickValues}
+          toLabel={(t) => t.toLocaleDateString()}
           totalLength={totalLength}
           interval={interval}
           scrollHandler={scrollHandler}

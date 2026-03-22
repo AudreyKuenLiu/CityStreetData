@@ -71,6 +71,8 @@ export const timeTrendsToAxis = {
     "Dec",
   ],
 } as const;
+export type TimeTrendValues =
+  (typeof timeTrendsToAxis)[keyof typeof timeTrendsToAxis][number];
 
 export type TimeTrendCrashStat = {
   crashClassification: CrashClassification;

@@ -2,14 +2,16 @@ import React, { useMemo, useEffect } from "react";
 import { Flex, Slider } from "antd";
 import _ from "lodash";
 
-export const ChartScroller = ({
+export const ChartScroller = <T extends Date | string>({
   allTicks,
+  toLabel,
   interval,
   scrollHandler,
   resetHandler,
   totalLength,
 }: {
-  allTicks: Date[];
+  allTicks: T[];
+  toLabel: (val: T) => string;
   interval: [number, number];
   resetHandler: (totalLength: number) => void;
   scrollHandler: (range: [number, number]) => void;
@@ -19,8 +21,8 @@ export const ChartScroller = ({
     resetHandler(totalLength);
   }, [totalLength, resetHandler]);
   const marks = {
-    0: allTicks[0].toLocaleDateString(),
-    [totalLength - 1]: allTicks[totalLength - 1].toLocaleDateString(),
+    0: toLabel(allTicks[0]),
+    [totalLength - 1]: toLabel(allTicks[totalLength - 1]),
   };
 
   const throttledFn = useMemo(
@@ -62,7 +64,7 @@ export const ChartScroller = ({
             if (value == null) {
               return;
             }
-            return allTicks[value].toLocaleDateString();
+            return toLabel(allTicks[value]);
           },
         }}
       />

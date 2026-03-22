@@ -12,6 +12,7 @@ import {
   TimeTrendId,
   initialTimeTrendFilter,
   initialTimePeriod,
+  TimeTrendValues,
 } from "./types";
 import { actions } from "./actions";
 import {
@@ -82,12 +83,16 @@ const initializeTrendDateByTimePeriod = ({
   selectedTimeSegment,
   selectedTimeTrendFilter,
   currentTimeSegments,
+  transformMethods,
 }: {
   groupTimeTrendData: GroupTimeTrendData;
   timeTrends: TimeTrendsEnum;
   selectedTimeTrendFilter: InjuryCrashTypeFilter;
   selectedTimeSegment: TimeSegments | null;
   currentTimeSegments: TimeTrendId[];
+  transformMethods: ((
+    data: { x: TimeTrendValues; y: number }[],
+  ) => { x: TimeTrendValues; y: number }[])[];
 }): GroupLineData<TimeTrendId, string> => {
   const timeSegment = selectedTimeSegment ?? TimeSegments.OneYear;
   const ret = groupTimeTrendData.map(([groupId, dateCrashStats]) => {
@@ -160,9 +165,18 @@ const initializeTrendDateByTimePeriod = ({
     });
     lineSeries = [averageLineSeries, ...lineSeries];
 
+    lineSeries = lineSeries.map((series) => {
+      let processedVals = series.data;
+      for (let i = 0; i < transformMethods.length; i += 1) {
+        processedVals = transformMethods[i](processedVals);
+      }
+      series.data = processedVals;
+      return series;
+    });
+
     return {
       id: groupId,
-      tickValues: Array.from(timeTrendsToAxis[timeTrends]),
+      tickValues: averageLineSeries.data.map((d) => d.x),
       allTickValues: Array.from(timeTrendsToAxis[timeTrends]),
       lineSeries,
       axisLegend: `${timeTrendsToName[timeTrends]} Traffic Injuries Every ${TimeSegmentsToName[timeSegment]}`,
@@ -171,7 +185,11 @@ const initializeTrendDateByTimePeriod = ({
   return ret;
 };
 
-export const useCrashTrendData = (): GroupLineData<TimeTrendId, string> => {
+export const useCrashTrendData = (
+  transformFuncs: ((
+    data: { x: TimeTrendValues; y: number }[],
+  ) => { x: TimeTrendValues; y: number }[])[],
+): GroupLineData<TimeTrendId, string> => {
   const { selectedTimeSegment } = useDataViewContext();
   const groupTimeTrendData = useTrendChartListData(
     useShallow((state) => state.groupTimeTrendData),
@@ -190,6 +208,7 @@ export const useCrashTrendData = (): GroupLineData<TimeTrendId, string> => {
     selectedTimeSegment,
     selectedTimeTrendFilter: currentTimeTrendFilter,
     currentTimeSegments,
+    transformMethods: transformFuncs,
   });
 };
 

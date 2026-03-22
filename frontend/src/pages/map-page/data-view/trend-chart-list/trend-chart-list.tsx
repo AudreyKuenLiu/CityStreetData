@@ -1,15 +1,29 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useStreetGroupsRef } from "../../store/street-map-data-form";
 import { Flex, Typography } from "antd";
-import { XFilled } from "@ant-design/icons";
+import { ScanOutlined, XFilled } from "@ant-design/icons";
 import { useCrashTrendData } from "../../store/trend-chart-list-data";
 import { PointTooltipProps, ResponsiveLine } from "@nivo/line";
 import { ControlPanel } from "./control-panel";
 import { AverageLineSeriesId } from "../../store/trend-chart-list-data/types";
+import { ChartScroller } from "../chart-scroller";
+import { useVirtualChartData } from "../chart-scroller/use-virtual-chart-data";
 
 export const TrendChartList = (): React.JSX.Element => {
   const streetGroups = useStreetGroupsRef();
-  const crashTrendData = useCrashTrendData();
+  const chartPanel = useRef<HTMLElement | null>(null);
+
+  const { scrollHandler, resetHandler, truncatedDataHandler, interval } =
+    useVirtualChartData({
+      sizePerTick: 80,
+      panel: chartPanel.current,
+    });
+  const crashTrendData = useCrashTrendData([truncatedDataHandler]);
+  if (crashTrendData?.[0] == null) {
+    return <div />;
+  }
+  const allTickValues = crashTrendData[0]?.allTickValues;
+  const totalLength = crashTrendData[0]?.allTickValues.length;
 
   return (
     <Flex
@@ -20,6 +34,7 @@ export const TrendChartList = (): React.JSX.Element => {
         height: "100vh",
         gap: "20px",
         padding: "16px",
+        width: "100%",
       }}
     >
       <ControlPanel />
@@ -28,10 +43,11 @@ export const TrendChartList = (): React.JSX.Element => {
         if (streetGroup == null) {
           return null;
         }
-        const totalWidth = Math.max(tickValues.length * 80, 1400);
+        //const totalWidth = Math.max(tickValues.length * 80, 1400);
         return (
           <Flex
             key={`${id}_graph`}
+            ref={chartPanel}
             style={{
               flexDirection: "column",
               border: `1px solid #d3d3d3`,
@@ -40,6 +56,8 @@ export const TrendChartList = (): React.JSX.Element => {
               paddingTop: "20px",
               paddingRight: "20px",
               height: "500px",
+              width: "100%",
+
               //boxShadow: "0 3px 6px rgba(0,0,0,.05),0 3px 6px rgba(0,0,0,.05)",
             }}
           >
@@ -64,7 +82,8 @@ export const TrendChartList = (): React.JSX.Element => {
             <div
               style={{
                 minHeight: "400px",
-                width: `${totalWidth}px`,
+                //width: `${totalWidth}px`,
+                width: "100%",
               }}
             >
               <ResponsiveLine
@@ -131,6 +150,14 @@ export const TrendChartList = (): React.JSX.Element => {
           </Flex>
         );
       })}
+      <ChartScroller
+        allTicks={allTickValues}
+        toLabel={(t) => t}
+        interval={interval}
+        scrollHandler={scrollHandler}
+        resetHandler={resetHandler}
+        totalLength={totalLength}
+      />
     </Flex>
   );
 };
