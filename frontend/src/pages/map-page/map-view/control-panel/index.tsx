@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { Select, DatePicker, Flex } from "antd";
+import { Select, DatePicker, Flex, Divider } from "antd";
 import { GroupSelector } from "./group-selector/group-selector";
 import { useRef } from "react";
 import type { RefSelectProps } from "antd";
@@ -7,7 +7,6 @@ import { TimeSegmentLabels, TimeSegmentOptions } from "./constants";
 import {
   useActions,
   useCurrentStreetGroup,
-  // useStreetGroupsRef,
   useTimeSegment,
   convertToGroupId,
   useStartDate,
@@ -17,9 +16,21 @@ import {
 } from "../../store/street-map-data-form";
 import { RunQueryButton } from "./run-query-button";
 import { useDataViewContext } from "../../context/data-view";
+import { StreetFeatureSelect } from "./street-feature-select";
+import { StreetFeatureType } from "../../../../models/api-models";
 
 export const ControlPanel = memo(
-  ({ onRunQuery }: { onRunQuery: () => void }): React.JSX.Element => {
+  ({
+    onRunQuery,
+    streetFeatureProps,
+  }: {
+    onRunQuery: () => void;
+    streetFeatureProps: {
+      streetFeatureLayer: StreetFeatureType | null;
+      setStreetFeatureLayer: (val: StreetFeatureType) => void;
+      isLoading: boolean;
+    };
+  }): React.JSX.Element => {
     const {
       addGroup,
       setCurrentGroup,
@@ -54,10 +65,17 @@ export const ControlPanel = memo(
       <Flex
         style={{
           gap: "8px",
-          height: "fit-content",
+          height: "var(--ant-control-height-lg)",
           pointerEvents: "all",
+          alignItems: "center",
         }}
       >
+        <StreetFeatureSelect {...streetFeatureProps} />
+        <Divider
+          orientation="vertical"
+          size="large"
+          style={{ height: "85%", backgroundColor: "#878787" }}
+        />
         <GroupSelector
           currentOption={
             currentStreetGroup != null

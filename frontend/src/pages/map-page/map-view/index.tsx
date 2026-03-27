@@ -19,6 +19,7 @@ import { ControlPanel } from "./control-panel";
 import { Flex } from "antd";
 import { SelectControlPanel } from "./select-control-panel";
 import { useMapControlPanel } from "./hooks/use-map-control-panel";
+import { useStreetFeatures } from "./hooks/use-street-features";
 
 export const MapView = ({
   onRunQuery,
@@ -55,6 +56,11 @@ export const MapView = ({
     () => ["in", "cnn", hoveredStreetSegment],
     [hoveredStreetSegment],
   );
+  const {
+    streetFeatureProps,
+    geoJson: streetFeatureGeoJson,
+    geoJsonStyle: streetFeatureGeoJsonStyle,
+  } = useStreetFeatures();
 
   return (
     <Flex
@@ -80,7 +86,10 @@ export const MapView = ({
           currentMapControl={currentMapControl}
           setMapControl={setMapControl}
         />
-        <ControlPanel onRunQuery={onRunQuery} />
+        <ControlPanel
+          onRunQuery={onRunQuery}
+          streetFeatureProps={streetFeatureProps}
+        />
       </Flex>
       <Map
         ref={mapRef}
@@ -119,6 +128,15 @@ export const MapView = ({
             </Source>
           );
         })}
+        {streetFeatureGeoJson != null && streetFeatureGeoJsonStyle != null && (
+          <Source
+            id="street-features"
+            type="geojson"
+            data={streetFeatureGeoJson}
+          >
+            <Layer {...streetFeatureGeoJsonStyle} />
+          </Source>
+        )}
       </Map>
     </Flex>
   );

@@ -23,15 +23,6 @@ import { LoadingDataView } from "./loading-data-view";
 import { useAllCrashEvents } from "./use-all-crash-events";
 
 const useHasNoData = (): boolean => {
-  // const trafficCrashData = useTrafficCrashesData();
-  // const streetGroups = useStreetGroupsRef();
-  // const trafficCrashGroupIds = trafficCrashData.map(({ id }) => id);
-  // for (const crashGroupId of trafficCrashGroupIds) {
-  //   if (streetGroups.has(crashGroupId)) {
-  //     return false;
-  //   }
-  // }
-  // return true;
   const streetGroups = useStreetGroupsRef();
   return streetGroups.size === 0;
 };

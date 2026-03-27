@@ -6,7 +6,6 @@ import (
 	cUtils "citystreetdata/controllers/utils"
 	rTypes "citystreetdata/repositories/types"
 	dTypes "citystreetdata/types"
-	"slices"
 
 	repo "citystreetdata/repositories"
 	"context"
@@ -142,18 +141,21 @@ func (sfc *SfDataController) GetCrashesForStreets(ctx context.Context, params *t
 
 }
 
-func (sfc *SfDataController) GetStreetFeatures(ctx context.Context, params *types.GetStreetFeaturesParams) ([]rTypes.StreetFeatureSegment, error) {
-	ret := []rTypes.StreetFeatureSegment{}
-	if slices.Contains(params.FeatureTypes, rTypes.SlowStreet) {
-		vals, err := sfc.sfDataRepository.GetSlowStreets(ctx, &rTypes.GetSlowStreetParams{
-			CompletedAfter:  params.CompletedAfter,
-			CompletedBefore: params.CompletedBefore,
-		})
-		if err != nil {
-			return nil, err
-		}
-		ret = append(ret, vals...)
+func (sfc *SfDataController) GetStreetFeatures(ctx context.Context, params *types.GetStreetFeaturesParams) ([]rTypes.StreetFeature, error) {
+	ret := []rTypes.StreetFeature{}
+	if params.FeatureType == rTypes.SlowStreet {
+		return sfc.sfDataRepository.GetSlowStreetFeatures(ctx, &rTypes.GetSlowStreetParams{})
 	}
+	// if slices.Contains(params.FeatureTypes, rTypes.SlowStreet) {
+	// 	vals, err := sfc.sfDataRepository.GetSlowStreets(ctx, &rTypes.GetSlowStreetParams{
+	// 		CompletedAfter:  params.CompletedAfter,
+	// 		CompletedBefore: params.CompletedBefore,
+	// 	})
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	ret = append(ret, vals...)
+	// }
 	return ret, nil
 }
 

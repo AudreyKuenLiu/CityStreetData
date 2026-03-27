@@ -20,15 +20,6 @@ type GetFeatureForStreetParams struct {
 }
 
 type GetSlowStreetParams struct {
-	StreetName      *string
-	CompletedAfter  time.Time
-	CompletedBefore time.Time
-	Limit           uint
-}
-
-type StreetFeatureSegment struct {
-	StreetSegment
-	StreetFeature
 }
 
 type StreetSegment struct {
@@ -51,9 +42,13 @@ func (f FeatureType) IsValid() bool {
 }
 
 type StreetFeature struct {
-	FeatureType FeatureType `json:"feature_type"`
-	CompletedAt time.Time   `json:"completed_at"`
-	Value       string      `json:"value"`
+	FeatureType FeatureType        `json:"feature_type"`
+	Name        string             `json:"name"`
+	Value       string             `json:"value"`
+	Properties  any                `json:"properties"`
+	CNN         int                `json:"cnn"`
+	CompletedAt time.Time          `json:"completed_at"`
+	Geometry    *geometry.Geometry `json:"geometry"`
 }
 
 type GetTrafficStatsForStreetsParams struct {

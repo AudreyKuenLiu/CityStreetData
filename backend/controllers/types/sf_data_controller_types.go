@@ -48,9 +48,9 @@ type GetCrashesForStreetsParams struct {
 }
 
 type GetStreetFeaturesParams struct {
-	FeatureTypes    []rTypes.FeatureType
-	CompletedAfter  time.Time
-	CompletedBefore time.Time
+	FeatureType rTypes.FeatureType
+	// CompletedAfter  time.Time
+	// CompletedBefore time.Time
 }
 
 type TimeSegmentSize string

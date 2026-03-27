@@ -56,39 +56,77 @@ func (h *handlers) InitHandlers() error {
 	return nil
 }
 
-func (h *handlers) getCrashDataForStreets(c echo.Context) error {
+func parseCnns(c echo.Context) ([]int, error) {
 	cnnsStr := c.QueryParam("cnns")
-	startTimeStr := c.QueryParam("startTime")
-	endTimeStr := c.QueryParam("endTime")
-	timeSegment := c.QueryParam("timeSegment")
-
 	cnns := []int{}
 	if len(cnnsStr) > 0 {
 		err := json.Unmarshal([]byte(cnnsStr), &cnns)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
+			return nil, echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
 		}
 	}
+	return cnns, nil
+}
+
+func parseTime(c echo.Context, timeParam string) (*time.Time, error) {
+	startTimeStr := c.QueryParam(timeParam)
+
 	startTimeEpoch, err := strconv.ParseInt(startTimeStr, 10, 64)
 	startTime := time.Unix(startTimeEpoch, 0)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
+		return nil, echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing %s: %v", timeParam, err))
 	}
-	endTimeEpoch, err := strconv.ParseInt(endTimeStr, 10, 64)
-	endTime := time.Unix(endTimeEpoch, 0)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
-	}
+	return &startTime, nil
+}
+
+func parseTimeSegment(c echo.Context) (*cTypes.TimeSegmentSize, error) {
+	timeSegment := c.QueryParam("timeSegment")
+
 	segmentSize, err := cTypes.StrToSegment(timeSegment)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing timeSegment: %v", err))
+		return nil, echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing timeSegment: %v", err))
+	}
+	return &segmentSize, nil
+}
+
+func parseFeatureType(c echo.Context) (*rTypes.FeatureType, error) {
+	featureTypesStr := c.QueryParam("featureType")
+	var featureType rTypes.FeatureType
+	if len(featureTypesStr) > 0 {
+		err := json.Unmarshal([]byte(featureTypesStr), &featureType)
+		if err != nil {
+			return nil, echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing featureType: %v", err))
+		}
+	}
+	if !featureType.IsValid() {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "invalid feature type")
+	}
+	return &featureType, nil
+}
+
+func (h *handlers) getCrashDataForStreets(c echo.Context) error {
+	cnns, err := parseCnns(c)
+	if err != nil {
+		return err
+	}
+	startTime, err := parseTime(c, "startTime")
+	if err != nil {
+		return err
+	}
+	endTime, err := parseTime(c, "endTime")
+	if err != nil {
+		return err
+	}
+	segmentSize, err := parseTimeSegment(c)
+	if err != nil {
+		return err
 	}
 
 	result, err := h.sfDataController.GetCrashDataForStreets(c.Request().Context(), &cTypes.GetCrashDataForStreetsParams{
 		CNNs:        cnns,
-		SegmentSize: segmentSize,
-		StartTime:   startTime,
-		EndTime:     endTime,
+		SegmentSize: *segmentSize,
+		StartTime:   *startTime,
+		EndTime:     *endTime,
 	})
 
 	if err != nil {
@@ -105,43 +143,28 @@ func (h *handlers) getAllCrashEventsForStreets(c echo.Context) error {
 }
 
 func (h *handlers) getCrashEventsForStreets(c echo.Context) error {
-	cnnsStr := c.QueryParam("cnns")
-	startTimeStr := c.QueryParam("startTime")
-	endTimeStr := c.QueryParam("endTime")
-	timeSegment := c.QueryParam("timeSegment")
-
-	cnns := []int{}
-	if len(cnnsStr) > 0 {
-		err := json.Unmarshal([]byte(cnnsStr), &cnns)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing cnns: %v", err))
-		}
-	}
-	startTimeEpoch, err := strconv.ParseInt(startTimeStr, 10, 64)
-	startTime := time.Unix(startTimeEpoch, 0)
+	cnns, err := parseCnns(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
+		return err
 	}
-	endTimeEpoch, err := strconv.ParseInt(endTimeStr, 10, 64)
-	endTime := time.Unix(endTimeEpoch, 0)
+	startTime, err := parseTime(c, "startTime")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
+		return err
 	}
-
-	var segmentSize *cTypes.TimeSegmentSize = nil
-	if len(timeSegment) > 0 {
-		parsedSegment, err := cTypes.StrToSegment(timeSegment)
-		segmentSize = &parsedSegment
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing timeSegment: %v", err))
-		}
+	endTime, err := parseTime(c, "endTime")
+	if err != nil {
+		return err
+	}
+	segmentSize, err := parseTimeSegment(c)
+	if err != nil {
+		return err
 	}
 
 	result, err := h.sfDataController.GetCrashesForStreets(c.Request().Context(), &cTypes.GetCrashesForStreetsParams{
 		CNNs:        cnns,
 		SegmentSize: segmentSize,
-		StartTime:   startTime,
-		EndTime:     endTime,
+		StartTime:   *startTime,
+		EndTime:     *endTime,
 	})
 
 	if err != nil {
@@ -152,38 +175,18 @@ func (h *handlers) getCrashEventsForStreets(c echo.Context) error {
 }
 
 func (h *handlers) getStreetFeatures(c echo.Context) error {
-	featureTypesStr := c.QueryParam("featureTypes")
-	startTimeStr := c.QueryParam("startTime")
-	endTimeStr := c.QueryParam("endTime")
-
-	featureTypes := []rTypes.FeatureType{}
-	if len(featureTypesStr) > 0 {
-		err := json.Unmarshal([]byte(featureTypesStr), &featureTypes)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing featureTypes: %v", err))
-		}
-	}
-	for _, feature := range featureTypes {
-		if !feature.IsValid() {
-			return echo.NewHTTPError(http.StatusBadRequest, "invalid feature type")
-		}
-	}
-	startTimeEpoch, err := strconv.ParseInt(startTimeStr, 10, 64)
-	startTime := time.Unix(startTimeEpoch, 0)
+	featureType, err := parseFeatureType(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing startTime: %v", err))
-	}
-	endTimeEpoch, err := strconv.ParseInt(endTimeStr, 10, 64)
-	endTime := time.Unix(endTimeEpoch, 0)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing endTime: %v", err))
+		return err
 	}
 
 	result, err := h.sfDataController.GetStreetFeatures(c.Request().Context(), &cTypes.GetStreetFeaturesParams{
-		FeatureTypes:    featureTypes,
-		CompletedAfter:  startTime,
-		CompletedBefore: endTime,
+		FeatureType: *featureType,
 	})
+
+	if err != nil {
+		return err
+	}
 
 	return c.JSON(http.StatusOK, result)
 }

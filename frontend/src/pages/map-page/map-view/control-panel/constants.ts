@@ -1,3 +1,7 @@
+import {
+  StreetFeatureEnum,
+  StreetFeatureType,
+} from "../../../../models/api-models";
 import { TimeSegments } from "../../store/street-map-data-form";
 
 export const TimeSegmentLabels = {
@@ -20,3 +24,18 @@ export const TimeSegmentOptions = [
     label: "1 Year",
   },
 ] satisfies { value: TimeSegments; label: string }[];
+
+export const StreetFeatureOptions = [
+  {
+    value: StreetFeatureEnum.SlowStreet,
+    label: "Slow Streets",
+  },
+  {
+    value: StreetFeatureEnum.SpeedLimit,
+    label: "Speed Limits",
+  },
+  {
+    value: StreetFeatureEnum.SchoolZone,
+    label: "School Zones",
+  },
+] satisfies { value: StreetFeatureType; label: string }[];

@@ -101,66 +101,70 @@ func (sfr *SfDataRepository) GetAllCrashEvents(ctx context.Context) ([]types.Cra
 	return crashesArr, nil
 }
 
-func (sfr *SfDataRepository) GetSlowStreets(ctx context.Context, params *types.GetSlowStreetParams) ([]types.StreetFeatureSegment, error) {
-	if params == nil {
-		return nil, fmt.Errorf("must provide params")
-	}
-
+func (sfr *SfDataRepository) GetSlowStreetFeatures(ctx context.Context, params *types.GetSlowStreetParams) ([]types.StreetFeature, error) {
 	conn, err := sfr.db.Conn(ctx)
 	if err != nil {
 		sfr.logger.Error("could not establish connection")
 		return nil, err
 	}
 
-	queryString := fmt.Sprintf(
-		`
+	queryString := `
+		WITH most_recent_slow_street AS (
+			SELECT *
+			FROM (
+				SELECT 
+					cnn,
+					completed_at,
+					value,
+					metadata,
+					ROW_NUMBER() OVER (PARTITION BY cnn ORDER BY completed_at DESC) as rn 
+				FROM
+					sf_street_feature_slow_street
+			)
+			WHERE
+				rn = 1
+		)
 		SELECT
-			ss.value, 
-			ss.completed_at,
+			si.street as name,
+			ss.value,
+			ss.metadata as properties,
 			si.cnn,
-			si.street,
-			si.line
+			ss.completed_at,
+			ST_AsBinary(si.line) as geometry
 		FROM
-			sf_street_feature_slow_street as ss
+			most_recent_slow_street as ss
 			LEFT JOIN
 			sf_streets_and_intersections si on ss.cnn = si.cnn
-		WHERE
-			ss.completed_at BETWEEN %d and %d
-	`,
-		params.CompletedAfter.Unix(),
-		params.CompletedBefore.Unix(),
-	)
-	if params.StreetName != nil {
-		queryString += fmt.Sprintf("%s AND ss.value = %s", queryString, *params.StreetName)
-	}
+	`
 	row, err := conn.QueryContext(ctx, queryString)
 	if err != nil {
 		return nil, err
 	}
 	defer row.Close()
 
-	streetFeatureSegments := []types.StreetFeatureSegment{}
+	streetFeatures := []types.StreetFeature{}
 	for row.Next() {
-		var streetFeatureSegment = types.StreetFeatureSegment{StreetFeature: types.StreetFeature{
+		var streetFeature = types.StreetFeature{
 			FeatureType: types.SlowStreet,
-		}}
+		}
 		var completedAtInt int64
 
 		err := row.Scan(
-			&streetFeatureSegment.Value,
+			&streetFeature.Name,
+			&streetFeature.Value,
+			&streetFeature.Properties,
+			&streetFeature.CNN,
 			&completedAtInt,
-			&streetFeatureSegment.CNN,
-			&streetFeatureSegment.StreetName,
-			&streetFeatureSegment.Line,
+			&streetFeature.Geometry,
 		)
 		if err != nil {
 			return nil, err
 		}
-		streetFeatureSegment.CompletedAt = time.Unix(completedAtInt, 0)
-		streetFeatureSegments = append(streetFeatureSegments, streetFeatureSegment)
+		streetFeature.CompletedAt = time.Unix(completedAtInt, 0)
+		streetFeatures = append(streetFeatures, streetFeature)
 	}
 
-	return streetFeatureSegments, nil
+	return streetFeatures, nil
 }
 
 func createTempTable(ctx context.Context, conn *sql.Conn, tableName string, columnName string, values []int) error {

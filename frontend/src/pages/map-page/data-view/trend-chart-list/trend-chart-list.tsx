@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { useStreetGroupsRef } from "../../store/street-map-data-form";
 import { Flex, Typography } from "antd";
-import { ScanOutlined, XFilled } from "@ant-design/icons";
+import { XFilled } from "@ant-design/icons";
 import { useCrashTrendData } from "../../store/trend-chart-list-data";
 import { PointTooltipProps, ResponsiveLine } from "@nivo/line";
 import { ControlPanel } from "./control-panel";

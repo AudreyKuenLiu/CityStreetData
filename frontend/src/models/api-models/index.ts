@@ -1,4 +1,4 @@
-import { FeatureCollection, LineString, Point } from "geojson";
+import { FeatureCollection, Geometry, LineString, Point } from "geojson";
 import { z } from "zod";
 
 export const classCodeSchema = z.object({
@@ -92,11 +92,23 @@ export type CrashEventFeatureCollection = FeatureCollection<
   ApiCrashEvent
 >;
 
-export const streetFeatureTypeSchema = z.literal(["SpeedLimit"]);
-export type StreetFeatureType = z.infer<typeof streetFeatureTypeSchema>;
+export const streetFeatureTypeSchema = z.object({
+  SlowStreet: "SlowStreet",
+  SpeedLimit: "SpeedLimit",
+  SchoolZone: "SchoolZone",
+} as const);
+export const StreetFeatureEnum = streetFeatureTypeSchema.shape;
+export type StreetFeatureType =
+  (typeof StreetFeatureEnum)[keyof typeof StreetFeatureEnum];
 
 export type StreetFeature = {
   featureType: StreetFeatureType;
-  cnn: number;
+  name: string;
   value: string;
+  properties: {
+    [key: string]: string;
+  };
+  cnn: number;
+  completedAt: number;
+  geometry: Geometry;
 };
