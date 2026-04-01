@@ -140,11 +140,11 @@ export const TrendChartList = (): React.JSX.Element => {
                   max: "auto",
                   reverse: false,
                 }}
-                //enableSlices="x"
                 //enableTouchCrosshair
                 useMesh={true}
                 margin={{ bottom: 40, left: 80, top: 50, right: 40 }}
                 tooltip={TrendTooltip}
+                //enableSlices="x"
               />
             </div>
           </Flex>

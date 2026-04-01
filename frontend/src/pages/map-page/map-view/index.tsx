@@ -20,6 +20,7 @@ import { Flex } from "antd";
 import { SelectControlPanel } from "./select-control-panel";
 import { useMapControlPanel } from "./hooks/use-map-control-panel";
 import { useStreetFeatures } from "./hooks/use-street-features";
+import { StreetFeatureLegend } from "./street-feature-legend";
 
 export const MapView = ({
   onRunQuery,
@@ -60,6 +61,7 @@ export const MapView = ({
     streetFeatureProps,
     geoJson: streetFeatureGeoJson,
     geoJsonStyle: streetFeatureGeoJsonStyle,
+    legend,
   } = useStreetFeatures();
 
   return (
@@ -134,10 +136,13 @@ export const MapView = ({
             type="geojson"
             data={streetFeatureGeoJson}
           >
-            <Layer {...streetFeatureGeoJsonStyle} />
+            {streetFeatureGeoJsonStyle.map((style) => {
+              return <Layer {...style} />;
+            })}
           </Source>
         )}
       </Map>
+      <StreetFeatureLegend legend={legend} />
     </Flex>
   );
 };

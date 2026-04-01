@@ -1,9 +1,11 @@
 import { format } from "date-fns-tz";
 
 let colorIndex = 1;
-export const getRandomColor = (): string => {
-  const hue = colorIndex * 137.508; // use golden angle approximation
-  colorIndex++;
+export const getRandomColor = (initialColorIndex?: number): string => {
+  const hue = (initialColorIndex ?? colorIndex) * 137.508; // use golden angle approximation
+  if (initialColorIndex == null) {
+    colorIndex++;
+  }
   return `hsl(${hue},70%,40%)`;
 };
 
