@@ -83,7 +83,13 @@ const streetFeaturesToLegend = ({
   const streetFeatureValues = new Set();
   let initialIndex = 40;
   const ret: { value: string; color: string }[] = [];
-  for (const streetFeature of streetFeatures) {
+  const sortedFeatures = streetFeatures.sort((a, b) => {
+    if (Number.isInteger(a.value) && Number.isInteger(b.value)) {
+      return Number(a.value) - Number(b.value);
+    }
+    return a.value.localeCompare(b.value);
+  });
+  for (const streetFeature of sortedFeatures) {
     const streetFeatureValue = streetFeature.value;
     if (!streetFeatureValues.has(streetFeatureValue)) {
       ret.push({
@@ -109,33 +115,31 @@ const streetFeaturesToGeoJson = ({
 }):
   | [data: FeatureCollection, layerStyles: LineLayerSpecification[]]
   | [null, null] => {
-  if (streetFeatureLayer === StreetFeatureEnum.SlowStreet) {
-    return [
-      {
-        type: "FeatureCollection" as const,
-        features: streetFeatures.map(({ properties, geometry, value }) => {
-          return {
-            type: "Feature" as const,
-            geometry,
-            properties: { value, ...properties },
-          };
-        }),
+  return [
+    {
+      type: "FeatureCollection" as const,
+      features: streetFeatures.map(({ properties, geometry, value }) => {
+        return {
+          type: "Feature" as const,
+          geometry,
+          properties: { value, ...properties },
+        };
+      }),
+    },
+    legend.map(({ value, color }) => ({
+      id: `${value}-${streetFeatureLayer}-features-style`,
+      filter: ["==", ["get", "value"], value],
+      type: "line" as const,
+      source: "street-features",
+      layout: {
+        "line-cap": "round" as const,
       },
-      legend.map(({ value, color }) => ({
-        id: `${value}-slow-street-features-style`,
-        filter: ["==", ["get", "value"], value],
-        type: "line" as const,
-        source: "street-features",
-        layout: {
-          "line-cap": "round" as const,
-        },
-        paint: {
-          "line-opacity": 0.8,
-          "line-width": 5,
-          "line-color": color,
-        },
-      })),
-    ];
-  }
-  return [null, null];
+      paint: {
+        "line-opacity": 0.8,
+        "line-width": 5,
+        "line-color": color,
+      },
+    })),
+  ];
+  //return [null, null];
 };

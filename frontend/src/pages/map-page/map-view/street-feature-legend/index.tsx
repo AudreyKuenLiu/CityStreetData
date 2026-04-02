@@ -22,11 +22,25 @@ export const StreetFeatureLegend = ({
         bottom: "20px",
       }}
     >
-      <Card style={{ pointerEvents: "all", maxWidth: "900px" }}>
+      <Card
+        style={{
+          pointerEvents: "all",
+          maxWidth: "1200px",
+          border: "1px solid #d3d3d3",
+        }}
+      >
         <Row gutter={[8, 8]}>
           {legend.map((legendVal) => {
+            let colSpan = 12;
+            if (legend.length >= 8) {
+              colSpan = 6;
+            }
+
+            if (legend.length >= 12) {
+              colSpan = 3;
+            }
             return (
-              <Col span={4}>
+              <Col span={colSpan}>
                 <Flex
                   style={{
                     alignItems: "center",

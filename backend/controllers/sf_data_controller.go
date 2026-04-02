@@ -146,16 +146,12 @@ func (sfc *SfDataController) GetStreetFeatures(ctx context.Context, params *type
 	if params.FeatureType == rTypes.SlowStreet {
 		return sfc.sfDataRepository.GetSlowStreetFeatures(ctx, &rTypes.GetSlowStreetParams{})
 	}
-	// if slices.Contains(params.FeatureTypes, rTypes.SlowStreet) {
-	// 	vals, err := sfc.sfDataRepository.GetSlowStreets(ctx, &rTypes.GetSlowStreetParams{
-	// 		CompletedAfter:  params.CompletedAfter,
-	// 		CompletedBefore: params.CompletedBefore,
-	// 	})
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	ret = append(ret, vals...)
-	// }
+	if params.FeatureType == rTypes.SchoolZone {
+		return sfc.sfDataRepository.GetSchoolZones(ctx)
+	}
+	if params.FeatureType == rTypes.SpeedLimit {
+		return sfc.sfDataRepository.GetSpeedLimits(ctx)
+	}
 	return ret, nil
 }
 

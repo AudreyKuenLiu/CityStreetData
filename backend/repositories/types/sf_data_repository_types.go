@@ -34,11 +34,12 @@ type FeatureType string
 
 const (
 	SpeedLimit FeatureType = "SpeedLimit"
+	SchoolZone FeatureType = "SchoolZone"
 	SlowStreet FeatureType = "SlowStreet"
 )
 
 func (f FeatureType) IsValid() bool {
-	return f == SpeedLimit || f == SlowStreet
+	return f == SpeedLimit || f == SlowStreet || f == SchoolZone
 }
 
 type StreetFeature struct {

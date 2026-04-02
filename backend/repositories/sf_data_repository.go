@@ -101,6 +101,144 @@ func (sfr *SfDataRepository) GetAllCrashEvents(ctx context.Context) ([]types.Cra
 	return crashesArr, nil
 }
 
+func (sfr *SfDataRepository) GetSpeedLimits(ctx context.Context) ([]types.StreetFeature, error) {
+	conn, err := sfr.db.Conn(ctx)
+	if err != nil {
+		sfr.logger.Error("could not establish connection")
+		return nil, err
+	}
+
+	queryString := `
+		WITH most_speed_limit AS (
+			SELECT *
+			FROM (
+				SELECT 
+					cnn,
+					completed_at,
+					CASE WHEN use_defacto_limit THEN 25 ELSE value END as value,
+					metadata,
+					ROW_NUMBER() OVER (PARTITION BY cnn ORDER BY completed_at DESC) as rn 
+				FROM
+					sf_street_feature_speed_limit
+				WHERE
+					removed_at is NULL
+			)
+			WHERE
+				rn = 1
+		)
+		SELECT
+			si.street as name,
+			sl.value,
+			sl.metadata as properties,
+			si.cnn,
+			sl.completed_at,
+			ST_AsBinary(si.line) as geometry
+		FROM
+			most_speed_limit as sl
+			LEFT JOIN
+			sf_streets_and_intersections si on sl.cnn = si.cnn
+	`
+	row, err := conn.QueryContext(ctx, queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	streetFeatures := []types.StreetFeature{}
+	for row.Next() {
+		var streetFeature = types.StreetFeature{
+			FeatureType: types.SpeedLimit,
+		}
+		var completedAtInt int64
+
+		err := row.Scan(
+			&streetFeature.Name,
+			&streetFeature.Value,
+			&streetFeature.Properties,
+			&streetFeature.CNN,
+			&completedAtInt,
+			&streetFeature.Geometry,
+		)
+		if err != nil {
+			return nil, err
+		}
+		streetFeature.CompletedAt = time.Unix(completedAtInt, 0)
+		streetFeatures = append(streetFeatures, streetFeature)
+	}
+
+	return streetFeatures, nil
+
+}
+
+func (sfr *SfDataRepository) GetSchoolZones(ctx context.Context) ([]types.StreetFeature, error) {
+	conn, err := sfr.db.Conn(ctx)
+	if err != nil {
+		sfr.logger.Error("could not establish connection")
+		return nil, err
+	}
+
+	queryString := `
+		WITH most_recent_school_zone AS (
+			SELECT *
+			FROM (
+				SELECT 
+					cnn,
+					completed_at,
+					value,
+					metadata,
+					ROW_NUMBER() OVER (PARTITION BY cnn ORDER BY completed_at DESC) as rn 
+				FROM
+					sf_street_feature_school_zone
+				WHERE
+					is_active = true
+			)
+			WHERE
+				rn = 1
+		)
+		SELECT
+			si.street as name,
+			sz.value,
+			sz.metadata as properties,
+			si.cnn,
+			sz.completed_at,
+			ST_AsBinary(si.line) as geometry
+		FROM
+			most_recent_school_zone as sz
+			LEFT JOIN
+			sf_streets_and_intersections si on sz.cnn = si.cnn
+	`
+	row, err := conn.QueryContext(ctx, queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	streetFeatures := []types.StreetFeature{}
+	for row.Next() {
+		var streetFeature = types.StreetFeature{
+			FeatureType: types.SpeedLimit,
+		}
+		var completedAtInt int64
+
+		err := row.Scan(
+			&streetFeature.Name,
+			&streetFeature.Value,
+			&streetFeature.Properties,
+			&streetFeature.CNN,
+			&completedAtInt,
+			&streetFeature.Geometry,
+		)
+		if err != nil {
+			return nil, err
+		}
+		streetFeature.CompletedAt = time.Unix(completedAtInt, 0)
+		streetFeatures = append(streetFeatures, streetFeature)
+	}
+
+	return streetFeatures, nil
+
+}
+
 func (sfr *SfDataRepository) GetSlowStreetFeatures(ctx context.Context, params *types.GetSlowStreetParams) ([]types.StreetFeature, error) {
 	conn, err := sfr.db.Conn(ctx)
 	if err != nil {
