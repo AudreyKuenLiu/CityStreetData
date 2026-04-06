@@ -100,7 +100,7 @@ export const AreaChartList = (): React.JSX.Element => {
                     }}
                   >
                     <ResponsiveLine
-                      animate={false}
+                      animate={true}
                       data={lineSeries}
                       colors={(datum) => {
                         return datum.color;

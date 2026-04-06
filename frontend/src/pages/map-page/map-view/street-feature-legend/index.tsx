@@ -32,10 +32,9 @@ export const StreetFeatureLegend = ({
         <Row gutter={[8, 8]}>
           {legend.map((legendVal) => {
             let colSpan = 12;
-            if (legend.length >= 8) {
-              colSpan = 6;
+            if (legend.length >= 6) {
+              colSpan = 4;
             }
-
             if (legend.length >= 12) {
               colSpan = 3;
             }

@@ -118,13 +118,13 @@ export const MapView = ({
           <Layer {...streetLayerStyle} filter={zoomLevelFilter} />
           <Layer {...hoveredLayerStyle} filter={hoveredSegmentFilter} />
         </Source>
-        {configs.map((config) => {
+        {configs.map((config, idx) => {
           return (
             <Source
               id={config.sourceId}
               type="geojson"
               data={config.data}
-              key={config.sourceId}
+              key={`${idx}_${config.sourceId}`}
             >
               <Layer {...config.layerStyle} />
             </Source>
@@ -136,8 +136,8 @@ export const MapView = ({
             type="geojson"
             data={streetFeatureGeoJson}
           >
-            {streetFeatureGeoJsonStyle.map((style) => {
-              return <Layer {...style} />;
+            {streetFeatureGeoJsonStyle.map((style, idx) => {
+              return <Layer key={`${idx}_${style.id}`} {...style} />;
             })}
           </Source>
         )}
