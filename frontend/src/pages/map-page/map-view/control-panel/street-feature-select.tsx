@@ -15,6 +15,10 @@ export const StreetFeatureSelect = ({
   return (
     <Select
       size="large"
+      style={{
+        height: "var(--ant-control-height-lg)",
+        pointerEvents: "all",
+      }}
       allowClear
       placeholder="View Street Features"
       value={streetFeatureLayer}

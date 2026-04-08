@@ -87,7 +87,7 @@ export const TrendChartList = (): React.JSX.Element => {
               }}
             >
               <ResponsiveLine
-                animate={true}
+                animate={false}
                 data={lineSeries}
                 colors={(datum) => {
                   return datum.color;

@@ -16,11 +16,13 @@ import {
 import { useStreetsForMapView } from "../hooks/use-streets-for-map-view";
 import { useSelectedStreets } from "./hooks/use-selected-streets";
 import { ControlPanel } from "./control-panel";
-import { Flex } from "antd";
+import { Flex, Layout } from "antd";
 import { SelectControlPanel } from "./select-control-panel";
 import { useMapControlPanel } from "./hooks/use-map-control-panel";
 import { useStreetFeatures } from "./hooks/use-street-features";
 import { StreetFeatureLegend } from "./street-feature-legend";
+import { Footer } from "antd/es/layout/layout";
+import { StreetFeatureSelect } from "./control-panel/street-feature-select";
 
 export const MapView = ({
   onRunQuery,
@@ -65,84 +67,103 @@ export const MapView = ({
   } = useStreetFeatures();
 
   return (
-    <Flex
-      ref={panelRef}
-      tabIndex={0}
-      style={{ position: "relative", width: "100%", height: "100%" }}
+    <Layout
+      style={{
+        flexDirection: "column",
+        width: "100%",
+        height: "100%",
+      }}
     >
       <Flex
+        ref={panelRef}
+        tabIndex={0}
         style={{
-          position: "absolute",
-          zIndex: 2,
-          justifyContent: "space-between",
-          marginTop: "16px",
-          marginLeft: "16px",
-          marginRight: "16px",
-          right: "0px",
-          left: "0",
-          pointerEvents: "none",
-          gap: "4px",
+          flex: 1,
+          position: "relative",
         }}
       >
-        <SelectControlPanel
-          currentMapControl={currentMapControl}
-          setMapControl={setMapControl}
-        />
-        <ControlPanel
-          onRunQuery={onRunQuery}
-          streetFeatureProps={streetFeatureProps}
-        />
-      </Flex>
-      <Map
-        ref={mapRef}
-        {...viewState}
-        onMove={(evt) => setViewState(evt.viewState)}
-        onMouseMove={onHover}
-        // [sw, ne]
-        maxBounds={[
-          SanFranciscoSWPoint[1],
-          SanFranciscoSWPoint[0],
-          SanFranciscoNEPoint[1],
-          SanFranciscoNEPoint[0],
-        ]}
-        reuseMaps
-        pitchWithRotate={false}
-        onClick={onClick}
-        maxZoom={MAX_ZOOM}
-        style={{ width: "100%", height: "100%" }}
-        interactiveLayerIds={[streetLayerId, hoveredLayerId, ...layerIds]}
-        mapStyle="https://tiles.openfreemap.org/styles/positron"
-        doubleClickZoom={false}
-      >
-        <Source id="streets" type="geojson" data={geoJson}>
-          <Layer {...streetLayerStyle} filter={zoomLevelFilter} />
-          <Layer {...hoveredLayerStyle} filter={hoveredSegmentFilter} />
-        </Source>
-        {configs.map((config, idx) => {
-          return (
-            <Source
-              id={config.sourceId}
-              type="geojson"
-              data={config.data}
-              key={`${idx}_${config.sourceId}`}
-            >
-              <Layer {...config.layerStyle} />
-            </Source>
-          );
-        })}
-        {streetFeatureGeoJson != null && streetFeatureGeoJsonStyle != null && (
-          <Source
-            id="street-features"
-            type="geojson"
-            data={streetFeatureGeoJson}
-          >
-            {streetFeatureGeoJsonStyle.map((style, idx) => {
-              return <Layer key={`${idx}_${style.id}`} {...style} />;
-            })}
+        <Flex
+          style={{
+            position: "absolute",
+            zIndex: 2,
+            justifyContent: "space-between",
+            marginTop: "16px",
+            marginLeft: "16px",
+            marginRight: "16px",
+            right: "0px",
+            left: "0",
+            pointerEvents: "none",
+            gap: "4px",
+          }}
+        >
+          <SelectControlPanel
+            currentMapControl={currentMapControl}
+            setMapControl={setMapControl}
+          />
+          <StreetFeatureSelect {...streetFeatureProps} />
+        </Flex>
+        <Map
+          ref={mapRef}
+          {...viewState}
+          onMove={(evt) => setViewState(evt.viewState)}
+          onMouseMove={onHover}
+          // [sw, ne]
+          maxBounds={[
+            SanFranciscoSWPoint[1],
+            SanFranciscoSWPoint[0],
+            SanFranciscoNEPoint[1],
+            SanFranciscoNEPoint[0],
+          ]}
+          reuseMaps
+          pitchWithRotate={false}
+          onClick={onClick}
+          maxZoom={MAX_ZOOM}
+          style={{ width: "100%", height: "100%" }}
+          interactiveLayerIds={[streetLayerId, hoveredLayerId, ...layerIds]}
+          mapStyle="https://tiles.openfreemap.org/styles/positron"
+          doubleClickZoom={false}
+        >
+          <Source id="streets" type="geojson" data={geoJson}>
+            <Layer {...streetLayerStyle} filter={zoomLevelFilter} />
+            <Layer {...hoveredLayerStyle} filter={hoveredSegmentFilter} />
           </Source>
-        )}
-      </Map>
-      <StreetFeatureLegend legend={legend} />
-    </Flex>
+          {configs.map((config, idx) => {
+            return (
+              <Source
+                id={config.sourceId}
+                type="geojson"
+                data={config.data}
+                key={`${idx}_${config.sourceId}`}
+              >
+                <Layer {...config.layerStyle} />
+              </Source>
+            );
+          })}
+          {streetFeatureGeoJson != null &&
+            streetFeatureGeoJsonStyle != null && (
+              <Source
+                id="street-features"
+                type="geojson"
+                data={streetFeatureGeoJson}
+              >
+                {streetFeatureGeoJsonStyle.map((style, idx) => {
+                  return <Layer key={`${idx}_${style.id}`} {...style} />;
+                })}
+              </Source>
+            )}
+        </Map>
+        <StreetFeatureLegend legend={legend} />
+      </Flex>
+      <Footer
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          padding: "12px",
+          borderTop: "1px solid #d9d9d9",
+        }}
+      >
+        <ControlPanel onRunQuery={onRunQuery} />
+      </Footer>
+    </Layout>
   );
 };

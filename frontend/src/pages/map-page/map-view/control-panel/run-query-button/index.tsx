@@ -14,7 +14,7 @@ import { useDataViewContext } from "../../../context/data-view";
 const DataViewConfig = {
   [DataViewEnum.NoView]: {
     icon: <BuildFilled />,
-    label: "Generate View",
+    label: "Build View",
   },
   [DataViewEnum.AreaChartView]: {
     icon: <AreaChartOutlined />,
@@ -98,13 +98,16 @@ export const RunQueryButton = ({
         menu={{
           items: viewOptions,
           onClick: async (e) => {
+            if (!canRunQuery) {
+              return;
+            }
             const selectedDataView = DataViewKeys.parse(e.key);
             setDataView(selectedDataView);
             setValidRun(true);
             onClick();
           },
         }}
-        disabled={!canRunQuery}
+        //disabled={!canRunQuery}
       >
         <Button
           size="large"
@@ -116,8 +119,11 @@ export const RunQueryButton = ({
               DataViewConfig[currentDataView].icon
             )
           }
-          disabled={!canRunQuery}
+          //disabled={!canRunQuery}
           onClick={async () => {
+            if (!canRunQuery) {
+              return;
+            }
             setValidRun(true);
             if (currentDataView === DataViewEnum.NoView) {
               setDataView(DataViewKeys.parse(DataViewEnum.AreaChartView));
@@ -129,11 +135,7 @@ export const RunQueryButton = ({
             justifyContent: "center",
             alignItems: "center",
             // for some reason this button is always transparent when disabled
-            backgroundColor: !canRunQuery
-              ? "#d9d9d9"
-              : isDirty && validRun
-                ? "#ed8821"
-                : undefined,
+            backgroundColor: isDirty && validRun ? "#ed8821" : undefined,
           }}
         >
           {DataViewConfig[currentDataView].label}

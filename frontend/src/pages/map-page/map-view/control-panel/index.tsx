@@ -16,21 +16,9 @@ import {
 } from "../../store/street-map-data-form";
 import { RunQueryButton } from "./run-query-button";
 import { useDataViewContext } from "../../context/data-view";
-import { StreetFeatureSelect } from "./street-feature-select";
-import { StreetFeatureType } from "../../../../models/api-models";
 
 export const ControlPanel = memo(
-  ({
-    onRunQuery,
-    streetFeatureProps,
-  }: {
-    onRunQuery: () => void;
-    streetFeatureProps: {
-      streetFeatureLayer: StreetFeatureType | null;
-      setStreetFeatureLayer: (val: StreetFeatureType) => void;
-      isLoading: boolean;
-    };
-  }): React.JSX.Element => {
+  ({ onRunQuery }: { onRunQuery: () => void }): React.JSX.Element => {
     const {
       addGroup,
       setCurrentGroup,
@@ -70,12 +58,6 @@ export const ControlPanel = memo(
           alignItems: "center",
         }}
       >
-        <StreetFeatureSelect {...streetFeatureProps} />
-        <Divider
-          orientation="vertical"
-          size="large"
-          style={{ height: "85%", backgroundColor: "#878787" }}
-        />
         <GroupSelector
           currentOption={
             currentStreetGroup != null

@@ -69,8 +69,8 @@ export const AreaChartList = (): React.JSX.Element => {
                     backgroundColor: "#FAFAFA",
                     borderRadius: "5px",
                     paddingTop: "20px",
-                    paddingRight: "20px",
-                    height: "500px",
+                    // paddingRight: "20px",
+                    //height: "500px",
                     width: "100%",
                     //boxShadow: "0 3px 6px rgba(0,0,0,.05),0 3px 6px rgba(0,0,0,.05)",
                   }}
@@ -79,17 +79,17 @@ export const AreaChartList = (): React.JSX.Element => {
                     align="middle"
                     style={{
                       alignItems: "center",
-                      gap: "1.5em",
+                      gap: "1em",
                       paddingLeft: "24px",
                     }}
                   >
                     <XFilled
                       style={{
-                        fontSize: "32px",
+                        fontSize: "24px",
                         color: streetGroup.color,
                       }}
                     />
-                    <Typography.Title level={2} style={{ margin: 0 }}>
+                    <Typography.Title level={3} style={{ margin: 0 }}>
                       {streetGroup.name}
                     </Typography.Title>
                   </Flex>
@@ -100,7 +100,10 @@ export const AreaChartList = (): React.JSX.Element => {
                     }}
                   >
                     <ResponsiveLine
-                      animate={true}
+                      animate={false}
+                      curve="monotoneX"
+                      enableGridX={false}
+                      //enableGridY={false}
                       data={lineSeries}
                       colors={(datum) => {
                         return datum.color;
@@ -143,7 +146,7 @@ export const AreaChartList = (): React.JSX.Element => {
                       }}
                       axisBottom={{
                         format: "%Y-%b-%d",
-                        tickPadding: 10,
+                        tickPadding: 20,
                         tickValues: tickValues,
                       }}
                       sliceTooltip={SliceTooltip}

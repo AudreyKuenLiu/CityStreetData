@@ -23,6 +23,11 @@ export const StreetFeatureLegend = ({
       }}
     >
       <Card
+        styles={{
+          root: {
+            padding: "8px",
+          },
+        }}
         style={{
           pointerEvents: "all",
           maxWidth: "1200px",
