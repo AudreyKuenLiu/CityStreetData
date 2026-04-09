@@ -41,7 +41,7 @@ export const ControlPanel = (): React.JSX.Element => {
         top: "0",
         left: "0",
         zIndex: "2",
-        minWidth: "800px",
+        minWidth: "500px",
         width: "100%",
       }}
     >

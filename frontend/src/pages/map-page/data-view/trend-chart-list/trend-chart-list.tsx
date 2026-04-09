@@ -8,6 +8,7 @@ import { ControlPanel } from "./control-panel";
 import { AverageLineSeriesId } from "../../store/trend-chart-list-data/types";
 import { ChartScroller } from "../chart-scroller";
 import { useVirtualChartData } from "../chart-scroller/use-virtual-chart-data";
+import { GraphCard } from "../graph-card";
 
 export const TrendChartList = (): React.JSX.Element => {
   const streetGroups = useStreetGroupsRef();
@@ -38,71 +39,50 @@ export const TrendChartList = (): React.JSX.Element => {
       }}
     >
       <ControlPanel />
-      {crashTrendData.map(({ id, tickValues, lineSeries, axisLegend }) => {
-        const streetGroup = streetGroups.get(id);
-        if (streetGroup == null) {
-          return null;
-        }
-        //const totalWidth = Math.max(tickValues.length * 80, 1400);
-        return (
-          <Flex
-            key={`${id}_graph`}
-            ref={chartPanel}
-            style={{
-              flexDirection: "column",
-              border: `1px solid #d3d3d3`,
-              backgroundColor: "#FAFAFA",
-              borderRadius: "5px",
-              paddingTop: "20px",
-              paddingRight: "20px",
-              height: "500px",
-              width: "100%",
-
-              //boxShadow: "0 3px 6px rgba(0,0,0,.05),0 3px 6px rgba(0,0,0,.05)",
-            }}
-          >
-            <Flex
-              align="middle"
-              style={{
-                alignItems: "center",
-                gap: "1.5em",
-                paddingLeft: "24px",
-              }}
-            >
-              <XFilled
-                style={{
-                  fontSize: "32px",
-                  color: streetGroup.color,
-                }}
-              />
-              <Typography.Title level={2} style={{ margin: 0 }}>
-                {streetGroup.name}
-              </Typography.Title>
-            </Flex>
-            <div
-              style={{
-                minHeight: "400px",
-                //width: `${totalWidth}px`,
-                width: "100%",
-              }}
+      <Flex
+        ref={chartPanel}
+        style={{
+          flexWrap: "wrap",
+          alignContent: "flex-start",
+          gap: "20px",
+          minWidth: "500px",
+          width: "100%",
+        }}
+      >
+        {crashTrendData.map(({ id, tickValues, lineSeries, axisLegend }) => {
+          const streetGroup = streetGroups.get(id);
+          if (streetGroup == null) {
+            return null;
+          }
+          return (
+            <GraphCard
+              id={id}
+              groupName={streetGroup.name}
+              groupColor={streetGroup.color}
             >
               <ResponsiveLine
                 animate={false}
+                curve="monotoneX"
+                enableGridX={false}
                 data={lineSeries}
                 colors={(datum) => {
                   return datum.color;
                 }}
                 theme={{
                   text: {
-                    fontWeight: "bold",
+                    fontWeight: 400,
+                    fill: "#595959",
                     textShadow:
                       "-1px 0 white, 0 1px white, 1px 0 white, 0 -1px white",
                   },
                   axis: {
                     legend: {
                       text: {
-                        fontWeight: "bold",
-                        fontSize: 14,
+                        fontWeight: 500,
+                        letterSpacing: "0.03em",
+                        fill: "#595959",
+                        fontSize: 16,
+                        textShadow: "none",
                       },
                     },
                   },
@@ -115,8 +95,8 @@ export const TrendChartList = (): React.JSX.Element => {
                   }
                   return "";
                 }}
-                pointSize={8}
-                axisLeft={{
+                pointSize={6}
+                axisTop={{
                   format: (e) => {
                     if (typeof e == "number" && Number.isInteger(e)) {
                       return e;
@@ -124,10 +104,11 @@ export const TrendChartList = (): React.JSX.Element => {
                     return "";
                   },
                   legend: axisLegend,
-                  legendOffset: -50,
+                  tickSize: 0,
+                  legendOffset: -30,
                 }}
                 axisBottom={{
-                  tickPadding: 10,
+                  tickPadding: 25,
                   tickValues: tickValues,
                 }}
                 // sliceTooltip={SliceTooltip}
@@ -142,14 +123,14 @@ export const TrendChartList = (): React.JSX.Element => {
                 }}
                 //enableTouchCrosshair
                 useMesh={true}
-                margin={{ bottom: 40, left: 80, top: 50, right: 40 }}
+                margin={{ bottom: 45, left: 50, top: 40, right: 40 }}
                 tooltip={TrendTooltip}
                 //enableSlices="x"
               />
-            </div>
-          </Flex>
-        );
-      })}
+            </GraphCard>
+          );
+        })}
+      </Flex>
       <ChartScroller
         allTicks={allTickValues}
         toLabel={(t) => t}

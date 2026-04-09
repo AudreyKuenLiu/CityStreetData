@@ -8,6 +8,7 @@ import type { SliceTooltipProps } from "@nivo/line";
 import { ControlPanel } from "./control-panel";
 import { ChartScroller } from "../chart-scroller";
 import { useVirtualChartData } from "../chart-scroller/use-virtual-chart-data";
+import { GraphCard } from "../graph-card";
 
 export const AreaChartList = (): React.JSX.Element => {
   const streetGroups = useStreetGroupsRef();
@@ -35,7 +36,6 @@ export const AreaChartList = (): React.JSX.Element => {
     >
       <Flex
         style={{
-          //overflow: "scroll",
           flexWrap: "wrap",
           height: "100vh",
           alignContent: "flex-start",
@@ -61,110 +61,80 @@ export const AreaChartList = (): React.JSX.Element => {
                 return null;
               }
               return (
-                <Flex
-                  key={`${id}_graph`}
-                  style={{
-                    flexDirection: "column",
-                    border: `1px solid #d3d3d3`,
-                    backgroundColor: "#FAFAFA",
-                    borderRadius: "5px",
-                    paddingTop: "20px",
-                    // paddingRight: "20px",
-                    //height: "500px",
-                    width: "100%",
-                    //boxShadow: "0 3px 6px rgba(0,0,0,.05),0 3px 6px rgba(0,0,0,.05)",
-                  }}
+                <GraphCard
+                  id={id}
+                  groupColor={streetGroup.color}
+                  groupName={streetGroup.name}
                 >
-                  <Flex
-                    align="middle"
-                    style={{
-                      alignItems: "center",
-                      gap: "1em",
-                      paddingLeft: "24px",
+                  <ResponsiveLine
+                    animate={false}
+                    curve="monotoneX"
+                    enableGridX={false}
+                    data={lineSeries}
+                    colors={(datum) => {
+                      return datum.color;
                     }}
-                  >
-                    <XFilled
-                      style={{
-                        fontSize: "24px",
-                        color: streetGroup.color,
-                      }}
-                    />
-                    <Typography.Title level={3} style={{ margin: 0 }}>
-                      {streetGroup.name}
-                    </Typography.Title>
-                  </Flex>
-                  <div
-                    style={{
-                      minHeight: "400px",
-                      //width: `${totalWidth}px`,
-                    }}
-                  >
-                    <ResponsiveLine
-                      animate={false}
-                      curve="monotoneX"
-                      enableGridX={false}
-                      //enableGridY={false}
-                      data={lineSeries}
-                      colors={(datum) => {
-                        return datum.color;
-                      }}
-                      theme={{
-                        text: {
-                          fontWeight: "bold",
-                          textShadow:
-                            "-1px 0 white, 0 1px white, 1px 0 white, 0 -1px white",
-                        },
-                        axis: {
-                          legend: {
-                            text: {
-                              fontWeight: "bold",
-                              fontSize: 14,
-                            },
+                    theme={{
+                      text: {
+                        fontWeight: 400,
+                        fill: "#595959",
+                        textShadow:
+                          "-1px 0 white, 0 1px white, 1px 0 white, 0 -1px white",
+                      },
+                      axis: {
+                        legend: {
+                          text: {
+                            fontWeight: 500,
+                            letterSpacing: "0.03em",
+                            fill: "#595959",
+                            fontSize: 16,
+                            textShadow: "none",
                           },
                         },
-                      }}
-                      enableArea={true}
-                      areaOpacity={1}
-                      enablePointLabel={true}
-                      pointLabel={(label) => {
-                        if (label.data.y === 0) {
-                          return "";
+                      },
+                    }}
+                    enableArea={true}
+                    areaOpacity={1}
+                    enablePointLabel={true}
+                    pointLabel={(label) => {
+                      if (label.data.y === 0) {
+                        return "";
+                      }
+                      return label.data.yFormatted;
+                    }}
+                    useMesh={false}
+                    pointSize={8}
+                    axisTop={{
+                      format: (e) => {
+                        if (typeof e == "number" && Number.isInteger(e)) {
+                          return e;
                         }
-                        return label.data.yFormatted;
-                      }}
-                      useMesh={false}
-                      pointSize={8}
-                      axisLeft={{
-                        format: (e) => {
-                          if (typeof e == "number" && Number.isInteger(e)) {
-                            return e;
-                          }
-                          return "";
-                        },
-                        legend: axisLegend,
-                        legendOffset: -50,
-                      }}
-                      axisBottom={{
-                        format: "%Y-%b-%d",
-                        tickPadding: 20,
-                        tickValues: tickValues,
-                      }}
-                      sliceTooltip={SliceTooltip}
-                      xScale={{
-                        type: "time",
-                      }}
-                      yScale={{
-                        type: "linear",
-                        min: 0,
-                        max: "auto",
-                        stacked: true,
-                        reverse: false,
-                      }}
-                      enableSlices="x"
-                      margin={{ bottom: 40, left: 80, top: 50, right: 40 }}
-                    />
-                  </div>
-                </Flex>
+                        return "";
+                      },
+                      legend: axisLegend,
+                      tickSize: 0,
+                      legendOffset: -30,
+                    }}
+                    axisBottom={{
+                      format: "%Y-%b-%d",
+                      tickPadding: 25,
+                      tickValues: tickValues,
+                    }}
+                    sliceTooltip={SliceTooltip}
+                    xScale={{
+                      type: "time",
+                    }}
+                    yScale={{
+                      type: "linear",
+                      min: 0,
+                      max: "auto",
+                      stacked: true,
+                      reverse: false,
+                    }}
+                    enableSlices="x"
+                    margin={{ bottom: 45, left: 50, top: 40, right: 40 }}
+                  />
+                </GraphCard>
               );
             },
           )}
