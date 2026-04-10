@@ -16,7 +16,7 @@ import {
 import { useStreetsForMapView } from "../hooks/use-streets-for-map-view";
 import { useSelectedStreets } from "./hooks/use-selected-streets";
 import { ControlPanel } from "./control-panel";
-import { Flex, Layout } from "antd";
+import { Flex, Layout, Typography } from "antd";
 import { SelectControlPanel } from "./select-control-panel";
 import { useMapControlPanel } from "./hooks/use-map-control-panel";
 import { useStreetFeatures } from "./hooks/use-street-features";
@@ -157,11 +157,19 @@ export const MapView = ({
       <Footer
         style={{
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
+          alignItems: "center",
           padding: "12px",
+          gap: "12px",
           borderTop: "1px solid #d9d9d9",
         }}
       >
+        <Typography.Title
+          level={4}
+          style={{ margin: 0, color: "#262626", whiteSpace: "nowrap" }}
+        >
+          San Francisco Traffic Crashes & Injuries
+        </Typography.Title>
         <ControlPanel onRunQuery={onRunQuery} />
       </Footer>
     </Layout>
