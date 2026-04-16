@@ -9,6 +9,7 @@ import { AverageLineSeriesId } from "../../store/trend-chart-list-data/types";
 import { ChartScroller } from "../chart-scroller";
 import { useVirtualChartData } from "../chart-scroller/use-virtual-chart-data";
 import { GraphCard } from "../graph-card";
+import { GraphLayout } from "../graph-layout";
 
 export const TrendChartList = (): React.JSX.Element => {
   const streetGroups = useStreetGroupsRef();
@@ -27,17 +28,7 @@ export const TrendChartList = (): React.JSX.Element => {
   const totalLength = crashTrendData[0]?.allTickValues.length;
 
   return (
-    <Flex
-      style={{
-        overflow: "scroll",
-        flexWrap: "wrap",
-        alignContent: "flex-start",
-        height: "100vh",
-        gap: "20px",
-        padding: "16px",
-        width: "100%",
-      }}
-    >
+    <GraphLayout>
       <ControlPanel />
       <Flex
         ref={chartPanel}
@@ -108,7 +99,7 @@ export const TrendChartList = (): React.JSX.Element => {
                   legendOffset: -30,
                 }}
                 axisBottom={{
-                  tickPadding: 25,
+                  tickPadding: 10,
                   tickValues: tickValues,
                 }}
                 // sliceTooltip={SliceTooltip}
@@ -131,6 +122,7 @@ export const TrendChartList = (): React.JSX.Element => {
           );
         })}
       </Flex>
+      <Flex style={{ display: "flex", flex: 1, flexGrow: 1 }} />
       <ChartScroller
         allTicks={allTickValues}
         toLabel={(t) => t}
@@ -139,7 +131,7 @@ export const TrendChartList = (): React.JSX.Element => {
         resetHandler={resetHandler}
         totalLength={totalLength}
       />
-    </Flex>
+    </GraphLayout>
   );
 };
 

@@ -6,6 +6,8 @@ export const DEFAULT_ZOOM = 5;
 export const LeftPanelClassName = "left-panel";
 export const RightPanelClassName = "right-panel";
 
+export const StreetLineWidth = 12;
+
 export const streetLayerId = "streetSegmentLayer";
 export const streetLayerStyle: LineLayerSpecification = {
   id: streetLayerId,
@@ -15,9 +17,9 @@ export const streetLayerStyle: LineLayerSpecification = {
     "line-cap": "round",
   },
   paint: {
-    "line-opacity": 0.4,
-    "line-width": 15,
-    "line-color": "#6D8196",
+    "line-opacity": 0.3,
+    "line-width": StreetLineWidth,
+    "line-color": "#738393",
   },
 } as const;
 export const hoveredLayerId = "hoveredSegmentLayer";
@@ -30,25 +32,11 @@ export const hoveredLayerStyle: LineLayerSpecification = {
   },
   paint: {
     "line-opacity": 0.7,
-    "line-width": 15,
+    "line-width": StreetLineWidth,
     "line-color": "#ED7B58",
   },
 } as const;
 
-export const selectedStreetLayerId = "selectedStreetSegmentLayer";
-export const selectedStreetLayerStyle: LineLayerSpecification = {
-  id: selectedStreetLayerId,
-  type: "line",
-  source: "streets",
-  layout: {
-    "line-cap": "round",
-  },
-  paint: {
-    "line-opacity": 0.9,
-    "line-width": 15,
-    "line-color": "#272757",
-  },
-} as const;
 export const highlightedSelectedStreetLayerId =
   "highlightedSelectedStreetSegmentLayer";
 export const highlightedSelectedStreetLayerStyle: LineLayerSpecification = {
@@ -60,7 +48,7 @@ export const highlightedSelectedStreetLayerStyle: LineLayerSpecification = {
   },
   paint: {
     "line-opacity": 0.7,
-    "line-width": 15,
+    "line-width": StreetLineWidth,
     "line-color": "#ED7B58",
   },
 } as const;

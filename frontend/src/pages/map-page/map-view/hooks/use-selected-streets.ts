@@ -2,6 +2,7 @@ import type { FeatureCollection, LineString } from "geojson";
 import { StreetSegment } from "../../../../models/map-models";
 import { LineLayerSpecification } from "maplibre-gl";
 import { useStreetGroups } from "../../store/street-map-data-form";
+import { StreetLineWidth } from "../constants";
 
 interface useSelectedStreetsReturnType {
   configs: {
@@ -44,7 +45,7 @@ export const useSelectedStreets = (): useSelectedStreetsReturnType => {
           },
           paint: {
             "line-opacity": 0.8,
-            "line-width": 15,
+            "line-width": StreetLineWidth,
             "line-color": streetGroup.color,
           },
         },

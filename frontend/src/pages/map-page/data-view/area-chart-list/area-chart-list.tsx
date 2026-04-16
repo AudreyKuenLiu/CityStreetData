@@ -9,6 +9,7 @@ import { ControlPanel } from "./control-panel";
 import { ChartScroller } from "../chart-scroller";
 import { useVirtualChartData } from "../chart-scroller/use-virtual-chart-data";
 import { GraphCard } from "../graph-card";
+import { GraphLayout } from "../graph-layout";
 
 export const AreaChartList = (): React.JSX.Element => {
   const streetGroups = useStreetGroupsRef();
@@ -30,19 +31,10 @@ export const AreaChartList = (): React.JSX.Element => {
     <Flex
       style={{
         position: "relative",
-        margin: "16px 16px 0px 16px",
         width: "100%",
       }}
     >
-      <Flex
-        style={{
-          flexWrap: "wrap",
-          height: "100vh",
-          alignContent: "flex-start",
-          gap: "20px",
-          width: "100%",
-        }}
-      >
+      <GraphLayout>
         <ControlPanel />
         <Flex
           ref={chartPanel}
@@ -117,7 +109,7 @@ export const AreaChartList = (): React.JSX.Element => {
                     }}
                     axisBottom={{
                       format: "%Y-%b-%d",
-                      tickPadding: 25,
+                      tickPadding: 10,
                       tickValues: tickValues,
                     }}
                     sliceTooltip={SliceTooltip}
@@ -139,6 +131,7 @@ export const AreaChartList = (): React.JSX.Element => {
             },
           )}
         </Flex>
+        <Flex style={{ display: "flex", flex: 1, flexGrow: 1 }} />
         <ChartScroller
           allTicks={allTickValues}
           toLabel={(t) => t.toLocaleDateString()}
@@ -147,7 +140,7 @@ export const AreaChartList = (): React.JSX.Element => {
           scrollHandler={scrollHandler}
           resetHandler={resetHandler}
         />
-      </Flex>
+      </GraphLayout>
     </Flex>
   );
 };

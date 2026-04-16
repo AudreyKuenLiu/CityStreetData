@@ -135,7 +135,7 @@ const streetFeaturesToGeoJson = ({
         "line-cap": "round" as const,
       },
       paint: {
-        "line-opacity": 0.8,
+        "line-opacity": 1,
         "line-width": 5,
         "line-color": color,
       },
