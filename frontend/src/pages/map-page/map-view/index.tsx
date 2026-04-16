@@ -79,6 +79,7 @@ export const MapView = ({
         tabIndex={0}
         style={{
           flex: 1,
+          minWidth: "1000px",
           position: "relative",
         }}
       >
@@ -168,7 +169,7 @@ export const MapView = ({
           level={4}
           style={{ margin: 0, color: "#262626", whiteSpace: "nowrap" }}
         >
-          San Francisco Traffic Crashes & Injuries
+          San Francisco Traffic Crashes
         </Typography.Title>
         <ControlPanel onRunQuery={onRunQuery} />
       </Footer>

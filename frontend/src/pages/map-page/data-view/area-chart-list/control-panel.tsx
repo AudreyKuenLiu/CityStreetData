@@ -14,6 +14,7 @@ import {
   useCurrentGraphType,
   useShouldNormalizeGraphData,
 } from "../../store/area-chart-list-data";
+import { ControlPanelLayout } from "../control-panel-layout";
 
 const TrafficCrashOptions: SegmentedProps<GraphType>["options"] = [
   { label: "Injuries and Deaths", value: "InjuriesAndFatalities" },
@@ -26,17 +27,7 @@ export const ControlPanel = (): React.JSX.Element => {
   const shouldNormalizeGraphData = useShouldNormalizeGraphData();
 
   return (
-    <Flex
-      style={{
-        position: "sticky",
-        alignItems: "center",
-        top: "16px",
-        left: "0",
-        zIndex: "2",
-        minWidth: "500px",
-        width: "100%",
-      }}
-    >
+    <ControlPanelLayout>
       <Segmented
         size="large"
         style={{ background: "white" }}
@@ -63,6 +54,6 @@ export const ControlPanel = (): React.JSX.Element => {
           }}
         />
       </Space>
-    </Flex>
+    </ControlPanelLayout>
   );
 };

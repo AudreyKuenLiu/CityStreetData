@@ -11,7 +11,7 @@ import { useActions } from "../../store/trend-chart-list-data";
 import { useDataViewContext } from "../../context/data-view";
 import { TimeSegments } from "../../store/street-map-data-form";
 import { injuryCrashTypeOptions } from "../../types/data-view";
-import { TimeSegmentsToName } from "../../store/street-map-data-form/types";
+import { ControlPanelLayout } from "../control-panel-layout";
 
 export const ControlPanel = (): React.JSX.Element => {
   const currentOption = useCurrentTimeTrend();
@@ -34,17 +34,7 @@ export const ControlPanel = (): React.JSX.Element => {
   }
 
   return (
-    <Flex
-      style={{
-        position: "sticky",
-        alignItems: "center",
-        top: "0",
-        left: "0",
-        zIndex: "2",
-        minWidth: "500px",
-        width: "100%",
-      }}
-    >
+    <ControlPanelLayout>
       <Select
         style={{ height: "fit-content" }}
         placeholder="Select data type"
@@ -87,6 +77,6 @@ export const ControlPanel = (): React.JSX.Element => {
         }}
         options={timeSelectOption}
       />
-    </Flex>
+    </ControlPanelLayout>
   );
 };
