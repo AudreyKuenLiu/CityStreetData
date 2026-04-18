@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useStreetGroupsRef } from "../../store/street-map-data-form";
 import { Flex, Typography } from "antd";
 import { XFilled } from "@ant-design/icons";
@@ -115,7 +115,12 @@ export const TrendChartList = (): React.JSX.Element => {
                 //enableTouchCrosshair
                 useMesh={true}
                 margin={{ bottom: 45, left: 50, top: 40, right: 40 }}
-                tooltip={TrendTooltip}
+                tooltip={(props) => (
+                  <TrendTooltip
+                    {...props}
+                    lineSeriesDataLength={lineSeries[0].data.length}
+                  />
+                )}
                 //enableSlices="x"
               />
             </GraphCard>
@@ -137,6 +142,7 @@ export const TrendChartList = (): React.JSX.Element => {
 
 const TrendTooltip = ({
   point,
+  lineSeriesDataLength,
 }: PointTooltipProps<{
   readonly id: string;
   readonly data: {
@@ -144,17 +150,26 @@ const TrendTooltip = ({
     y: number;
   }[];
   readonly color: string;
-}>): React.JSX.Element => {
+}> & { lineSeriesDataLength: number }): React.JSX.Element => {
   const titleString = point.id.split(".")[0];
+  let offset = 0;
+  //This is really hacky, but because I know the layout of the graph
+  //so I will hard code the offset to prevent
+  //the tooltip from being rendered offscreen
+  if (point.indexInSeries === 0) {
+    offset = 10;
+  } else if (point.indexInSeries === lineSeriesDataLength - 1) {
+    offset = -20;
+  }
 
   return (
     <div
       style={{
         background: "white",
         padding: "14px",
-        width: "200px",
+        width: "150px",
         border: "1px solid #ccc",
-        //transform: "translate(115px, -100px)",
+        transform: `translateX(${offset}px)`,
         borderRadius: 5,
       }}
     >

@@ -77,6 +77,22 @@ const getTimeTrendCrashStatVal = ({
   return 0;
 };
 
+const filterToDisplayName = (filter: InjuryCrashTypeFilter): string => {
+  if (["AllInjuries", "SevereInjuries"].find((v) => v === filter)) {
+    return "Traffic Injuries";
+  }
+  if (
+    [
+      "VehicleInvolvedCrashes",
+      "BicycleInvolvedCrashes",
+      "PedestrianInvolvedCrashes",
+    ].find((v) => v === filter)
+  ) {
+    return "Traffic Crashes";
+  }
+  throw new Error("display name not mapped");
+};
+
 const initializeTrendDateByTimePeriod = ({
   groupTimeTrendData,
   timeTrends,
@@ -163,7 +179,8 @@ const initializeTrendDateByTimePeriod = ({
         x: vals.x,
       };
     });
-    lineSeries = [averageLineSeries, ...lineSeries];
+    lineSeries =
+      lineSeries.length > 1 ? [averageLineSeries, ...lineSeries] : lineSeries;
 
     lineSeries = lineSeries.map((series) => {
       let processedVals = series.data;
@@ -179,7 +196,7 @@ const initializeTrendDateByTimePeriod = ({
       tickValues: averageLineSeries.data.map((d) => d.x),
       allTickValues: Array.from(timeTrendsToAxis[timeTrends]),
       lineSeries,
-      axisLegend: `${timeTrendsToName[timeTrends]} Traffic Injuries Every ${TimeSegmentsToName[timeSegment]}`,
+      axisLegend: `${timeTrendsToName[timeTrends]} ${filterToDisplayName(selectedTimeTrendFilter)} Every ${TimeSegmentsToName[timeSegment]}`,
     } as const;
   });
   return ret;
