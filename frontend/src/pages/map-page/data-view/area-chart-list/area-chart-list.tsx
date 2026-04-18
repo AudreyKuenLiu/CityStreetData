@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ResponsiveLine } from "@nivo/line";
 import { Flex, Typography } from "antd";
 import { useStreetGroupsRef } from "../../store/street-map-data-form";
@@ -112,7 +112,9 @@ export const AreaChartList = (): React.JSX.Element => {
                       tickPadding: 10,
                       tickValues: tickValues,
                     }}
-                    sliceTooltip={SliceTooltip}
+                    sliceTooltip={(props) => (
+                      <SliceTooltip {...props} panelRef={chartPanel} />
+                    )}
                     xScale={{
                       type: "time",
                     }}
@@ -156,15 +158,50 @@ type sliceData = {
 
 export const SliceTooltip = ({
   slice,
-}: SliceTooltipProps<sliceData>): React.JSX.Element => {
+  panelRef,
+}: SliceTooltipProps<sliceData> & {
+  panelRef: React.RefObject<HTMLElement | null>;
+}): React.JSX.Element => {
+  const [offset, setOffset] = useState(0);
+  const tooltipWidth = 200;
+  const panelObj = panelRef.current;
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (panelObj == null) {
+        return;
+      }
+      const tooltipPosRight = e.clientX + tooltipWidth / 2;
+      const tooltipPosLeft = e.clientX - tooltipWidth / 2;
+      const panelLeft = panelObj.getBoundingClientRect().left;
+      const panelRight = panelObj.getBoundingClientRect().right;
+      if (tooltipPosLeft < panelLeft) {
+        setOffset(panelLeft - tooltipPosLeft);
+      }
+      if (tooltipPosRight > panelRight) {
+        setOffset(panelRight - tooltipPosRight);
+      }
+    },
+    [panelObj, setOffset],
+  );
+  useEffect(() => {
+    if (panelObj == null) {
+      return;
+    }
+    panelObj.addEventListener("mousemove", handleMouseMove);
+    return (): void => {
+      panelObj.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [panelObj, handleMouseMove]);
+  const finalPos = 114 + offset;
+
   return (
     <div
       style={{
         background: "white",
         padding: "14px",
-        width: "200px",
+        width: `${tooltipWidth}px`,
         border: "1px solid #ccc",
-        transform: "translate(115px, -100px)",
+        transform: `translate(${finalPos}px, -100px)`,
         borderRadius: 5,
       }}
     >

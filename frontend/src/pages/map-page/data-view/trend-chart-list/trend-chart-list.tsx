@@ -157,9 +157,9 @@ const TrendTooltip = ({
   //so I will hard code the offset to prevent
   //the tooltip from being rendered offscreen
   if (point.indexInSeries === 0) {
-    offset = 10;
+    offset = 24;
   } else if (point.indexInSeries === lineSeriesDataLength - 1) {
-    offset = -20;
+    offset = -34;
   }
 
   return (
