@@ -9,7 +9,7 @@ import {
 import type { FeatureCollection } from "geojson";
 import { LineLayerSpecification } from "maplibre-gl";
 import axios from "axios";
-import { getRandomColor } from "../../../../utils";
+import { getColorGradient, getRandomColor } from "../../../../utils";
 
 export type StreetFeatureLegend = { value: string; color: string }[];
 
@@ -92,9 +92,12 @@ const streetFeaturesToLegend = ({
   for (const streetFeature of sortedFeatures) {
     const streetFeatureValue = streetFeature.value;
     if (!streetFeatureValues.has(streetFeatureValue)) {
+      const color = !isNaN(Number(streetFeatureValue))
+        ? getColorGradient(Number(streetFeatureValue))
+        : getRandomColor(initialIndex);
       ret.push({
         value: streetFeatureValue,
-        color: getRandomColor(initialIndex),
+        color,
       });
       initialIndex += 1;
       streetFeatureValues.add(streetFeatureValue);
@@ -136,7 +139,7 @@ const streetFeaturesToGeoJson = ({
       },
       paint: {
         "line-opacity": 1,
-        "line-width": 5,
+        "line-width": 3,
         "line-color": color,
       },
     })),

@@ -125,8 +125,16 @@ export const MapView = ({
           doubleClickZoom={false}
         >
           <Source id="streets" type="geojson" data={geoJson}>
-            <Layer {...streetLayerStyle} filter={zoomLevelFilter} />
-            <Layer {...hoveredLayerStyle} filter={hoveredSegmentFilter} />
+            <Layer
+              {...streetLayerStyle}
+              filter={zoomLevelFilter}
+              beforeId="waterway_line_label"
+            />
+            <Layer
+              {...hoveredLayerStyle}
+              filter={hoveredSegmentFilter}
+              beforeId="waterway_line_label"
+            />
           </Source>
           {configs.map((config, idx) => {
             return (
@@ -136,7 +144,7 @@ export const MapView = ({
                 data={config.data}
                 key={`${idx}_${config.sourceId}`}
               >
-                <Layer {...config.layerStyle} />
+                <Layer {...config.layerStyle} beforeId="waterway_line_label" />
               </Source>
             );
           })}
@@ -148,7 +156,14 @@ export const MapView = ({
                 data={streetFeatureGeoJson}
               >
                 {streetFeatureGeoJsonStyle.map((style, idx) => {
-                  return <Layer key={`${idx}_${style.id}`} {...style} />;
+                  return (
+                    <Layer
+                      key={`${idx}_${style.id}`}
+                      {...style}
+                      beforeId="waterway_line_label"
+                      // beforeId="highway_path"
+                    />
+                  );
                 })}
               </Source>
             )}

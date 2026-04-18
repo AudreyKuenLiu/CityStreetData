@@ -179,6 +179,7 @@ export const useMapControlPanel = ({
     ) {
       return;
     }
+    console.log("these are the layers", mapRef.getMap().getStyle().layers);
 
     const terraDrawAdapter = new TerraDrawMapLibreGLAdapter({
       map: mapRef?.getMap(),
