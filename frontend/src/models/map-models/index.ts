@@ -30,3 +30,13 @@ export const ViewableZoomLevels = (
   }
   return [ZoomLevelInView.ONE];
 };
+
+export const ViewableZoomLevel = (zoomLevel: number): ZoomLevelInView => {
+  if (zoomLevel >= 15.5) {
+    return ZoomLevelInView.THREE;
+  }
+  if (zoomLevel < 15.5 && zoomLevel >= 13.5) {
+    return ZoomLevelInView.TWO;
+  }
+  return ZoomLevelInView.ONE;
+};

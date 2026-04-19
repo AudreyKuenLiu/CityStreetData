@@ -80,6 +80,17 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
     };
   }, [minZoomData, medZoomData, maxZoomData]);
 
+  const getFilterForZoomLevel = useCallback(
+    (zoomLevel: number): FilterSpecification => {
+      return [
+        "in",
+        ["get", "zoomLevel"],
+        ["literal", ViewableZoomLevels(zoomLevel)],
+      ];
+    },
+    [],
+  );
+
   const geoJson = useMemo(() => {
     const minZoomFeatures = minZoomData.map((segment) => ({
       type: "Feature" as const,
@@ -111,17 +122,6 @@ export const useStreetsForMapView = (): useStreetsForMapViewReturn => {
       features: [...minZoomFeatures, ...medZoomFeatures, ...maxZoomFeatures],
     };
   }, [minZoomData, medZoomData, maxZoomData]);
-
-  const getFilterForZoomLevel = useCallback(
-    (zoomLevel: number): FilterSpecification => {
-      return [
-        "in",
-        ["get", "zoomLevel"],
-        ["literal", ViewableZoomLevels(zoomLevel)],
-      ];
-    },
-    [],
-  );
 
   return {
     geoJson,

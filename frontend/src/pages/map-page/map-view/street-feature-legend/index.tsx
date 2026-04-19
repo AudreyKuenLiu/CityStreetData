@@ -29,6 +29,7 @@ export const StreetFeatureLegend = ({
           },
         }}
         style={{
+          boxShadow: "0 3px 6px rgba(0,0,0,.1),0 3px 6px rgba(0,0,0,.1)",
           pointerEvents: "all",
           maxWidth: "1100px",
           border: "1px solid #d3d3d3",

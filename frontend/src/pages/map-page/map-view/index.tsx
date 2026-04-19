@@ -115,6 +115,21 @@ export const MapView = ({
             SanFranciscoNEPoint[1],
             SanFranciscoNEPoint[0],
           ]}
+          onLoad={(event) => {
+            [
+              "highway-name-minor",
+              "highway-name-path",
+              "highway-name-major",
+            ].forEach((layerId) => {
+              const layer = event.target.getLayer(layerId);
+              layer?.setPaintProperty(
+                "text-halo-color",
+                "rgba(255, 255, 255, 0.7)",
+              );
+              layer?.setPaintProperty("text-halo-width", 1.5);
+              layer?.setPaintProperty("text-halo-blur", 0);
+            });
+          }}
           reuseMaps
           pitchWithRotate={false}
           onClick={onClick}
@@ -161,7 +176,6 @@ export const MapView = ({
                       key={`${idx}_${style.id}`}
                       {...style}
                       beforeId="waterway_line_label"
-                      // beforeId="highway_path"
                     />
                   );
                 })}

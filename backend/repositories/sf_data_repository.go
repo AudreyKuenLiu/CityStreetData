@@ -550,7 +550,7 @@ func (sfr *SfDataRepository) GetSegmentsWithinPolygon(ctx context.Context, param
 		si.f_node_cnn,
 		si.t_node_cnn,
 		TRIM(si.street || ' ' || COALESCE(si.st_type, '')) as street,
-		ST_AsBinary(si.line) as line
+		ST_AsBinary(ST_ReducePrecision(si.line, 0.00001)) as line
 	FROM
 		sf_streets_and_intersections as si
 		%s
