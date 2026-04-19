@@ -179,6 +179,7 @@ export const useMapControlPanel = ({
     ) {
       return;
     }
+    //mapRef.getMap().getLayer("water")?.setPaintProperty("fill-color", "red");
     console.log("these are the layers", mapRef.getMap().getStyle().layers);
 
     const terraDrawAdapter = new TerraDrawMapLibreGLAdapter({

@@ -35,19 +35,19 @@ export const streetLayerStyles: LineLayerSpecification[] = [
     ...streetLayerStyle,
     id: maxZoomStreetLayerId,
     filter: ["in", ["get", "zoomLevel"], ["literal", [ZoomLevelInView.THREE]]],
-    minzoom: 15.5,
+    minzoom: 16,
   },
   {
     ...streetLayerStyle,
     id: medZoomStreetLayerId,
     filter: ["in", ["get", "zoomLevel"], ["literal", [ZoomLevelInView.TWO]]],
-    minzoom: 13.5,
+    minzoom: 14,
   },
   {
     ...streetLayerStyle,
     id: minZoomStreetLayerId,
     filter: ["in", ["get", "zoomLevel"], ["literal", [ZoomLevelInView.ONE]]],
-    minzoom: 0,
+    minzoom: 13,
   },
 ];
 

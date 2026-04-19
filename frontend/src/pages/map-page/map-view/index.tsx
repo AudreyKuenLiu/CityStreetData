@@ -1,5 +1,10 @@
 import React, { useRef, useMemo } from "react";
-import Map, { Layer, Source, MapRef } from "react-map-gl/maplibre";
+import Map, {
+  Layer,
+  Source,
+  MapRef,
+  StyleSpecification,
+} from "react-map-gl/maplibre";
 import {
   SanFranciscoNEPoint,
   SanFranciscoSWPoint,
@@ -12,6 +17,10 @@ import {
   DEFAULT_ZOOM,
   hoveredLayerStyle,
   hoveredLayerId,
+  streetLayerStyles,
+  maxZoomStreetLayerId,
+  minZoomStreetLayerId,
+  medZoomStreetLayerId,
 } from "./constants";
 import { useStreetsForMapView } from "../hooks/use-streets-for-map-view";
 import { useSelectedStreets } from "./hooks/use-selected-streets";
@@ -23,6 +32,7 @@ import { useStreetFeatures } from "./hooks/use-street-features";
 import { StreetFeatureLegend } from "./street-feature-legend";
 import { Footer } from "antd/es/layout/layout";
 import { StreetFeatureSelect } from "./control-panel/street-feature-select";
+import MapStyle from "../../../map-style.json";
 
 export const MapView = ({
   onRunQuery,
@@ -65,6 +75,7 @@ export const MapView = ({
     geoJsonStyle: streetFeatureGeoJsonStyle,
     legend,
   } = useStreetFeatures();
+  // console.log("current zoom level", mapRef.current?.getZoom());
 
   return (
     <Layout
@@ -115,36 +126,33 @@ export const MapView = ({
             SanFranciscoNEPoint[1],
             SanFranciscoNEPoint[0],
           ]}
-          onLoad={(event) => {
-            [
-              "highway-name-minor",
-              "highway-name-path",
-              "highway-name-major",
-            ].forEach((layerId) => {
-              const layer = event.target.getLayer(layerId);
-              layer?.setPaintProperty(
-                "text-halo-color",
-                "rgba(255, 255, 255, 0.7)",
-              );
-              layer?.setPaintProperty("text-halo-width", 1.5);
-              layer?.setPaintProperty("text-halo-blur", 0);
-            });
-          }}
           reuseMaps
           pitchWithRotate={false}
           onClick={onClick}
           maxZoom={MAX_ZOOM}
           style={{ width: "100%", height: "100%" }}
-          interactiveLayerIds={[streetLayerId, hoveredLayerId, ...layerIds]}
-          mapStyle="https://tiles.openfreemap.org/styles/positron"
+          interactiveLayerIds={[
+            minZoomStreetLayerId,
+            medZoomStreetLayerId,
+            maxZoomStreetLayerId,
+            streetLayerId,
+            hoveredLayerId,
+            ...layerIds,
+          ]}
+          mapStyle={MapStyle as StyleSpecification}
           doubleClickZoom={false}
         >
           <Source id="streets" type="geojson" data={geoJson}>
-            <Layer
+            {streetLayerStyles.map((streetLayerStyle) => {
+              return (
+                <Layer {...streetLayerStyle} beforeId="waterway_line_label" />
+              );
+            })}
+            {/* <Layer
               {...streetLayerStyle}
               filter={zoomLevelFilter}
               beforeId="waterway_line_label"
-            />
+            /> */}
             <Layer
               {...hoveredLayerStyle}
               filter={hoveredSegmentFilter}
