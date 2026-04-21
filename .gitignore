@@ -1,13 +1,7 @@
 .vscode
 *.swp
-/database/initdata
-/datapipeline/config
-/datapipeline/logs
-/datapipeline/data
-/datapipeline/dags/initdata
-/datapipeline/plugins
 /datapipeline/venv_city_street_data
-/datapipeline/dags/__pycache__
+/datapipeline/chronjobs/__pycache__
 scratch.sql
 project
 # Environment variables
