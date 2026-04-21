@@ -123,7 +123,7 @@ func (sfr *SfDataRepository) GetSpeedLimits(ctx context.Context) ([]types.Street
 				WHERE
 					removed_at is NULL
 					AND
-					use_defacto_limit != true AND value != 25
+					use_defacto_limit != true
 			)
 			WHERE
 				rn = 1

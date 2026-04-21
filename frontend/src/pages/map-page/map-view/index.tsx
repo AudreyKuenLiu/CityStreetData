@@ -12,9 +12,9 @@ import {
 } from "../../../constants/map-dimensions";
 import {
   streetLayerId,
-  streetLayerStyle,
+  // streetLayerStyle,
   MAX_ZOOM,
-  DEFAULT_ZOOM,
+  // DEFAULT_ZOOM,
   hoveredLayerStyle,
   hoveredLayerId,
   streetLayerStyles,
@@ -41,8 +41,11 @@ export const MapView = ({
 }): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
-  const { geoJson, getFilterForZoomLevel, streetSearchTrees } =
-    useStreetsForMapView();
+  const {
+    geoJson,
+    //getFilterForZoomLevel,
+    streetSearchTrees,
+  } = useStreetsForMapView();
   const {
     hoverInfo,
     onHover,
@@ -61,9 +64,9 @@ export const MapView = ({
   const layerIds = configs.map((config) => {
     return config.layerStyle.id;
   });
-  const zoomLevelFilter = getFilterForZoomLevel(
-    mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
-  );
+  // const zoomLevelFilter = getFilterForZoomLevel(
+  //   mapRef.current?.getZoom() ?? DEFAULT_ZOOM,
+  // );
   const hoveredStreetSegment = (hoverInfo && hoverInfo.cnn) || "";
   const hoveredSegmentFilter: ["in", string, string] = useMemo(
     () => ["in", "cnn", hoveredStreetSegment],

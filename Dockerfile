@@ -53,20 +53,9 @@ COPY ./database/startup/initSqlite.sh /database/startup/initSqlite.sh
 RUN chmod +x /database/startup/initSqlite.sh
 RUN ./database/startup/initSqlite.sh
 
-#setting up local airflow
-ARG _AIRFLOW_WWW_EMAIL
-ARG _AIRFLOW_WWW_USER_USERNAME
-ARG _AIRFLOW_WWW_USER_PASSWORD
-ARG AIRFLOW_HOME
-ARG AIRFLOW__CORE__FERNET_KEY
-ARG AIRFLOW__CORE__EXECUTION_API_SERVER_URL
-ENV _AIRFLOW_WWW_EMAIL=${_AIRFLOW_WWW_EMAIL}
-ENV _AIRFLOW_WWW_USER_USERNAME=${_AIRFLOW_WWW_USER_USERNAME}
-ENV _AIRFLOW_WWW_USER_PASSWORD=${_AIRFLOW_WWW_USER_PASSWORD}
-ENV AIRFLOW_HOME=${AIRFLOW_HOME}
-ENV AIRFLOW__CORE__FERNET_KEY=${AIRFLOW__CORE__FERNET_KEY}
-ENV AIRFLOW__CORE__EXECUTION_API_SERVER_URL=${AIRFLOW__CORE__EXECUTION_API_SERVER_URL}
-COPY ./database/startup/initAirflow.sh /database/startup/initAirflow.sh
-RUN chmod +x /database/startup/initAirflow.sh
-RUN ./database/startup/initAirflow.sh 
-EXPOSE 8081
+#setting up venv for chron
+ARG CHRON_HOME
+ENV CHRON_HOME=${CHRON_HOME}
+COPY ./database/startup/initChron.sh /database/startup/initChron.sh
+RUN chmod +x /database/startup/initChron.sh
+RUN ./database/startup/initChron.sh 

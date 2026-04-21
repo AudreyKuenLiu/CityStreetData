@@ -4,52 +4,26 @@ services:
       context: .
       args:
         SQLITE_DB: ${SQLITE_DB}
-        _AIRFLOW_WWW_EMAIL: ${_AIRFLOW_WWW_EMAIL}
-        _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME}
-        _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD}
-        AIRFLOW__CORE__FERNET_KEY: ""
-        AIRFLOW__CORE__EXECUTION_API_SERVER_URL: ${AIRFLOW__CORE__EXECUTION_API_SERVER_URL}
-        AIRFLOW_HOME: ${AIRFLOW_HOME}
+        CHRON_HOME: ${CHRON_HOME}
     container_name: city-street-data
     hostname: city-street-data
     command: bash -c "
-      . /opt/airflow_venv/bin/activate;
-      nohup airflow api-server -D --port 8081 >> /opt/airflow/api-server_nohup.out &
-      nohup airflow scheduler -D >> /opt/airflow/scheduler_nohup.out &
-      nohup airflow triggerer -D >> /opt/airflow/triggerer_nohup.out &
-      nohup airflow dag-processor >> /opt/airflow/dag_processor_nohup.out &
+      . /opt/chron_venv/bin/activate;
+      nohup python3 ./datapipeline/chronjobs/main.py -j sf_open_data_local_load >> ./datapipeline/chronjobs/sf_open_data_local_load.out &&
+      nohup python3 ./datapipeline/chronjobs/main.py -j sf_open_data_api_load >> ./datapipeline/chronjobs/sf_open_data_api_load.out;
       deactivate;
-      cd /backend && air -c .air.toml;
-      "
+      cd /backend && air -c .air.toml;"
     ports:
       - 80:8080
       - 8080:8081
     environment:
       - SQLITE_DB=${SQLITE_DB}
-      - _AIRFLOW_WWW_EMAIL=${_AIRFLOW_WWW_EMAIL}
-      - _AIRFLOW_WWW_USER_USERNAME=${_AIRFLOW_WWW_USER_USERNAME}
-      - _AIRFLOW_WWW_USER_PASSWORD=${_AIRFLOW_WWW_USER_PASSWORD}
-      - AIRFLOW_HOME=${AIRFLOW_HOME}
-      - AIRFLOW__CORE__FERNET_KEY=""
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL=${AIRFLOW__CORE__EXECUTION_API_SERVER_URL}
-      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=true
-      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - CHRON_HOME=${CHRON_HOME}
       - SF_DATA_APP_TOKEN=${SF_DATA_APP_TOKEN}
-      - PGUSER=${POSTGRES_USER}
-      - PGPASSWORD=${POSTGRES_PASSWORD}
-      - PGHOST=${PGHOST}
-      - PGPORT=${POSTGRES_DB_PORT}
-      - PGDATABASE=${POSTGRES_DB}
     volumes:
       - ./frontend:/frontend
       - ./backend:/backend
-      - ${AIRFLOW_LOCAL_PROJ_DIR:-.}/config:${AIRFLOW_HOME}/config
-      - ${AIRFLOW_LOCAL_PROJ_DIR:-.}/dags:${AIRFLOW_HOME}/dags
-      - ${AIRFLOW_LOCAL_PROJ_DIR:-.}/data:${AIRFLOW_HOME}/data
-      - ${AIRFLOW_LOCAL_PROJ_DIR:-.}/plugins:${AIRFLOW_HOME}/plugins
+      - ./datapipeline/chronjobs:${CHRON_HOME}
     deploy:
       restart_policy:
         condition: on-failure
