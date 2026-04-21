@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Dropdown, Space } from "antd";
+import { Button, Dropdown, Space, Tooltip } from "antd";
 import {
   AreaChartOutlined,
   BuildFilled,
@@ -94,53 +94,66 @@ export const RunQueryButton = ({
 
   return (
     <Space.Compact>
-      <Dropdown
-        menu={{
-          items: viewOptions,
-          onClick: async (e) => {
-            if (!canRunQuery) {
-              return;
-            }
-            const selectedDataView = DataViewKeys.parse(e.key);
-            setDataView(selectedDataView);
-            setValidRun(true);
-            onClick();
-          },
-        }}
-        //disabled={!canRunQuery}
+      <Tooltip
+        title={
+          !canRunQuery ? (
+            <div>
+              You must select all of the following: <br /> - street <br /> -
+              time segment <br />- start date <br />- end date
+            </div>
+          ) : null
+        }
       >
-        <Button
-          size="large"
-          type="primary"
-          icon={
-            isDirty && validRun ? (
-              <RedoOutlined />
-            ) : (
-              DataViewConfig[currentDataView].icon
-            )
-          }
-          //disabled={!canRunQuery}
-          onClick={async () => {
-            if (!canRunQuery) {
-              return;
-            }
-            setValidRun(true);
-            if (currentDataView === DataViewEnum.NoView) {
-              setDataView(DataViewKeys.parse(DataViewEnum.AreaChartView));
-            }
-            onClick();
-          }}
-          style={{
-            width: "160px",
-            justifyContent: "center",
-            alignItems: "center",
-            // for some reason this button is always transparent when disabled
-            backgroundColor: isDirty && validRun ? "#ed8821" : undefined,
-          }}
-        >
-          {DataViewConfig[currentDataView].label}
-        </Button>
-      </Dropdown>
+        <span>
+          <Dropdown
+            menu={{
+              items: viewOptions,
+              onClick: async (e) => {
+                if (!canRunQuery) {
+                  return;
+                }
+                const selectedDataView = DataViewKeys.parse(e.key);
+                setDataView(selectedDataView);
+                setValidRun(true);
+                onClick();
+              },
+            }}
+            disabled={!canRunQuery}
+          >
+            <Button
+              size="large"
+              type="primary"
+              icon={
+                isDirty && validRun ? (
+                  <RedoOutlined />
+                ) : (
+                  DataViewConfig[currentDataView].icon
+                )
+              }
+              disabled={!canRunQuery}
+              onClick={async () => {
+                if (!canRunQuery) {
+                  return;
+                }
+                setValidRun(true);
+                if (currentDataView === DataViewEnum.NoView) {
+                  setDataView(DataViewKeys.parse(DataViewEnum.AreaChartView));
+                }
+                onClick();
+              }}
+              style={{
+                width: "160px",
+                justifyContent: "center",
+                alignItems: "center",
+                // for some reason this button is always transparent when disabled
+                backgroundColor: isDirty && validRun ? "#ed8821" : undefined,
+              }}
+            >
+              {DataViewConfig[currentDataView].label}
+            </Button>
+          </Dropdown>
+        </span>
+      </Tooltip>
     </Space.Compact>
   );
 };

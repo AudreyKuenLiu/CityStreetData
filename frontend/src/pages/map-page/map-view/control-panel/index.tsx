@@ -102,7 +102,7 @@ export const ControlPanel = memo(
         <Select
           size="large"
           ref={timeSegmentSelectRef}
-          placeholder="every 'X' Days"
+          placeholder="Time segment"
           onInputKeyDown={(e) => {
             timeSegmentSelectRef.current?.blur();
             e.stopPropagation();

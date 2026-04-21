@@ -72,13 +72,13 @@ export const MapView = ({
     () => ["in", "cnn", hoveredStreetSegment],
     [hoveredStreetSegment],
   );
+
   const {
     streetFeatureProps,
     geoJson: streetFeatureGeoJson,
     geoJsonStyle: streetFeatureGeoJsonStyle,
     legend,
   } = useStreetFeatures();
-  // console.log("current zoom level", mapRef.current?.getZoom());
 
   return (
     <Layout
@@ -93,6 +93,7 @@ export const MapView = ({
         tabIndex={0}
         style={{
           flex: 1,
+          outline: "none",
           minWidth: "1000px",
           position: "relative",
         }}

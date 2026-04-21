@@ -44,15 +44,15 @@ export const ControlPanel = (): React.JSX.Element => {
       />
       <Divider orientation="vertical" size="large" style={{ height: "85%" }} />
       <Space style={{ alignItems: "center" }}>
-        <Typography.Title level={5} style={{ margin: 0 }}>
-          Normalize
-        </Typography.Title>
         <Switch
           defaultChecked={shouldNormalizeGraphData}
           onChange={() => {
             toggleNormalize();
           }}
         />
+        <Typography.Title level={5} style={{ margin: 0, fontWeight: 550 }}>
+          Normalize
+        </Typography.Title>
       </Space>
     </ControlPanelLayout>
   );

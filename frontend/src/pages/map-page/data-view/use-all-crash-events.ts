@@ -49,7 +49,6 @@ export const useAllCrashEvents = (): void => {
       return;
     }
     if (currentDataView === DataViewEnum.HeatmapView) {
-      console.log("reinitializing map");
       initializeHeatmap({
         data: result.data,
         selectedStartEndTime: selectedStartEndTime ?? [new Date(), new Date()],
@@ -58,7 +57,6 @@ export const useAllCrashEvents = (): void => {
       });
     }
     if (currentDataView === DataViewEnum.AreaChartView) {
-      console.log("reinitializing areachart");
       initializeGraphData({
         data: result.data,
         selectedStartEndTime: selectedStartEndTime ?? [new Date(), new Date()],
@@ -67,7 +65,6 @@ export const useAllCrashEvents = (): void => {
       });
     }
     if (currentDataView === DataViewEnum.TrendView) {
-      console.log("reinitializing trendView");
       initializeChartGraphData({
         data: result.data,
         selectedStartEndTime: selectedStartEndTime ?? [new Date(), new Date()],
