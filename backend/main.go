@@ -2,8 +2,10 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"citystreetdata/handlers"
 
@@ -12,6 +14,8 @@ import (
 )
 
 func main() {
+	projDir := os.Getenv("PROJ_DIR")
+
 	// Echo instance
 	e := echo.New()
 
@@ -24,7 +28,7 @@ func main() {
 	//Starting fileserver for webapp
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Skipper: nil,
-		Root:    "/frontend/dist",
+		Root:    fmt.Sprintf("%s/frontend/dist", projDir),
 		// Index file for serving a directory.
 		Index: "index.html",
 		// Enable HTML5 mode by forwarding all not-found requests to root so that

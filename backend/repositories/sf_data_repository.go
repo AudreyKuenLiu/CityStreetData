@@ -22,7 +22,7 @@ type SfDataRepository struct {
 
 func NewSFDataRepository(logger *slog.Logger) (*SfDataRepository, error) {
 	sqlFileName := os.Getenv("SQLITE_DB")
-	sqlFile := fmt.Sprintf("/%s", sqlFileName)
+	sqlFile := fmt.Sprintf("%s", sqlFileName)
 
 	sql.Register("sqlite_with_extensions", &sqlite3.SQLiteDriver{
 		Extensions: []string{

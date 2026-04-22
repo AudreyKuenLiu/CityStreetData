@@ -14,7 +14,7 @@ from utils import (
 
 sqliteDB = os.environ.get("SQLITE_DB", "test_file.db")
 def initConnection():
-    conn = sqlite3.connect(f"/{sqliteDB}")
+    conn = sqlite3.connect(f"{sqliteDB}")
     conn.load_extension('mod_spatialite')
     conn.create_function("dateTimeStrToEpoch", 1, dateTimeStrToEpoch)
     conn.create_function("integer_to_class_code", 1, integer_to_class_code)
