@@ -48,7 +48,7 @@ func main() {
 	h.InitHandlers()
 
 	// Start server
-	if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err := e.Start(":443"); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("failed to start server", "error", err)
 	}
 }

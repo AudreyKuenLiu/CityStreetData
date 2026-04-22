@@ -47,7 +47,7 @@ export const streetLayerStyles: LineLayerSpecification[] = [
     ...streetLayerStyle,
     id: minZoomStreetLayerId,
     filter: ["in", ["get", "zoomLevel"], ["literal", [ZoomLevelInView.ONE]]],
-    minzoom: 13,
+    minzoom: 0,
   },
 ];
 
