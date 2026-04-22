@@ -28,10 +28,10 @@ import { ControlPanel } from "./control-panel";
 import { Flex, Layout, Typography } from "antd";
 import { SelectControlPanel } from "./select-control-panel";
 import { useMapControlPanel } from "./hooks/use-map-control-panel";
-import { useStreetFeatures } from "./hooks/use-street-features";
-import { StreetFeatureLegend } from "./street-feature-legend";
+// import { useStreetFeatures } from "./hooks/use-street-features";
+// import { StreetFeatureLegend } from "./street-feature-legend";
+//import { StreetFeatureSelect } from "./control-panel/street-feature-select";
 import { Footer } from "antd/es/layout/layout";
-import { StreetFeatureSelect } from "./control-panel/street-feature-select";
 import MapStyle from "../../../map-style.json";
 
 export const MapView = ({
@@ -73,12 +73,12 @@ export const MapView = ({
     [hoveredStreetSegment],
   );
 
-  const {
-    streetFeatureProps,
-    geoJson: streetFeatureGeoJson,
-    geoJsonStyle: streetFeatureGeoJsonStyle,
-    legend,
-  } = useStreetFeatures();
+  // const {
+  //   streetFeatureProps,
+  //   geoJson: streetFeatureGeoJson,
+  //   geoJsonStyle: streetFeatureGeoJsonStyle,
+  //   legend,
+  // } = useStreetFeatures();
 
   return (
     <Layout
@@ -116,7 +116,7 @@ export const MapView = ({
             currentMapControl={currentMapControl}
             setMapControl={setMapControl}
           />
-          <StreetFeatureSelect {...streetFeatureProps} />
+          {/* <StreetFeatureSelect {...streetFeatureProps} /> */}
         </Flex>
         <Map
           ref={mapRef}
@@ -175,7 +175,7 @@ export const MapView = ({
               </Source>
             );
           })}
-          {streetFeatureGeoJson != null &&
+          {/* {streetFeatureGeoJson != null &&
             streetFeatureGeoJsonStyle != null && (
               <Source
                 id="street-features"
@@ -192,9 +192,9 @@ export const MapView = ({
                   );
                 })}
               </Source>
-            )}
+            )} */}
         </Map>
-        <StreetFeatureLegend legend={legend} />
+        {/* <StreetFeatureLegend legend={legend} /> */}
       </Flex>
       <Footer
         style={{
@@ -208,7 +208,12 @@ export const MapView = ({
       >
         <Typography.Title
           level={4}
-          style={{ margin: 0, color: "#262626", whiteSpace: "nowrap" }}
+          style={{
+            margin: 0,
+            color: "#262626",
+            whiteSpace: "nowrap",
+            fontWeight: 700,
+          }}
         >
           San Francisco Traffic Crashes
         </Typography.Title>
