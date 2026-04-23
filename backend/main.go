@@ -53,7 +53,7 @@ func main() {
 		serverCrt := fmt.Sprintf("%s/.server.crt", projDir)
 		serverKey := fmt.Sprintf("%s/.server.key", projDir)
 
-		if err := e.StartTLS(":443", serverCrt, serverKey); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := e.StartTLS(":8080", serverCrt, serverKey); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("failed to start server", "error", err)
 		}
 	}
