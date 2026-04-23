@@ -15,7 +15,6 @@ import (
 
 func main() {
 	projDir := os.Getenv("PROJ_DIR")
-	env := os.Getenv("ENV")
 
 	// Echo instance
 	e := echo.New()
@@ -49,16 +48,7 @@ func main() {
 	h.InitHandlers()
 
 	// Start server
-	if env == "PROD" {
-		serverCrt := fmt.Sprintf("%s/.server.crt", projDir)
-		serverKey := fmt.Sprintf("%s/.server.key", projDir)
-
-		if err := e.StartTLS(":8080", serverCrt, serverKey); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			slog.Error("failed to start server", "error", err)
-		}
-	}
-	if err := e.Start(":80"); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("failed to start server", "error", err)
 	}
-
 }

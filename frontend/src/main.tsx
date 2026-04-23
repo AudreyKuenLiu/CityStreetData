@@ -14,7 +14,7 @@ import { routeTree } from "./routeTree.gen";
 const router = createRouter({ routeTree });
 
 // Create Axios Instance
-axios.defaults.baseURL = `http://${import.meta.env.VITE_BACKEND_SERVER_URL}`;
+axios.defaults.baseURL = `${import.meta.env.VITE_BACKEND_SERVER_URL}`;
 
 const queryClient = new QueryClient({
   defaultOptions: {
