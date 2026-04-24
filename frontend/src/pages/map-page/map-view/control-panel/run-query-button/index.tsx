@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Dropdown, Space, Tooltip } from "antd";
 import {
   AreaChartOutlined,
-  BuildFilled,
+  CaretRightFilled,
   HeatMapOutlined,
   LineChartOutlined,
   RedoOutlined,
@@ -13,7 +13,7 @@ import { useDataViewContext } from "../../../context/data-view";
 
 const DataViewConfig = {
   [DataViewEnum.NoView]: {
-    icon: <BuildFilled />,
+    icon: <CaretRightFilled />,
     label: "Build View",
   },
   [DataViewEnum.AreaChartView]: {

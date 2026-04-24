@@ -1,5 +1,14 @@
 import React, { useState, useRef, forwardRef, useEffect } from "react";
-import { Divider, Button, Input, Select, Space, Tooltip, Flex } from "antd";
+import {
+  Divider,
+  Button,
+  Input,
+  Select,
+  Space,
+  Tooltip,
+  Flex,
+  Typography,
+} from "antd";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -13,6 +22,7 @@ type GroupOption = {
   id: string;
   name: string;
   color: string;
+  total: number;
 };
 
 interface GroupSelectorParams {
@@ -20,8 +30,8 @@ interface GroupSelectorParams {
   groups: GroupOption[];
   onAddItem: (name: string) => GroupOption;
   onSelectItem: (id: string) => void;
-  onDeleteItem: (deletedOption: GroupOption) => void;
-  onEditItem: (editedOption: GroupOption, newName: string) => void;
+  onDeleteItem: (deletedOption: { id: string }) => void;
+  onEditItem: (editedOption: { id: string }, newName: string) => void;
 }
 
 export const GroupSelector = ({
@@ -56,7 +66,7 @@ export const GroupSelector = ({
     selectRef.current?.blur();
   };
 
-  const deleteItem = (deletedOption: GroupOption): void => {
+  const deleteItem = (deletedOption: { id: string }): void => {
     onDeleteItem(deletedOption);
     const newGroups = groups.filter((group) => group.id !== deletedOption.id);
     if (newGroups.length > 0) {
@@ -77,6 +87,7 @@ export const GroupSelector = ({
           }}
         />
       }
+      suffix={<Typography.Text>({currentOption?.total})</Typography.Text>}
       ref={selectRef}
       style={{ width: 300 }}
       open={open}
@@ -92,6 +103,7 @@ export const GroupSelector = ({
           label: group.name,
           value: group.id,
           color: group.color,
+          total: group.total,
         };
       })}
       optionRender={(option) => {
@@ -102,16 +114,12 @@ export const GroupSelector = ({
             deleteItem={() =>
               deleteItem({
                 id: option.data.value,
-                name: option.data.label,
-                color: option.data.color,
               })
             }
             editItem={(newName: string) => {
               onEditItem(
                 {
                   id: option.data.value,
-                  name: option.data.label,
-                  color: option.data.color,
                 },
                 newName,
               );

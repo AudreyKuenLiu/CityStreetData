@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { Select, DatePicker, Flex, Divider } from "antd";
+import { Select, DatePicker, Flex, Typography } from "antd";
 import { GroupSelector } from "./group-selector/group-selector";
 import { useRef } from "react";
 import type { RefSelectProps } from "antd";
@@ -45,6 +45,7 @@ export const ControlPanel = memo(
         id: streetGroup.id,
         name: streetGroup.name,
         color: streetGroup.color,
+        total: streetGroup.cnns.size,
       };
     });
     const timeSegmentSelectRef = useRef<RefSelectProps>(null);
@@ -52,12 +53,29 @@ export const ControlPanel = memo(
     return (
       <Flex
         style={{
-          gap: "8px",
+          gap: "12px",
           height: "var(--ant-control-height-lg)",
           pointerEvents: "all",
           alignItems: "center",
         }}
       >
+        <Select
+          size="large"
+          style={{ fontWeight: 500 }}
+          defaultValue={"Traffic Crashes"}
+        />
+        <Typography.Title
+          level={5}
+          style={{
+            margin: 0,
+            color: "#262626",
+            whiteSpace: "nowrap",
+            fontWeight: 500,
+          }}
+        >
+          on
+        </Typography.Title>
+
         <GroupSelector
           currentOption={
             currentStreetGroup != null
@@ -65,6 +83,7 @@ export const ControlPanel = memo(
                   id: currentStreetGroup.id,
                   name: currentStreetGroup.name,
                   color: currentStreetGroup.color,
+                  total: currentStreetGroup.cnns.size,
                 }
               : null
           }
@@ -75,6 +94,7 @@ export const ControlPanel = memo(
               id: group.id,
               name,
               color: group.color,
+              total: currentStreetGroup?.cnns.size ?? 0,
             };
           }}
           onSelectItem={(id) => {
@@ -99,6 +119,45 @@ export const ControlPanel = memo(
             return editGroup({ id: groupId, name });
           }}
         />
+        <Typography.Title
+          level={5}
+          style={{
+            margin: 0,
+            color: "#262626",
+            whiteSpace: "nowrap",
+            fontWeight: 500,
+          }}
+        >
+          from
+        </Typography.Title>
+        <DatePicker.RangePicker
+          size="large"
+          placeholder={["Start Date", "End Date"]}
+          onChange={(value) => {
+            if (
+              value == null ||
+              value[0]?.date == null ||
+              value[1]?.date == null
+            ) {
+              setStartDate(null);
+              setEndDate(null);
+              return;
+            }
+            setStartDate(value[0].toDate());
+            setEndDate(value[1].toDate());
+          }}
+        />
+        <Typography.Title
+          level={5}
+          style={{
+            margin: 0,
+            color: "#262626",
+            whiteSpace: "nowrap",
+            fontWeight: 500,
+          }}
+        >
+          every
+        </Typography.Title>
         <Select
           size="large"
           ref={timeSegmentSelectRef}
@@ -121,23 +180,6 @@ export const ControlPanel = memo(
           onSelect={(_, option) => {
             setTimeSegment(option.value);
             timeSegmentSelectRef.current?.blur();
-          }}
-        />
-        <DatePicker.RangePicker
-          size="large"
-          placeholder={["From Start Date", "To End Date"]}
-          onChange={(value) => {
-            if (
-              value == null ||
-              value[0]?.date == null ||
-              value[1]?.date == null
-            ) {
-              setStartDate(null);
-              setEndDate(null);
-              return;
-            }
-            setStartDate(value[0].toDate());
-            setEndDate(value[1].toDate());
           }}
         />
         <RunQueryButton

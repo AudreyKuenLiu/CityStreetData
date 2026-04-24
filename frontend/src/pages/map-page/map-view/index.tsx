@@ -199,14 +199,14 @@ export const MapView = ({
       <Footer
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           alignItems: "center",
           padding: "12px",
           gap: "12px",
           borderTop: "1px solid #d9d9d9",
         }}
       >
-        <Typography.Title
+        {/* <Typography.Title
           level={4}
           style={{
             margin: 0,
@@ -216,7 +216,7 @@ export const MapView = ({
           }}
         >
           San Francisco Traffic Crashes
-        </Typography.Title>
+        </Typography.Title> */}
         <ControlPanel onRunQuery={onRunQuery} />
       </Footer>
     </Layout>
