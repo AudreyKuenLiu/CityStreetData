@@ -14,7 +14,10 @@ import { routeTree } from "./routeTree.gen";
 const router = createRouter({ routeTree });
 
 // Create Axios Instance
-axios.defaults.baseURL = `${import.meta.env.VITE_BACKEND_SERVER_URL}`;
+const isProd = import.meta.env.PROD;
+axios.defaults.baseURL = isProd
+  ? "https://sfmapdata.com"
+  : "http://127.0.0.1:8080";
 
 const queryClient = new QueryClient({
   defaultOptions: {
