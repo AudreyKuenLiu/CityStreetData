@@ -3,7 +3,7 @@ import type { TerraDrawMouseEvent } from "terra-draw";
 import { ValidateNotSelfIntersecting } from "terra-draw";
 import { bbox, booleanWithin, polygon } from "@turf/turf";
 import { StreetSearchTrees, StreetSegmentRBush } from "../street-search-tree";
-import { StreetSegment, ViewableZoomLevels } from "..";
+import { StreetSegment, ZoomLevelInView, ViewableZoomLevels } from "..";
 
 export class PolygonSelectHandler {
   private polygonLine: Position[];
@@ -44,7 +44,11 @@ export class PolygonSelectHandler {
 
   onFinish = ({ zoomLevel }: { zoomLevel: number }): StreetSegment[] => {
     const polygonObj = polygon([[...this.polygonLine, this.polygonLine[0]]]);
-    const zoomLevelsInView = ViewableZoomLevels(zoomLevel);
+    const zoomLevelsInView = [
+      ZoomLevelInView.ONE,
+      ZoomLevelInView.TWO,
+      ZoomLevelInView.THREE,
+    ]; //ViewableZoomLevels(zoomLevel);
     const [minX, minY, maxX, maxY] = bbox(polygonObj);
     const streetSegmentMap = new Map<number, StreetSegment>();
     const searchTrees = [this.selectedStreetTree];

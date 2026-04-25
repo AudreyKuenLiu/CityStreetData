@@ -12,11 +12,13 @@ import {
 } from "../../store/heatmap-data";
 import { Source } from "react-map-gl/maplibre";
 import { HeatmapControls } from "./heatmap-controls";
+import { useStreetGroupsRef } from "../../store/street-map-data-form";
 
 export const HeatmapView = (): React.JSX.Element => {
   const mapRef = useRef<MapRef | null>(null);
   const currentFeatureCollections = useHeatmapFeatureCollections();
   const layerProps = useHeatmapLayerProps();
+  const streetGroups = useStreetGroupsRef();
 
   return (
     <Flex
@@ -46,9 +48,35 @@ export const HeatmapView = (): React.JSX.Element => {
         doubleClickZoom={false}
       >
         {currentFeatureCollections.map(([groupId, geoJson]) => {
+          const paintProps = layerProps.paint;
+          const streetGroup = streetGroups.get(groupId);
+          if (streetGroup == null) {
+            return null;
+          }
           return (
             <Source id={groupId} key={groupId} type="geojson" data={geoJson}>
-              <Layer id={`heatmap-${groupId}`} {...layerProps} />
+              <Layer
+                id={`heatmap-${groupId}`}
+                {...layerProps}
+                paint={{
+                  ...paintProps,
+                  "heatmap-color": [
+                    "interpolate-hcl",
+                    ["linear"],
+                    ["heatmap-density"],
+                    0,
+                    "rgba(0, 0, 0, 0)",
+                    0.2,
+                    streetGroup.color,
+                    0.6,
+                    "rgb(253,219,199)",
+                    0.8,
+                    "rgb(239,138,98)",
+                    1,
+                    "rgb(255,201,101)",
+                  ],
+                }}
+              />
             </Source>
           );
         })}

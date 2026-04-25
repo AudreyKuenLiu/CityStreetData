@@ -13,6 +13,7 @@ import { LayerProps } from "react-map-gl/maplibre";
 import {
   DataDrivenPropertyValueSpecification,
   ExpressionFilterSpecification,
+  HeatmapLayerSpecification,
 } from "maplibre-gl";
 import {
   InjuryCrashTypeFilter,
@@ -38,7 +39,10 @@ export const useHeatmapFilter = (): InjuryCrashTypeFilter => {
   return useHeatmapData(useShallow((state) => state.heatmapFilter));
 };
 
-export const useHeatmapLayerProps = (): LayerProps => {
+export const useHeatmapLayerProps = (): Omit<
+  HeatmapLayerSpecification,
+  "id" | "source"
+> => {
   const heatmapFilter = useHeatmapFilter();
 
   const timeSegmentList = useHeatmapData(
