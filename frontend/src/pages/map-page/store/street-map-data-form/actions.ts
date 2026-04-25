@@ -48,12 +48,12 @@ const isStreetMapFormReady = (
 };
 const getCurrentStreetGroup = (
   curState: StreetMapFormState,
-): [StreetGroup, true] | [undefined, false] => {
+): StreetGroup | undefined => {
   const streetGroup = curState.streetGroups.get(curState.currentGroupId);
   if (streetGroup == null) {
-    return [undefined, false];
+    return undefined;
   }
-  return [streetGroup, true];
+  return streetGroup;
 };
 const removeCnnFromGroup = (
   curState: StreetMapFormState,
@@ -81,7 +81,6 @@ const addStreetToGroup = (
   const cnnMap = curStreetGroup.cnns;
   cnnMap.set(streetSegment.cnn, streetSegment);
   curState._cnnToGroupId.set(streetSegment.cnn, curStreetGroup.id);
-  curStreetGroup.cnns = new Map(curStreetGroup.cnns); // need to create a new reference to rerender pages
 };
 
 export const actions = ({
@@ -162,8 +161,8 @@ export const actions = ({
   toggleStreet: (streetSegment: StreetSegment): boolean => {
     let ret = true;
     setState((state) => {
-      const [streetGroup, isNull] = getCurrentStreetGroup(state);
-      if (isNull === false) {
+      const streetGroup = getCurrentStreetGroup(state);
+      if (streetGroup == null) {
         ret = false;
         return {};
       }
@@ -174,6 +173,8 @@ export const actions = ({
       } else {
         addStreetToGroup(state, streetGroup, streetSegment);
       }
+      // need to create a new reference to rerender pages
+      streetGroup.cnns = new Map(streetGroup.cnns);
 
       return {
         streetGroups: new Map(state.streetGroups),
@@ -189,14 +190,16 @@ export const actions = ({
   addStreet: (streetSegment: StreetSegment): boolean => {
     let ret = true;
     setState((state) => {
-      const [streetGroup, isNull] = getCurrentStreetGroup(state);
-      if (isNull === false) {
+      const streetGroup = getCurrentStreetGroup(state);
+      if (streetGroup == null) {
         ret = false;
         return {};
       }
       const existingSegment = streetGroup.cnns.get(streetSegment.cnn) != null;
 
       addStreetToGroup(state, streetGroup, streetSegment);
+      // need to create a new reference to rerender pages
+      streetGroup.cnns = new Map(streetGroup.cnns);
       return {
         streetGroups: new Map(state.streetGroups),
         _cnnToGroupId: new Map(state._cnnToGroupId),
@@ -211,8 +214,8 @@ export const actions = ({
   bulkAddStreets: (streetSegments: StreetSegment[]): boolean => {
     let ret = true;
     setState((state) => {
-      const [streetGroup, isNull] = getCurrentStreetGroup(state);
-      if (isNull === false) {
+      const streetGroup = getCurrentStreetGroup(state);
+      if (streetGroup == null) {
         ret = false;
         return {};
       }
@@ -220,9 +223,12 @@ export const actions = ({
 
       for (const streetSegment of streetSegments) {
         existingSegment =
-          state._cnnToGroupId.get(streetSegment.cnn) != null && existingSegment;
+          state._cnnToGroupId.get(streetSegment.cnn) === streetGroup.id &&
+          existingSegment;
         addStreetToGroup(state, streetGroup, streetSegment);
       }
+      // need to create a new reference to rerender pages
+      streetGroup.cnns = new Map(streetGroup.cnns);
       return {
         streetGroups: new Map(state.streetGroups),
         _cnnToGroupId: new Map(state._cnnToGroupId),
