@@ -80,7 +80,11 @@ export const useStreetGroupsRef = (): StreetGroups => {
 export const useCurrentStreetGroup = (): StreetGroup | null => {
   return useStreetMapDataForm(
     useShallow((state) => {
-      return state.streetGroups.get(state.currentGroupId) ?? null;
+      const currentGroup = state.streetGroups.get(state.currentGroupId) ?? null;
+      if (currentGroup == null) {
+        return null;
+      }
+      return { ...currentGroup };
     }),
   );
 };

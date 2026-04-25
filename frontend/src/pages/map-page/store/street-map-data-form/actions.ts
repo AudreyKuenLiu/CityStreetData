@@ -77,10 +77,11 @@ const addStreetToGroup = (
   curStreetGroup: StreetGroup,
   streetSegment: StreetSegment,
 ): void => {
-  const cnnMap = curStreetGroup.cnns;
   removeCnnFromGroup(curState, streetSegment.cnn);
+  const cnnMap = curStreetGroup.cnns;
   cnnMap.set(streetSegment.cnn, streetSegment);
   curState._cnnToGroupId.set(streetSegment.cnn, curStreetGroup.id);
+  curStreetGroup.cnns = new Map(curStreetGroup.cnns); // need to create a new reference to rerender pages
 };
 
 export const actions = ({
